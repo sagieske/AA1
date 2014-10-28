@@ -122,7 +122,7 @@ class Prey:
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=False):
+	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
 		""" Initalize environment and agents """
 		# Initialize prey and predators
 		if(prey==None):
@@ -243,8 +243,9 @@ class Game:
 		#Check if prey is caught
 		same = (self.predator.get_location() == self.prey.get_location())
 
+
 		# Only print grid or show prey & predator states if verbose level is 1 or 2 
-		if self.verbose == 1 & same:
+		if (self.verbose == 1 and same):
 			self.environment.print_grid()
 			print "States: "
 			print self.predator.get_state()
@@ -345,6 +346,8 @@ if __name__ == "__main__":
 		loops = vars(args)['loops']
 	if(vars(args)['verbose'] is not None):
 		verbose = vars(args)['verbose']
+	else:
+		verbose = 2
 
 	count = 0
 	count_list = []
