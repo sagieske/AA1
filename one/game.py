@@ -222,6 +222,22 @@ class Game:
 
 	def turn(self):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
+		# Play one turn prey
+		self.turn_prey()
+		# Play one turn predator
+		self.turn_predator()
+		#Print the grid
+		self.environment.print_grid()
+		#Check if prey is caught
+		same = (self.predator.get_location() == self.prey.get_location())
+		#Show prey & predator states
+		print "States: "
+		print self.predator.get_state()
+		print self.prey.get_state()
+		return same
+
+	def turn_prey(self):
+		""" Perform turn for prey """
 		#Remove prey from old location
 		self.environment.remove(self.prey.get_location())
 		#Get action for prey
@@ -237,6 +253,9 @@ class Game:
 		self.environment.place_object(self.prey, new_prey_location)	
 		#Update prey's location in its own knowledge
 		self.prey.set_location(new_prey_location)
+
+	def turn_predator(self):
+		""" Perform turn for predator """
 		#Remove predator from old location
 		self.environment.remove(self.predator.get_location())
 		#Get action for predator
@@ -247,15 +266,6 @@ class Game:
 		self.environment.place_object(self.predator, new_predator_location)	
 		#Update predator's location in its own knowledge
 		self.predator.set_location(new_predator_location)
-		#Print the grid
-		self.environment.print_grid()
-		#Check if prey is caught
-		same = (self.predator.get_location() == self.prey.get_location())
-		#Show prey & predator states
-		print "States: "
-		print self.predator.get_state()
-		print self.prey.get_state()
-		return same
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
