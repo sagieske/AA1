@@ -1,0 +1,21 @@
+Steps:
+- basic environment: 	toroidal 11 by 11 grid 
+- prey:  		start position: (5,5)
+			stays at the same square with probability 0.8, and moves randomly and with equal probability to any of the adjacent
+			squares. prey would never move into the predator, so the probabilities are different when the prey is standing next to the predator
+- predator: 		start position: (0,0)
+			5 possible actions: 4 directions to move or wait.
+			It's goal is to catch the prey 
+Episode ends when prey is captured. 
+
+Rewards:
+Immediate reward for catching prey is 1, immediate reward for anything else is 1
+
+Assignment 1
+M:
+- simulate environment, use random policy for predator action. Encode state as Predator(X,Y), Prey(X,Y)
+Measure the time it takes on average (for 100 runs) for the predator to catch the prey with this random policy, mention the average and the standard deviation
+in your report.
+
+- Implement Value Iteration and output the values of all states in which the prey is located at (5; 5). Test the convergence speed (in
+number of iterations), for different discount factors: at least 0:1, 0:5, 0:7 and 0:9, and report on the results
