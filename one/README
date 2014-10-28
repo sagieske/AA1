@@ -1,3 +1,7 @@
+TODO ASSIGNMENT 1.1:
+-Better probabilistic policy implementation
+-Prey needs to avoid stepping on predator (ie if it would, wait instead)
+
 Steps:
 - basic environment: 	toroidal 11 by 11 grid 
 - prey:  		start position: (5,5)
