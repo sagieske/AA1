@@ -111,11 +111,18 @@ class Game:
 	def turn(self):
 		self.environment.remove(self.prey.get_location())
 		prey_move = self.prey.action()
+
 		new_prey_location = self.move(self.prey, prey_move)
+		if new_prey_location == self.predator.get_location():
+			new_prey_location = self.prey.get_location()
+			"Prey almost stepped on predator! It's hiding in the bushes instead."
+
+		self.environment.place_object(self.prey, new_prey_location)	
 		self.prey.set_location(new_prey_location)
 		self.environment.remove(self.predator.get_location())
 		predator_move = self.predator.action()
 		new_predator_location = self.move(self.predator, predator_move)
+		self.environment.place_object(self.predator, new_predator_location)	
 		self.predator.set_location(new_predator_location)
 		self.environment.print_grid()
 		same = (self.predator.get_location() == self.prey.get_location())
@@ -141,7 +148,6 @@ class Game:
 
 		elif new_location[1] == environment_size[1]:
 			new_location[1] = 0
-		self.environment.place_object(chosen_object, new_location)
 		return new_location
 
 class Environment:
