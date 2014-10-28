@@ -91,9 +91,11 @@ class Game:
 		self.predator = Predator()
 		self.prey = Prey()
 		self.environment = Environment()
+		#Place prey and predator on board
 		self.environment.place_object(self.prey, [5,5])
 		self.environment.place_object(self.predator, [0,0])
 		self.environment.print_grid()
+		#Do steps until prey is caught
 		self.rounds = self.until_caught()
 
 	def get_rounds(self):
@@ -109,34 +111,48 @@ class Game:
 		return steps
 
 	def turn(self):
+		#Remove prey from old location
 		self.environment.remove(self.prey.get_location())
+		#Get action for prey
 		prey_move = self.prey.action()
-
-		new_prey_location = self.move(self.prey, prey_move)
+		#Get new location for prey
+		new_prey_location = self.get_new_location(self.prey, prey_move)
+		#Check if the prey is not stepping on the predator
 		if new_prey_location == self.predator.get_location():
+			#If it is, make it wait (hide) instead
 			new_prey_location = self.prey.get_location()
 			"Prey almost stepped on predator! It's hiding in the bushes instead."
-
+		#Move prey to new location
 		self.environment.place_object(self.prey, new_prey_location)	
+		#Update prey's location in its own knowledge
 		self.prey.set_location(new_prey_location)
+		#Remove predator from old location
 		self.environment.remove(self.predator.get_location())
+		#Get action for predator
 		predator_move = self.predator.action()
-		new_predator_location = self.move(self.predator, predator_move)
+		#Get new location for predator
+		new_predator_location = self.get_new_location(self.predator, predator_move)
+		#Move predator to new location
 		self.environment.place_object(self.predator, new_predator_location)	
+		#Update predator's location in its own knowledge
 		self.predator.set_location(new_predator_location)
+		#Print the grid
 		self.environment.print_grid()
+		#Check if prey is caught
 		same = (self.predator.get_location() == self.prey.get_location())
+		#Show prey & predator states
 		print "States: "
 		print self.predator.get_state()
 		print self.prey.get_state()
 		return same
 
-	def move(self, chosen_object, chosen_move):
+	def get_new_location(self, chosen_object, chosen_move):
 		new_location = []
 		old_location = chosen_object.get_location()
 		new_location.append(old_location[0] + chosen_move[0])
 		new_location.append(old_location[1] + chosen_move[1])
 		environment_size = self.environment.get_size()
+		# Make board toroidal:
 		if new_location[0] == -1:
 			new_location[0] = environment_size[0] -1
 
