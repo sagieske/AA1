@@ -243,17 +243,18 @@ class Game:
 		#Check if prey is caught
 		same = (self.predator.get_location() == self.prey.get_location())
 
-		# Only print grid or state output if verbose level is 1 or 2 
-		if self.verbose > 0:
-			#Show prey & predator states
+		# Only print grid or show prey & predator states if verbose level is 1 or 2 
+		if self.verbose == 1 & same:
+			self.environment.print_grid()
 			print "States: "
 			print self.predator.get_state()
 			print self.prey.get_state()
-			if self.verbose == 1 & same:
-				self.environment.print_grid()
 			# Always print grid at verbose level 2
-			elif self.verbose == 2:
-				self.environment.print_grid()
+		elif self.verbose == 2:
+			self.environment.print_grid()
+			print "States: "
+			print self.predator.get_state()
+			print self.prey.get_state()
 
 		return same
 
