@@ -139,7 +139,7 @@ class Game:
 			# Reset to start position and reset award value
 			if reset:
 				self.predator.set_location(predator_location)
-				self.predator.reset_reward()
+				#self.predator.reset_reward()
 		# Initialize environment
 		self.environment = Environment()
 		# Specify level of verbose output
