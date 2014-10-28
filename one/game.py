@@ -5,7 +5,7 @@ import argparse
 
 '''Predator class, with policy'''
 class Predator:
-	def __init__(self, location=[0,0]):
+	def __init__(self, location):
 		self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
@@ -58,6 +58,10 @@ class Predator:
 		""" Add reward gained on time step to total reward """
 		self.reward += reward
 
+	def reset_reward(self):
+		""" Reset reward to inital value """
+		self.reward = 0
+
 	def get_reward(self):
 		""" Get collected reward for predator """
 		return self.reward
@@ -68,7 +72,7 @@ class Predator:
 
 '''Prey class, with policy'''
 class Prey:
-	def __init__(self, location=[5,5]):
+	def __init__(self, location):
 		""" Initialize Prey with standard policy """
 		self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
@@ -118,24 +122,30 @@ class Prey:
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 class Game:
-	def __init__(self, prey=None, predator=None):
+	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0]):
+		""" Initalize environment and agents """
+		# Initialize prey and predators
 		if(prey==None):
-			self.prey = Prey()
+			self.prey = Prey(prey_location)
 		else:
 			self.prey = prey
+			# Reset to start position
+			if reset:
+				self.prey.set_location(prey_location)
 		if(predator==None):
-			self.predator = Predator()
+			self.predator = Predator(predator_location)
 		else:
 			self.predator = predator
+			# Reset to start position and reset award value
+			if reset:
+				self.predator.set_location(predator_location)
+				self.predator.reset_reward()
+		# Initialize environment
 		self.environment = Environment()
-		self.environment.print_grid()
-		current_prey_location = self.prey.get_location()
-		current_predator_location = self.predator.get_location()
-		self.prey.set_location([5,5])
-		self.predator.set_location([0,0])
+
 		#Place prey and predator on board
-		self.environment.place_object(self.prey, [5,5])
-		self.environment.place_object(self.predator, [0,0])
+		self.environment.place_object(self.prey, self.prey.get_location())
+		self.environment.place_object(self.predator, self.predator.get_location())
 		self.environment.print_grid()
 
 	def value_iteration(self, discount_factor, loops):
@@ -324,11 +334,12 @@ if __name__ == "__main__":
 	count = 0
 	count_list = []
 	#Initialize re-usable prey and predator objects
-	prey = Prey()
-	predator = Predator()
+	prey = Prey([0,0])
+	predator = Predator([5,5])
 	#Run N games
 	for x in range(0, N):
-		game = Game(prey=prey, predator=predator)
+		# Start game and put prey and predator at initial starting position
+		game = Game(reset=True,prey=prey, predator=predator)
 		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
