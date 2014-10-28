@@ -4,62 +4,68 @@ import sys
 
 '''Predator class, with policy'''
 class Predator:
-	#Initialize Predator with standard policy
 	def __init__(self, location=[0,0]):
+		""" Initialize Predator with standard policy """
 		self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Predator(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
 
-	#Represent Predator as X
 	def __repr__(self):
+		""" Represent Predator as X """
 		return ' X '
 
-	#Choose an action and turn it into a move
 	def action(self):
+		""" Choose an action and turn it into a move """
 		chosen_action = self.pick_action()
 		chosen_move = self.actions[chosen_action]
 		return chosen_move
 
-	#Choose an action from the list at random
 	def pick_action(self):
+		""" Choose an action from the list at random """
 		action = random.choice(self.policy.keys())
 		return action
 
 	def get_location(self):
+		""" Returns location of predator """
 		return self.location
 
 	def set_location(self, new_location):
+		""" Set location of predator """
 		self.location = new_location
 		self.set_state(new_location)
 
 	def get_state(self):
+		""" Get state of predator """
 		return self.state
 
 	def set_state(self, new_location):
+		""" Set state of predator """
 		self.state = "Predator(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 '''Prey class, with policy'''
 class Prey:
-	#Initialize Prey with standard policy
 	def __init__(self, location=[5,5]):
+		""" Initialize Prey with standard policy """
 		self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Prey(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
 
-	#Represent Prey as 0
 	def __repr__(self):
+		""" Represent Prey as 0"""
 		return ' O '
-	#Choose an action and turn it into a move
+
+
 	def action(self):
+		""" Choose an action and turn it into a move """
 		chosen_action = self.pick_action()
 		chosen_move = self.actions[chosen_action]
 		return chosen_move
 
-	#Choose an action from the list according to the policy
-	#This can probably be done much better
+	# TODO This can probably be done much better
 	def pick_action(self):
+		""" Choose an action from the list according to the policy.  """
 		threshold = random.uniform(0,100)
 		if threshold <= 5:
 			return 'North'
@@ -74,21 +80,26 @@ class Prey:
 		return action
 
 	def get_location(self):
+		""" Return location of prey """
 		return self.location		
 
 	def set_location(self, new_location):
+		""" Set location of prey """
 		self.location = new_location
 		self.set_state(new_location)
 	
 	def get_state(self):
+		""" Return state of prey """
 		return self.state	
 
 	def set_state(self, new_location):
+		""" Set state of prey """
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 class Game:
-	#Initialize game 
+
 	def __init__(self):
+		""" Initialize game """
 		self.predator = Predator()
 		self.prey = Prey()
 		self.environment = Environment()
@@ -100,9 +111,11 @@ class Game:
 		self.rounds = self.until_caught()
 
 	def get_rounds(self):
+		""" Return rounds played """
 		return self.rounds
 
 	def until_caught(self):
+		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
 		steps = 0
 		caught = 0
 		while(caught == 0):
@@ -112,6 +125,7 @@ class Game:
 		return steps
 
 	def turn(self):
+		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Remove prey from old location
 		self.environment.remove(self.prey.get_location())
 		#Get action for prey
@@ -148,6 +162,7 @@ class Game:
 		return same
 
 	def get_new_location(self, chosen_object, chosen_move):
+		""" Returns new location of an object when performs the chosen move """
 		new_location = []
 		old_location = chosen_object.get_location()
 		environment_size = self.environment.get_size()
@@ -157,25 +172,29 @@ class Game:
 		return new_location
 
 class Environment:
-	#Initialize environment of given size
+
 	def __init__(self, size=[11,11]):
+		"""Initialize environment of given size"""
 		self.size = size
 		self.grid = [[ ' ' for i in range(0, size[0])] for y in range(0, size[1])]
-	#Print the environment
+
 	def print_grid(self):
+		""" Print the environment"""
 		print "=========="
 		for row in self.grid:
 			print row
 		print "=========="
 
-	#Place an object at a given location in the environment
 	def place_object(self, grid_object, new_location):
+		""" Place an object at a given location in the environment"""
 		self.grid[new_location[0]][new_location[1]] = grid_object
 
 	def remove(self, location):
+		""" Remove object on given location """
 		self.grid[location[0]][location[1]] = ' '
 
 	def get_size(self):
+		""" Return environment size"""
 		return self.size
 
 if __name__ == "__main__":
