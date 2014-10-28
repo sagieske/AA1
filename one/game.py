@@ -1,4 +1,5 @@
 import random
+import math
 
 '''Predator class, with policy'''
 class Predator:
@@ -168,8 +169,13 @@ class Environment:
 if __name__ == "__main__":
 	N = 100
 	count = 0
+	count_list = []
 	for x in range(0, 100):
 		game = Game().get_rounds()
 		count += game
+		count_list.append(game)
 	average = float(count/N)
-	print "Average over " + str(N) + " rounds is " + str(average)
+	var_list = [(x-average)**2 for x in count_list]
+	variance = float(sum(var_list)/len(var_list))
+	standard_deviation = math.sqrt(variance)
+	print "Average steps over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
