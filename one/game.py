@@ -122,7 +122,7 @@ class Prey:
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0]):
+	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=False):
 		""" Initalize environment and agents """
 		# Initialize prey and predators
 		if(prey==None):
@@ -142,18 +142,21 @@ class Game:
 				self.predator.reset_reward()
 		# Initialize environment
 		self.environment = Environment()
+		# Specify level of verbose output
+		self.verbose = verbose
 
 		#Place prey and predator on board
 		self.environment.place_object(self.prey, self.prey.get_location())
 		self.environment.place_object(self.predator, self.predator.get_location())
-		self.environment.print_grid()
+		if self.verbose > 0:
+			self.environment.print_grid()
 
-	def value_iteration(self, discount_factor, loops):
+	def value_iteration(self, discount_factor, loops, startlocation_prey=[5,5]):
 		""" Performs value iteration """
 		#Initialize new environment, prey objects
 		new_env = Environment()
-		new_prey = Prey()
-		new_env.place_object(new_prey, [5,5])
+		new_prey = Prey(startlocation_prey)
+		new_env.place_object(new_prey, startlocation_prey)
 		[x_size, y_size] = new_env.get_size()
 		#Create grid for V values
 		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
@@ -236,14 +239,22 @@ class Game:
 		self.turn_prey()
 		# Play one turn predator
 		self.turn_predator()
-		#Print the grid
-		self.environment.print_grid()
+
 		#Check if prey is caught
 		same = (self.predator.get_location() == self.prey.get_location())
-		#Show prey & predator states
-		print "States: "
-		print self.predator.get_state()
-		print self.prey.get_state()
+
+		# Only print grid or state output if verbose level is 1 or 2 
+		if self.verbose > 0:
+			#Show prey & predator states
+			print "States: "
+			print self.predator.get_state()
+			print self.prey.get_state()
+			if self.verbose == 1 & same:
+				self.environment.print_grid()
+			# Always print grid at verbose level 2
+			elif self.verbose == 2:
+				self.environment.print_grid()
+
 		return same
 
 	def turn_prey(self):
@@ -319,6 +330,7 @@ if __name__ == "__main__":
 	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
 	parser.add_argument('-discount', metavar='Specify the size of the discount factor for value iteration.', type=float)
 	parser.add_argument('-loops', metavar='Specify the amount of loops to test value iteration on.', type=int)
+	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
 	args = parser.parse_args()
 
 	N = 100
@@ -330,6 +342,8 @@ if __name__ == "__main__":
 		discount_factor = vars(args)['discount']
 	if(vars(args)['loops'] is not None):
 		loops = vars(args)['loops']
+	if(vars(args)['verbose'] is not None):
+		verbose = vars(args)['verbose']
 
 	count = 0
 	count_list = []
@@ -339,7 +353,7 @@ if __name__ == "__main__":
 	#Run N games
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
-		game = Game(reset=True,prey=prey, predator=predator)
+		game = Game(reset=True,prey=prey, predator=predator, verbose=verbose)
 		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
