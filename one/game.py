@@ -1,5 +1,6 @@
 import random
 import math
+import sys
 
 '''Predator class, with policy'''
 class Predator:
@@ -149,21 +150,10 @@ class Game:
 	def get_new_location(self, chosen_object, chosen_move):
 		new_location = []
 		old_location = chosen_object.get_location()
-		new_location.append(old_location[0] + chosen_move[0])
-		new_location.append(old_location[1] + chosen_move[1])
 		environment_size = self.environment.get_size()
-		# Make board toroidal:
-		if new_location[0] == -1:
-			new_location[0] = environment_size[0] -1
-
-		elif new_location[0] == environment_size[0]:
-			new_location[0] = 0
-
-		if new_location[1] == -1:
-			new_location[1] = environment_size[1] -1
-
-		elif new_location[1] == environment_size[1]:
-			new_location[1] = 0
+		# division by modulo makes board toroidal:
+		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
+		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
 		return new_location
 
 class Environment:
