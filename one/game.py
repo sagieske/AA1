@@ -1,6 +1,7 @@
 import random
 import math
 import sys
+import argparse
 
 '''Predator class, with policy'''
 class Predator:
@@ -69,9 +70,7 @@ class Predator:
 class Prey:
 	def __init__(self, location=[5,5]):
 		""" Initialize Prey with standard policy """
-		# Policy is turned off to make prey stand at [5,5]
-		#self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
-		self.policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Prey(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
@@ -139,32 +138,52 @@ class Game:
 		self.environment.place_object(self.predator, [0,0])
 		self.environment.print_grid()
 
-	def value_iteration(self, discount_factor):
+	def value_iteration(self, discount_factor, loops):
+		""" Performs value iteration """
+		#Initialize new environment, prey objects
 		new_env = Environment()
 		new_prey = Prey()
 		new_env.place_object(new_prey, [5,5])
-		new_env.print_grid()
 		[x_size, y_size] = new_env.get_size()
+		#Create grid for V values
 		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
-		#FOR EVERY STATE (LOCATION)
+		#Create grid for delta V values
 		delta_V = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+		#For later: threshold to hold max(delta_V) against to check for convergence
 		not_threshold_reached = True
-		for loop in range(0, 10):
+		#Should be: until convergence
+		for loop in range(0, loops):
+			#Loop through states
 			for i in range(0, x_size):
 				for j in range(0, y_size):
+					#Store old V value for this state
 					old_grid = value_grid[i][j]
+					#Get all possible new states
 					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 					action_sum = 0
+					action_list = []
+					#Loop over all possible actions
 					for action in self.predator.get_policy().iteritems():
-						prob_sum = 0						
+						prob_sum = 0	
+						#For every new state					
 						for new_state in possible_new_states:
-							new_prob = self.transition([i,j], new_state, action[0]) * (self.reward_function([i,j], new_state, action[0]) +  discount_factor * old_grid)
+							temp_state = new_state
+							#Make grid toroidal
+							new_state[0] = temp_state[0] % x_size
+							new_state[1] = temp_state[1] % y_size
+							#Get transition value from Si to Si+1 using current action
+							transition_value = self.transition([i,j], new_state, action[0])
+							#Get reward value from Si to Si+1 using current action
+							reward_value = self.reward_function([i,j], new_state, action[0])
+							#Calculate the update factor
+							new_prob = transition_value * (reward_value + discount_factor * old_grid)
+							#Add update factor to total
 							prob_sum += new_prob
-							print 'new_prob: ', new_prob							
-						new_action = action[1] * prob_sum
-						print 'new_action: ', new_action
-						action_sum += new_action
-					value_grid[i][j] = action_sum
+						#Append update total to action list 
+						action_list.append(prob_sum)
+					#The new V value is the max of the expected values
+					value_grid[i][j] = max(action_list)
+					#Store difference between old and new V value
 					delta_V[i][j] = value_grid[i][j]-old_grid
 		for row in value_grid:
 			print row
@@ -275,21 +294,41 @@ class Environment:
 		return self.size
 
 if __name__ == "__main__":
+	#Command line arguments
+	parser = argparse.ArgumentParser(description="Run simulation")
+	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
+	parser.add_argument('-discount', metavar='Specify the size of the discount factor for value iteration.', type=float)
+	parser.add_argument('-loops', metavar='Specify the amount of loops to test value iteration on.', type=int)
+	args = parser.parse_args()
+
 	N = 100
+	discount_factor = 0.9
+	loops = 3
+	if(vars(args)['runs'] is not None):
+		N = vars(args)['runs']
+	if(vars(args)['discount'] is not None):
+		discount_factor = vars(args)['discount']
+	if(vars(args)['loops'] is not None):
+		loops = vars(args)['loops']
+
 	count = 0
 	count_list = []
+	#Initialize re-usable prey and predator objects
 	prey = Prey()
 	predator = Predator()
+	#Run N games
 	for x in range(0, N):
 		game = Game(prey=prey, predator=predator)
-		#rounds = game.get_rounds()
-		rounds = 0
-		game.value_iteration(0.9)
+		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
-		print 'Cumulative reward for game ' + str(x+1) + ': ' + str(predator.get_reward())
+		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
+	#Calculate average steps needed to catch prey
 	average = float(count/N)
+	#Calculate corresponding standard deviation
 	var_list = [(x-average)**2 for x in count_list]
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+	#Perform value_iteration over the policy
+	game.value_iteration(discount_factor, loops)
