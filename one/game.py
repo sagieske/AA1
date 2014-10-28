@@ -5,11 +5,11 @@ import sys
 '''Predator class, with policy'''
 class Predator:
 	def __init__(self, location=[0,0]):
-		""" Initialize Predator with standard policy """
 		self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Predator(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
+		self.reward = 0
 
 	def __repr__(self):
 		""" Represent Predator as X """
@@ -22,8 +22,18 @@ class Predator:
 		return chosen_move
 
 	def pick_action(self):
-		""" Choose an action from the list at random """
-		action = random.choice(self.policy.keys())
+		""" Use the probabilities in the policy to pick a move """
+		threshold = random.uniform(0,1)
+		if threshold <= self.policy['North']:
+			return 'North'
+		elif threshold <= self.policy['North']+self.policy['East']:
+			return 'East'
+		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']:
+			return 'South'
+		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']+self.policy['West']:
+			return 'West'
+		else:
+			return 'Wait'
 		return action
 
 	def get_location(self):
@@ -43,6 +53,14 @@ class Predator:
 		""" Set state of predator """
 		self.state = "Predator(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
+	def update_reward(self, reward):
+		""" Add reward gained on time step to total reward """
+		self.reward += reward
+
+	def get_reward(self):
+		""" Get collected reward for predator """
+		return self.reward
+
 '''Prey class, with policy'''
 class Prey:
 	def __init__(self, location=[5,5]):
@@ -53,9 +71,8 @@ class Prey:
 		self.state = "Prey(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
 
 	def __repr__(self):
-		""" Represent Prey as 0"""
+		""" Represent Prey as 0 """
 		return ' O '
-
 
 	def action(self):
 		""" Choose an action and turn it into a move """
@@ -63,17 +80,16 @@ class Prey:
 		chosen_move = self.actions[chosen_action]
 		return chosen_move
 
-	# TODO This can probably be done much better
 	def pick_action(self):
-		""" Choose an action from the list according to the policy.  """
-		threshold = random.uniform(0,100)
-		if threshold <= 5:
+		""" Use the probabilities in the policy to pick a move """
+		threshold = random.uniform(0,1)
+		if threshold <= self.policy['North']:
 			return 'North'
-		elif threshold <= 10:
+		elif threshold <= self.policy['North']+self.policy['East']:
 			return 'East'
-		elif threshold <= 15:
+		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']:
 			return 'South'
-		elif threshold <= 20:
+		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']+self.policy['West']:
 			return 'West'
 		else:
 			return 'Wait'
@@ -97,21 +113,29 @@ class Prey:
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
 class Game:
-
-	def __init__(self):
-		""" Initialize game """
-		self.predator = Predator()
-		self.prey = Prey()
+	def __init__(self, prey=None, predator=None):
+		if(prey==None):
+			self.prey = Prey()
+		else:
+			self.prey = prey
+		if(predator==None):
+			self.predator = Predator()
+		else:
+			self.predator = predator
 		self.environment = Environment()
+		self.environment.print_grid()
+		current_prey_location = self.prey.get_location()
+		current_predator_location = self.predator.get_location()
+		self.prey.set_location([5,5])
+		self.predator.set_location([0,0])
 		#Place prey and predator on board
 		self.environment.place_object(self.prey, [5,5])
 		self.environment.place_object(self.predator, [0,0])
 		self.environment.print_grid()
-		#Do steps until prey is caught
-		self.rounds = self.until_caught()
 
 	def get_rounds(self):
 		""" Return rounds played """
+		self.rounds = self.until_caught()
 		return self.rounds
 
 	def until_caught(self):
@@ -121,7 +145,9 @@ class Game:
 		while(caught == 0):
 			steps +=1
 			caught = self.turn()
-		print "Caught prey in " + str(steps) + " rounds!"
+			self.predator.update_reward(0)
+		self.predator.update_reward(10)
+		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return steps
 
 	def turn(self):
@@ -136,7 +162,7 @@ class Game:
 		if new_prey_location == self.predator.get_location():
 			#If it is, make it wait (hide) instead
 			new_prey_location = self.prey.get_location()
-			"Prey almost stepped on predator! It's hiding in the bushes instead."
+			"Prey almost stepped on predator! It went to hide in the bushes instead."
 		#Move prey to new location
 		self.environment.place_object(self.prey, new_prey_location)	
 		#Update prey's location in its own knowledge
@@ -201,12 +227,16 @@ if __name__ == "__main__":
 	N = 100
 	count = 0
 	count_list = []
-	for x in range(0, 100):
-		game = Game().get_rounds()
-		count += game
-		count_list.append(game)
+	prey = Prey()
+	predator = Predator()
+	for x in range(0, N):
+		game = Game(prey=prey, predator=predator)
+		rounds = game.get_rounds()
+		count += rounds
+		count_list.append(rounds)
+		print 'Cumulative reward for game ' + str(x+1) + ': ' + str(predator.get_reward())
 	average = float(count/N)
 	var_list = [(x-average)**2 for x in count_list]
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
-	print "Average steps over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
