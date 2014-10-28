@@ -149,21 +149,34 @@ class Game:
 		#FOR EVERY STATE (LOCATION)
 		delta_V = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 		not_threshold_reached = True
-		for loop in range(0, 30):
+		for loop in range(0, 10):
 			for i in range(0, x_size):
 				for j in range(0, y_size):
+					old_grid = value_grid[i][j]
 					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+					action_sum = 0
 					for action in self.predator.get_policy().iteritems():
+						prob_sum = 0						
 						for new_state in possible_new_states:
-							old_grid = value_grid[i][j]
-							value_grid[i][j] = round(action[1] * self.transition([i,j], new_state, action) * (self.reward_function([i,j], new_state, action) +  discount_factor * old_grid),2)
-							delta_V[i][j] = value_grid[i][j]-old_grid
+							new_prob = self.transition([i,j], new_state, action[0]) * (self.reward_function([i,j], new_state, action[0]) +  discount_factor * old_grid)
+							prob_sum += new_prob
+							print 'new_prob: ', new_prob							
+						new_action = action[1] * prob_sum
+						print 'new_action: ', new_action
+						action_sum += new_action
+					value_grid[i][j] = action_sum
+					delta_V[i][j] = value_grid[i][j]-old_grid
 		for row in value_grid:
 			print row
 
 
 	def transition(self, old_state, new_state, action):
-		return 1
+		if old_state == new_state and action != 'Wait':
+			return 0
+		elif old_state != new_state and action == 'Wait':
+			return 0
+		else:
+			return 1
 
 	def reward_function(self, old_state, new_state, action):
 		if new_state == [5,5]:
