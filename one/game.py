@@ -61,11 +61,17 @@ class Predator:
 		""" Get collected reward for predator """
 		return self.reward
 
+	def get_policy(self):
+		""" Return the predator's policy """
+		return self.policy
+
 '''Prey class, with policy'''
 class Prey:
 	def __init__(self, location=[5,5]):
 		""" Initialize Prey with standard policy """
-		self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
+		# Policy is turned off to make prey stand at [5,5]
+		#self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
+		self.policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Prey(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
@@ -132,6 +138,38 @@ class Game:
 		self.environment.place_object(self.prey, [5,5])
 		self.environment.place_object(self.predator, [0,0])
 		self.environment.print_grid()
+
+	def value_iteration(self, discount_factor):
+		new_env = Environment()
+		new_prey = Prey()
+		new_env.place_object(new_prey, [5,5])
+		new_env.print_grid()
+		[x_size, y_size] = new_env.get_size()
+		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+		#FOR EVERY STATE (LOCATION)
+		delta_V = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+		not_threshold_reached = True
+		for loop in range(0, 30):
+			for i in range(0, x_size):
+				for j in range(0, y_size):
+					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+					for action in self.predator.get_policy().iteritems():
+						for new_state in possible_new_states:
+							old_grid = value_grid[i][j]
+							value_grid[i][j] = round(action[1] * self.transition([i,j], new_state, action) * (self.reward_function([i,j], new_state, action) +  discount_factor * old_grid),2)
+							delta_V[i][j] = value_grid[i][j]-old_grid
+		for row in value_grid:
+			print row
+
+
+	def transition(self, old_state, new_state, action):
+		return 1
+
+	def reward_function(self, old_state, new_state, action):
+		if new_state == [5,5]:
+			return 10
+		else:
+			return 0
 
 	def get_rounds(self):
 		""" Return rounds played """
@@ -231,7 +269,9 @@ if __name__ == "__main__":
 	predator = Predator()
 	for x in range(0, N):
 		game = Game(prey=prey, predator=predator)
-		rounds = game.get_rounds()
+		#rounds = game.get_rounds()
+		rounds = 0
+		game.value_iteration(0.9)
 		count += rounds
 		count_list.append(rounds)
 		print 'Cumulative reward for game ' + str(x+1) + ': ' + str(predator.get_reward())
