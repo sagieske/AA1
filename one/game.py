@@ -163,7 +163,19 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	#def value_encoded(self, discount_factor, )
+	def euclidian(self, first_location, second_location):
+		distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
+		return distance
+
+	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
+		if self.euclidian(start_location_prey, [gridsize[0]-1, gridsize[1]-1]) > self.euclidian(start_location_prey, [0,0]):
+			gridsize = [gridsize[0]-(start_location_prey[0]), gridsize[1]-(start_location_prey[1])]
+		else:
+			gridsize = [start_location_prey[0]+1, start_location_prey[1]+1]
+		print gridsize
+		value_grid = self.value_iteration(discount_factor, start_location_prey, gridsize)
+
+
 
 	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
 		""" Performs value iteration """
@@ -224,7 +236,7 @@ class Game:
 				convergence = True
 				stop_time = time.time()
 				print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
-				
+		return value_grid
 
 	def pretty_print(self, matrix, label):
 		print "|----------", label[1], " in loop ", label[0], "----------|"
@@ -434,3 +446,4 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor)
+	game.value_encoded(discount_factor)
