@@ -2,6 +2,8 @@ import random
 import math
 import sys
 import argparse
+import numpy as np
+from helpers import common_entries
 
 '''Predator class, with policy'''
 class Predator:
@@ -20,22 +22,15 @@ class Predator:
 		""" Choose an action and turn it into a move """
 		chosen_action = self.pick_action()
 		chosen_move = self.actions[chosen_action]
-		return chosen_move
+		return chosen_move, chosen_action
 
 	def pick_action(self):
 		""" Use the probabilities in the policy to pick a move """
-		threshold = random.uniform(0,1)
-		if threshold <= self.policy['North']:
-			return 'North'
-		elif threshold <= self.policy['North']+self.policy['East']:
-			return 'East'
-		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']:
-			return 'South'
-		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']+self.policy['West']:
-			return 'West'
-		else:
-			return 'Wait'
-		return action
+		# Split policy dictionary in list of keys and list of values
+		action_name, policy = zip(*self.policy.items())
+		# Get choice using probability distribution
+		choice_index = np.random.choice(list(action_name), 1, list(policy))[0]
+		return choice_index
 
 	def get_location(self):
 		""" Returns location of predator """
@@ -83,26 +78,43 @@ class Prey:
 		""" Represent Prey as 0 """
 		return ' O '
 
-	def action(self):
+	def action(self, restricted=None):
 		""" Choose an action and turn it into a move """
-		chosen_action = self.pick_action()
+		# Check if restricted subset of moves can be chosen
+		if restricted is not None:
+			chosen_action = self.pick_action_restricted(restricted)
+		else:
+			chosen_action = self.pick_action()
 		chosen_move = self.actions[chosen_action]
-		return chosen_move
+		return chosen_move, chosen_action
 
 	def pick_action(self):
 		""" Use the probabilities in the policy to pick a move """
-		threshold = random.uniform(0,1)
-		if threshold <= self.policy['North']:
-			return 'North'
-		elif threshold <= self.policy['North']+self.policy['East']:
-			return 'East'
-		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']:
-			return 'South'
-		elif threshold <= self.policy['North']+self.policy['East']+self.policy['South']+self.policy['West']:
-			return 'West'
-		else:
-			return 'Wait'
-		return action
+		# Split policy dictionary in list of keys and list of values
+		action_name, policy = zip(*self.policy.items())
+		# Get choice using probability distribution
+		choice_index = np.random.choice(list(action_name), 1, list(policy))[0]
+		return choice_index
+
+	def pick_action_restricted(self, blocked_moves):
+		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
+		# Temporary policy list
+		temp_policy = self.policy
+		# Keep track of probability of deleted moves
+		update_probability = 0
+		# Delete blocked moves from temporary policy list
+		for block in blocked_moves:
+			update_probability += temp_policy[block]
+			del temp_policy[block]			
+
+		# Split policy dictionary in list of keys and list of values
+		action_name, policy = zip(*temp_policy.items())
+		# Create new policy wrt deleted moves
+		added_probability = update_probability/float(len(blocked_moves))
+		new_policy = new_list = [x+added_probability for x in list(policy)]
+		# Get choice using probability distribution
+		choice_index = np.random.choice(list(action_name), 1, new_policy)[0]
+		return choice_index
 
 	def get_location(self):
 		""" Return location of prey """
@@ -243,7 +255,6 @@ class Game:
 		#Check if prey is caught
 		same = (self.predator.get_location() == self.prey.get_location())
 
-
 		# Only print grid or show prey & predator states if verbose level is 1 or 2 
 		if (self.verbose == 1 and same):
 			self.environment.print_grid()
@@ -264,14 +275,17 @@ class Game:
 		#Remove prey from old location
 		self.environment.remove(self.prey.get_location())
 		#Get action for prey
-		prey_move = self.prey.action()
+		prey_move, action_name = self.prey.action()
 		#Get new location for prey
 		new_prey_location = self.get_new_location(self.prey, prey_move)
 		#Check if the prey is not stepping on the predator
 		if new_prey_location == self.predator.get_location():
-			#If it is, make it wait (hide) instead
-			new_prey_location = self.prey.get_location()
-			"Prey almost stepped on predator! It went to hide in the bushes instead."
+			prey_move,action_name = self.prey.action(restricted=[action_name])
+			new_prey_location = self.get_new_location(self.prey, prey_move)
+			print "Prey almost stepped on predator!"
+			##If it is, make it wait (hide) instead
+			#new_prey_location = self.prey.get_location()
+			#"Prey almost stepped on predator! It went to hide in the bushes instead."
 		#Move prey to new location
 		self.environment.place_object(self.prey, new_prey_location)	
 		#Update prey's location in its own knowledge
@@ -282,7 +296,7 @@ class Game:
 		#Remove predator from old location
 		self.environment.remove(self.predator.get_location())
 		#Get action for predator
-		predator_move = self.predator.action()
+		predator_move,action_name = self.predator.action()
 		#Get new location for predator
 		new_predator_location = self.get_new_location(self.predator, predator_move)
 		#Move predator to new location
