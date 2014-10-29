@@ -181,8 +181,8 @@ class Game:
 		#Should be: until convergence
 		for loop in range(0, loops):
 			#Loop through states
-			for i in range(0, 11):
-				for j in range(0, 11):
+			for i in range(0, x_size):
+				for j in range(0, y_size):
 					old_grid = value_grid[i][j]
 					value_grid[i][j] = self.get_value([i,j], [5,5], discount_factor, [x_size, y_size], loops)
 					#Store difference between old and new V value
