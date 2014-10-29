@@ -168,16 +168,38 @@ class Game:
 		return distance
 
 	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
-		if self.euclidian(start_location_prey, [gridsize[0]-1, gridsize[1]-1]) > self.euclidian(start_location_prey, [0,0]):
-			gridsize = [gridsize[0]-(start_location_prey[0]), gridsize[1]-(start_location_prey[1])]
+		x_size = gridsize[0]
+		y_size = gridsize[1]
+		dist_end = self.euclidian(start_location_prey, gridsize)
+		dist_begin = self.euclidian(start_location_prey, [0,0])
+		new_grid = np.zeros((x_size,y_size))
+		largest_x = 0
+		largest_y = 0
+		for i in range(0, x_size):
+			for j in range(0, y_size):
+				x_difference = abs(i - start_location_prey[0])
+				y_difference = abs(j - start_location_prey[1])
+				if abs(i - x_difference) > largest_x:
+					largest_x = x_difference
+				if abs(j - y_difference) > largest_y:
+					largest_y = y_difference
+		new_prey_location = [0,0]
+		new_prey_location[0] = start_location_prey[0]-1
+		new_prey_location[1] = start_location_prey[1]-1
+		self.value_iteration(discount_factor, new_prey_location, [largest_x, largest_y], encoding=True)
+
+	def wrap_state(self, state, gridsize, encoding):
+		if not encoding:
+			temp_state = state
+			state[0] = temp_state[0] % gridsize[0]
+			state[1] = temp_state[1] % gridsize[1]
 		else:
-			gridsize = [start_location_prey[0]+1, start_location_prey[1]+1]
-		print gridsize
-		value_grid = self.value_iteration(discount_factor, start_location_prey, gridsize)
+			temp_state = state
+			state[0] = temp_state[0] % gridsize[0]
+			state[1] = temp_state[1] % gridsize[1]
+		return state
 
-
-
-	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
+	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False):
 		""" Performs value iteration """
 		# Get start time
 		start_time = time.time()
@@ -209,10 +231,9 @@ class Game:
 				# Get surrounding states
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 				for new_state in possible_new_states:
-					temp_state = new_state
+					
 					#Check for toroidal wrap
-					new_state[0] = temp_state[0] % x_size
-					new_state[1] = temp_state[1] % y_size
+					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 					# Get value for state
 					value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
 					# Update grid
@@ -246,7 +267,7 @@ class Game:
 				print '| ', x[:7],
 			print ' |\n',
 
-   	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid):
+   	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid, encoding=False):
    		if(state == goal_state):
    			return 10
    		else:
@@ -259,11 +280,8 @@ class Game:
 			for action in actions:
 				prob_sum = 0
 				for new_state in new_states:
-							#Back up old state
-					temp_state = new_state
 							#Check for toroidal wrap
-					new_state[0] = temp_state[0] % x_size
-					new_state[1] = temp_state[1] % y_size
+					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 							#Compute transition value from s to s'
 					transition_value = self.transition(state, new_state, goal_state, action[0])
 							#Compute reward from s to s'
