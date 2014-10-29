@@ -3,7 +3,7 @@ import math
 import sys
 import argparse
 import numpy as np
-from helpers import common_entries
+#from helpers import common_entries
 
 '''Predator class, with policy'''
 class Predator:
@@ -163,15 +163,15 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	def value_iteration(self, discount_factor, loops, startlocation_prey=[5,5]):
+	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5]):
 		""" Performs value iteration """
 		#Initialize new environment, prey objects
 		new_env = Environment()
-		new_prey = Prey(startlocation_prey)
-		new_env.place_object(new_prey, startlocation_prey)
+		new_prey = Prey(start_location_prey)
+		new_env.place_object(new_prey, start_location_prey)
 		[x_size, y_size] = new_env.get_size()
 		# Initalize goal state
-		goal_state = startlocation_prey
+		goal_state = start_location_prey
 		#Create grid for V values
 		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 		#Create grid for delta V values
@@ -199,7 +199,7 @@ class Game:
 							new_state[0] = temp_state[0] % x_size
 							new_state[1] = temp_state[1] % y_size
 							#Get transition value from Si to Si+1 using current action
-							transition_value = self.transition([i,j], new_state, action[0])
+							transition_value = self.transition([i,j], new_state, goal_state, action[0])
 							#Get reward value from Si to Si+1 using current action
 							reward_value = self.reward_function([i,j], new_state, goal_state, action[0])
 							#Calculate the update factor
@@ -216,7 +216,9 @@ class Game:
 			print row
 
 
-	def transition(self, old_state, new_state, action):
+	def transition(self, old_state, new_state, goal_state, action):
+		if old_state == goal_state:
+			return 1
 		if old_state == new_state and action != 'Wait':
 			return 0
 		elif old_state != new_state and action == 'Wait':
@@ -373,7 +375,7 @@ if __name__ == "__main__":
 	#Run N games
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
-		game = Game(reset=True,prey=prey, predator=predator, verbose=verbose)
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
