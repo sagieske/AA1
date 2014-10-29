@@ -173,6 +173,7 @@ class Game:
 		value_grid[start_location_prey[0]][start_location_prey[1]] = 10
 		new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 		new_grid[start_location_prey[0]][start_location_prey[1]] = 10
+		delta_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 		count = 0
 		while(not convergence):
 			for i in range(0, x_size):
@@ -186,6 +187,7 @@ class Game:
 							new_state[1] = temp_state[1] % y_size
 							value = self.get_value2(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
 							new_grid[new_state[0]][new_state[1]] = value
+							delta_grid[new_state[0]][new_state[1]] = abs(new_grid[new_state[0]][new_state[1]] - value_grid[new_state[0]][new_state[1]])
 			count+=1
 			value_grid = new_grid
 			print "=========="
@@ -193,8 +195,10 @@ class Game:
    				pretty_row =["%.2f" % v for v in row]
    				print pretty_row
    			print "=========="
-			if(count>10):
+   			delta = max(delta_grid)
+			if delta < 1:
 				convergence = True
+				print "Converged!"
 
 
    	def get_value2(self, state, goal_state, discount_factor, grid_size, value_grid):
