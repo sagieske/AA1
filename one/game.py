@@ -284,10 +284,10 @@ class Game:
 		if new_prey_location == self.predator.get_location():
 			prey_move,action_name = self.prey.action(restricted=[action_name])
 			new_prey_location = self.get_new_location(self.prey, prey_move)
-			print "Prey almost stepped on predator!"
+			#print "Prey almost stepped on predator! Performed action: %s" %(action_name)
 			##If it is, make it wait (hide) instead
 			#new_prey_location = self.prey.get_location()
-			#"Prey almost stepped on predator! It went to hide in the bushes instead."
+			"Prey almost stepped on predator! It went to hide in the bushes instead."
 		#Move prey to new location
 		self.environment.place_object(self.prey, new_prey_location)	
 		#Update prey's location in its own knowledge
@@ -351,7 +351,7 @@ if __name__ == "__main__":
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
 	args = parser.parse_args()
 
-	N = 100
+	N = 1
 	discount_factor = 0.9
 	loops = 3
 	if(vars(args)['runs'] is not None):
