@@ -181,40 +181,39 @@ class Game:
 		#Should be: until convergence
 		for loop in range(0, loops):
 			#Loop through states
-			for i in range(0, x_size):
-				for j in range(0, y_size):
-					#Store old V value for this state
+			for i in range(0, 11):
+				for j in range(0, 11):
 					old_grid = value_grid[i][j]
-					#Get all possible new states
-					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-					action_sum = 0
-					action_list = []
-					#Loop over all possible actions
-					for action in self.predator.get_policy().iteritems():
-						prob_sum = 0	
-						#For every new state					
-						for new_state in possible_new_states:
-							temp_state = new_state
-							#Make grid toroidal
-							new_state[0] = temp_state[0] % x_size
-							new_state[1] = temp_state[1] % y_size
-							#Get transition value from Si to Si+1 using current action
-							transition_value = self.transition([i,j], new_state, goal_state, action[0])
-							#Get reward value from Si to Si+1 using current action
-							reward_value = self.reward_function([i,j], new_state, goal_state, action[0])
-							#Calculate the update factor
-							new_prob = transition_value * (reward_value + discount_factor * old_grid)
-							#Add update factor to total
-							prob_sum += new_prob
-						#Append update total to action list 
-						action_list.append(prob_sum)
-					#The new V value is the max of the expected values
-					value_grid[i][j] = max(action_list)
+					value_grid[i][j] = self.get_value([i,j], [5,5], discount_factor, [x_size, y_size], loops)
 					#Store difference between old and new V value
 					delta_V[i][j] = value_grid[i][j]-old_grid
 		for row in value_grid:
 			print row
 
+	def get_value(self, state, goal_state, discount_factor, grid_size, loops):
+		i = state[0]
+		j = state[1]
+		loops = loops-1
+		if(loops > 0):
+			x_size = grid_size[0]
+			y_size = grid_size[1]
+			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+			actions =  self.predator.get_policy().iteritems()
+			action_values = []
+			for action in actions:
+				prob_sum = 0
+				for new_state in new_states:
+					temp_state = new_state
+					new_state[0] = temp_state[0] % x_size
+					new_state[1] = temp_state[1] % y_size
+					transition_value = self.transition(state, new_state, goal_state, action[0])
+					reward_value = self.reward_function(state, new_state, goal_state, action[0])
+					prob_sum += transition_value * (reward_value + discount_factor * self.get_value(new_state, goal_state, discount_factor, grid_size, loops))
+				action_values.append(prob_sum)
+			value = max(action_values)
+			return value
+		else:
+			return 0
 
 	def transition(self, old_state, new_state, goal_state, action):
 		if old_state == goal_state:
