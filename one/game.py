@@ -188,15 +188,26 @@ class Game:
 							value = self.get_value2(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
 							new_grid[new_state[0]][new_state[1]] = value
 							delta_grid[new_state[0]][new_state[1]] = abs(new_grid[new_state[0]][new_state[1]] - value_grid[new_state[0]][new_state[1]])
+							print "-----======-----"
+							print 'old_grid at ', new_state, ' = ', value_grid[new_state[0]][new_state[1]]
+							print 'new_grid at ', new_state, ' = ', new_grid[new_state[0]][new_state[1]]
+							print 'delta at ', new_state, ' = ', delta_grid[new_state[0]][new_state[1]]
+							print "-----======-----"
 			count+=1
 			value_grid = new_grid
-			print "=========="
-			for row in new_grid:
-   				pretty_row =["%.2f" % v for v in row]
+			new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+			new_grid[start_location_prey[0]][start_location_prey[1]] = 10
+   			print "=====val====="
+			for row in value_grid:
+   				pretty_row =["%.6f" % v for v in row]
    				print pretty_row
    			print "=========="
-   			delta = max(delta_grid)
-			if delta < 1:
+   			delta = 0
+   			for x in delta_grid:
+   				for y in x:
+   					if y > delta:
+   						delta = y
+			if delta < 0.0001:
 				convergence = True
 				print "Converged!"
 
