@@ -195,8 +195,14 @@ class Game:
 			state[1] = temp_state[1] % gridsize[1]
 		else:
 			temp_state = state
-			state[0] = temp_state[0] % gridsize[0]
-			state[1] = temp_state[1] % gridsize[1]
+			if state[0] == -1:
+				state[0] = 0
+			elif state[0] == gridsize[0]:
+				state[0] = gridsize[0]-1
+			if state[1] == -1:
+				state[1] = 0
+			elif state[1] == gridsize[1]:
+				state[1] = gridsize[1]-1
 		return state
 
 	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False):
