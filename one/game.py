@@ -170,6 +170,8 @@ class Game:
 		new_prey = Prey(startlocation_prey)
 		new_env.place_object(new_prey, startlocation_prey)
 		[x_size, y_size] = new_env.get_size()
+		# Initalize goal state
+		goal_state = startlocation_prey
 		#Create grid for V values
 		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 		#Create grid for delta V values
@@ -199,7 +201,7 @@ class Game:
 							#Get transition value from Si to Si+1 using current action
 							transition_value = self.transition([i,j], new_state, action[0])
 							#Get reward value from Si to Si+1 using current action
-							reward_value = self.reward_function([i,j], new_state, action[0])
+							reward_value = self.reward_function([i,j], new_state, goal_state, action[0])
 							#Calculate the update factor
 							new_prob = transition_value * (reward_value + discount_factor * old_grid)
 							#Add update factor to total
@@ -222,8 +224,8 @@ class Game:
 		else:
 			return 1
 
-	def reward_function(self, old_state, new_state, action):
-		if new_state == [5,5]:
+	def reward_function(self, old_state, new_state, goal_state, action):
+		if new_state == goal_state:
 			return 10
 		else:
 			return 0
