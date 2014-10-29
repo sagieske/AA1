@@ -163,6 +163,71 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
+	def value_iteration2(self, discount_factor, loops, start_location_prey=[5,5]):
+		""" Performs value iteration """
+		#Initialize new environment, prey objects
+		x_size = 11
+		y_size = 11
+		convergence = False
+		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+		value_grid[start_location_prey[0]][start_location_prey[1]] = 10
+		new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+		new_grid[start_location_prey[0]][start_location_prey[1]] = 10
+		count = 0
+		while(not convergence):
+			for i in range(0, x_size):
+				for j in range(0, y_size):
+					if value_grid[i][j] != 0:
+						possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+						for new_state in possible_new_states:
+							temp_state = new_state
+							#Check for toroidal wrap
+							new_state[0] = temp_state[0] % x_size
+							new_state[1] = temp_state[1] % y_size
+							value = self.get_value2(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
+							new_grid[new_state[0]][new_state[1]] = value
+			count+=1
+			value_grid = new_grid
+			print "=========="
+			for row in new_grid:
+   				pretty_row =["%.2f" % v for v in row]
+   				print pretty_row
+   			print "=========="
+			if(count>10):
+				convergence = True
+
+
+   	def get_value2(self, state, goal_state, discount_factor, grid_size, value_grid):
+   		if(state == goal_state):
+   			return 10
+   		else:
+   			i = state[0]
+	   		j = state[1]
+	   		[x_size, y_size] = grid_size
+	   		actions =  self.predator.get_policy().iteritems()
+			action_values = []
+			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+			for action in actions:
+				prob_sum = 0
+				for new_state in new_states:
+							#Back up old state
+					temp_state = new_state
+							#Check for toroidal wrap
+					new_state[0] = temp_state[0] % x_size
+					new_state[1] = temp_state[1] % y_size
+							#Compute transition value from s to s'
+					transition_value = self.transition(state, new_state, goal_state, action[0])
+							#Compute reward from s to s'
+					reward_value = self.reward_function(state, new_state, goal_state, action[0])
+							#Add this to the sum of state probabilities
+					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
+						#Append sum of state probabilities for this action times probability for this action to the action list
+				action_values.append(prob_sum*action[1])
+					#The value for i,j is the max of all action_values
+			value = max(action_values)
+			return value
+
+
 	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5]):
 		""" Performs value iteration """
 		#Initialize new environment, prey objects
@@ -398,4 +463,4 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, loops)
+	game.value_iteration2(discount_factor, loops)
