@@ -206,29 +206,38 @@ class Game:
 				for action in actions:
 					prob_sum = 0
 					for new_state in new_states:
+						#Back up old state
 						temp_state = new_state
+						#Check for toroidal wrap
 						new_state[0] = temp_state[0] % x_size
 						new_state[1] = temp_state[1] % y_size
+						#Compute transition value from s to s'
 						transition_value = self.transition(state, new_state, goal_state, action[0])
+						#Compute reward from s to s'
 						reward_value = self.reward_function(state, new_state, goal_state, action[0])
+						#Add this to the sum of state probabilities
 						prob_sum += transition_value * (reward_value + discount_factor * self.get_value(new_state, goal_state, discount_factor, grid_size, loops))
-					action_values.append(prob_sum)
+					#Append sum of state probabilities for this action times probability for this action to the action list
+					action_values.append(prob_sum*action[1])
+				#The value for i,j is the max of all action_values
 				value = max(action_values)
 				return value
 			else:
 				return 0
 
 	def transition(self, old_state, new_state, goal_state, action):
-		if old_state == goal_state:
-			return 1
+		#If we're staying in the same place with a non-waiting action, the prob is 0
 		if old_state == new_state and action != 'Wait':
 			return 0
+		#If we're moving while using the wait action, the prob is 0
 		elif old_state != new_state and action == 'Wait':
 			return 0
+		#All other actions have transition probability of 1
 		else:
 			return 1
 
 	def reward_function(self, old_state, new_state, goal_state, action):
+		#All states have a reward of 0, except the terminal state
 		return 0
 
 	def get_rounds(self):
