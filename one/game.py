@@ -193,16 +193,11 @@ class Game:
 							#print 'new_grid at ', new_state, ' = ', new_grid[new_state[0]][new_state[1]]
 							#print 'delta at ', new_state, ' = ', delta_grid[new_state[0]][new_state[1]]
 							#print "-----======-----"
-			count+=1
+			count = count + 1
 			value_grid = new_grid
 			new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
 			new_grid[start_location_prey[0]][start_location_prey[1]] = 10
-			self.pretty_print(value_grid)
-   			print "=====val====="
-			for row in value_grid:
-   				pretty_row =["%.6f" % v for v in row]
-   				print pretty_row
-   			print "=========="
+			self.pretty_print(value_grid, ['Value grid: ', count])
    			delta = 0
    			for x in delta_grid:
    				for y in x:
@@ -212,7 +207,8 @@ class Game:
 				convergence = True
 				print "Converged!"
 
-	def pretty_print(self, matrix):
+	def pretty_print(self, matrix, label):
+		print "|----------", label[0], " in loop ", count, "----------|"
 		for row in matrix:
 			pretty_row = ['%.6f' %v +'|' for v in row]
 			for x in pretty_row:
