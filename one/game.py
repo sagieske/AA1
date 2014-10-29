@@ -163,54 +163,66 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5]):
+	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5], gridsize=[11,11]):
 		""" Performs value iteration """
-		#Initialize new environment, prey objects
-		x_size = 11
-		y_size = 11
+		#Initialize parameters
+		x_size = gridsize[0]
+		y_size = gridsize[1]
 		convergence = False
-		value_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+
+		# Initialize grids
+		value_grid = np.zeros((x_size, y_size))
+		new_grid = np.zeros((x_size, y_size))
+		delta_grid = np.zeros((x_size,y_size))
+
+		# Set goal state reward
 		value_grid[start_location_prey[0]][start_location_prey[1]] = 10
-		new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
-		new_grid[start_location_prey[0]][start_location_prey[1]] = 10
-		delta_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
+
 		count = 0
+		# Continue value iteration until convergence has taken place
 		while(not convergence):
-			for i in range(0, x_size):
-				for j in range(0, y_size):
-					if value_grid[i][j] != 0:
-						possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-						for new_state in possible_new_states:
-							temp_state = new_state
-							#Check for toroidal wrap
-							new_state[0] = temp_state[0] % x_size
-							new_state[1] = temp_state[1] % y_size
-							value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
-							new_grid[new_state[0]][new_state[1]] = value
-							delta_grid[new_state[0]][new_state[1]] = abs(new_grid[new_state[0]][new_state[1]] - value_grid[new_state[0]][new_state[1]])
-							print "-----======-----"
-							print 'old_grid at ', new_state, ' = ', value_grid[new_state[0]][new_state[1]]
-							print 'new_grid at ', new_state, ' = ', new_grid[new_state[0]][new_state[1]]
-							print 'delta at ', new_state, ' = ', delta_grid[new_state[0]][new_state[1]]
-							print "-----======-----"
-			count+=1
+			# Get all nonzero indices from value_grid
+			nonzero_indices = np.transpose(np.nonzero(value_grid))
+
+			# Calculate surrounding values for non zero elements
+			for item in nonzero_indices:
+				# Set indices
+				i  = item[0]
+				j = item[1]
+				# Get surrounding states
+				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				for new_state in possible_new_states:
+					temp_state = new_state
+					#Check for toroidal wrap
+					new_state[0] = temp_state[0] % x_size
+					new_state[1] = temp_state[1] % y_size
+					# Get value for state
+					value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
+					# Update grid
+					new_grid[new_state[0]][new_state[1]] = value
+
+			# Get delta between old and new grid
+			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
+
+			# Update grids for next round
 			value_grid = new_grid
-			new_grid = [[0 for x in range(0, x_size)] for y in range(0, y_size)]
-			new_grid[start_location_prey[0]][start_location_prey[1]] = 10
+			new_grid = np.zeros((x_size,y_size))
+
 			self.pretty_print(value_grid)
    			print "=====val====="
 			for row in value_grid:
    				pretty_row =["%.6f" % v for v in row]
    				print pretty_row
    			print "=========="
-   			delta = 0
-   			for x in delta_grid:
-   				for y in x:
-   					if y > delta:
-   						delta = y
+
+			# Get maximum difference between grids
+			delta = np.amax(delta_grid)
+
+			count+=1
+			# Check for convergence
 			if delta < 0.0001:
 				convergence = True
-				print "Converged!"
+				print "Converged! Counter is at: %i" %(count)
 
 	def pretty_print(self, matrix):
 		for row in matrix:
