@@ -188,7 +188,9 @@ class Game:
 					#Store difference between old and new V value
 					delta_V[i][j] = value_grid[i][j]-old_grid
 		for row in value_grid:
-			print row
+			# pretty row just for now
+			pretty_row =["%.2f" % v for v in row]
+			print pretty_row
 
 	def get_value(self, state, goal_state, discount_factor, grid_size, loops):
 		if state == [5,5]:
