@@ -3,7 +3,7 @@ import math
 import sys
 import argparse
 import numpy as np
-#from helpers import common_entries
+import time
 
 '''Predator class, with policy'''
 class Predator:
@@ -165,6 +165,9 @@ class Game:
 
 	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5], gridsize=[11,11]):
 		""" Performs value iteration """
+		# Get start time
+		start_time = time.time()
+
 		#Initialize parameters
 		x_size = gridsize[0]
 		y_size = gridsize[1]
@@ -217,7 +220,9 @@ class Game:
 			# Check for convergence
 			if delta < 0.0001:
 				convergence = True
-				print "Converged! Counter is at: %i" %(count)
+				stop_time = time.time()
+				print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+				
 
 	def pretty_print(self, matrix, label):
 		print "|----------", label[1], " in loop ", label[0], "----------|"
