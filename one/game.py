@@ -163,7 +163,9 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	def value_iteration(self, discount_factor, loops, start_location_prey=[5,5], gridsize=[11,11]):
+	#def value_encoded(self, discount_factor, )
+
+	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
 		""" Performs value iteration """
 		#Initialize parameters
 		x_size = gridsize[0]
@@ -429,4 +431,4 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, loops)
+	game.value_iteration(discount_factor)
