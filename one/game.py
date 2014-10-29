@@ -332,9 +332,6 @@ class Game:
 		if new_prey_location == self.predator.get_location():
 			prey_move,action_name = self.prey.action(restricted=[action_name])
 			new_prey_location = self.get_new_location(self.prey, prey_move)
-			#print "Prey almost stepped on predator! Performed action: %s" %(action_name)
-			##If it is, make it wait (hide) instead
-			#new_prey_location = self.prey.get_location()
 			"Prey almost stepped on predator! It went to hide in the bushes instead."
 		#Move prey to new location
 		self.environment.place_object(self.prey, new_prey_location)	
