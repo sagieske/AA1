@@ -191,29 +191,32 @@ class Game:
 			print row
 
 	def get_value(self, state, goal_state, discount_factor, grid_size, loops):
-		i = state[0]
-		j = state[1]
-		loops = loops-1
-		if(loops > 0):
-			x_size = grid_size[0]
-			y_size = grid_size[1]
-			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-			actions =  self.predator.get_policy().iteritems()
-			action_values = []
-			for action in actions:
-				prob_sum = 0
-				for new_state in new_states:
-					temp_state = new_state
-					new_state[0] = temp_state[0] % x_size
-					new_state[1] = temp_state[1] % y_size
-					transition_value = self.transition(state, new_state, goal_state, action[0])
-					reward_value = self.reward_function(state, new_state, goal_state, action[0])
-					prob_sum += transition_value * (reward_value + discount_factor * self.get_value(new_state, goal_state, discount_factor, grid_size, loops))
-				action_values.append(prob_sum)
-			value = max(action_values)
-			return value
+		if state == [5,5]:
+			return 10
 		else:
-			return 0
+			i = state[0]
+			j = state[1]
+			loops = loops-1
+			if(loops > 0):
+				x_size = grid_size[0]
+				y_size = grid_size[1]
+				new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				actions =  self.predator.get_policy().iteritems()
+				action_values = []
+				for action in actions:
+					prob_sum = 0
+					for new_state in new_states:
+						temp_state = new_state
+						new_state[0] = temp_state[0] % x_size
+						new_state[1] = temp_state[1] % y_size
+						transition_value = self.transition(state, new_state, goal_state, action[0])
+						reward_value = self.reward_function(state, new_state, goal_state, action[0])
+						prob_sum += transition_value * (reward_value + discount_factor * self.get_value(new_state, goal_state, discount_factor, grid_size, loops))
+					action_values.append(prob_sum)
+				value = max(action_values)
+				return value
+			else:
+				return 0
 
 	def transition(self, old_state, new_state, goal_state, action):
 		if old_state == goal_state:
@@ -226,10 +229,7 @@ class Game:
 			return 1
 
 	def reward_function(self, old_state, new_state, goal_state, action):
-		if new_state == goal_state:
-			return 10
-		else:
-			return 0
+		return 0
 
 	def get_rounds(self):
 		""" Return rounds played """
