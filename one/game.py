@@ -226,9 +226,10 @@ class Game:
 
 	def pretty_print(self, matrix):
 		for row in matrix:
-			pretty_row = [ v*1000 for v in row]
-			print pretty_row
-
+			pretty_row = ['%.6f' %v +'|' for v in row]
+			for x in pretty_row:
+				print '| ', x[:7],
+			print ' |\n',
 
    	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid):
    		if(state == goal_state):
