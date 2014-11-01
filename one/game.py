@@ -137,8 +137,11 @@ class Prey:
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
 		""" Initalize environment and agents """
+		# Initialize environment
+		self.environment = Environment()
+
 		# Initialize prey and predators
-		prey_predator_distance = self.xy_distance(predator_location, prey_location)
+		prey_predator_distance = self.xy_distance(predator_location, prey_location, self.environment.get_size())
 		print prey_predator_distance
 		if(prey==None):
 			self.prey = Prey(prey_location)
@@ -155,8 +158,7 @@ class Game:
 			if reset:
 				self.predator.set_location(predator_location)
 				#self.predator.reset_reward()
-		# Initialize environment
-		self.environment = Environment()
+
 		# Specify level of verbose output
 		self.verbose = verbose
 
@@ -166,16 +168,24 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	def xy_distance(self, predator_location, prey_location):
+	def xy_distance(self, predator_location, prey_location, grid_size, toroidal=True):
+		""" Calculate xy distance using a toroidal grid"""
 		x_distance = abs(predator_location[0] - prey_location[0])
 		y_distance = abs(predator_location[1] - prey_location[1])
+
+		if toroidal:
+			# Make use of toroidal grid
+			x_distance = min(x_distance, grid_size[0] - x_distance)
+			y_distance = min(y_distance, grid_size[1] - y_distance)
 		return [x_distance, y_distance]
 
 	def euclidian(self, first_location, second_location):
+		"""  Calculates euclidian distance"""
 		distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
 		return distance
 
 	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], verbose=0):
+		""" Use smaller state-space encoding in order to only save 1/3 """
 		x_size = gridsize[0]
 		y_size = gridsize[1]
 		dist_end = self.euclidian(start_location_prey, gridsize)
@@ -183,15 +193,11 @@ class Game:
 		new_grid = np.zeros((x_size,y_size))
 		largest_x = 0
 		largest_y = 0
-		#Find largest x difference, y difference (THIS CAN BE MORE EFFICIENT)
-		for i in range(0, x_size):
-			for j in range(0, y_size):
-				x_difference = abs(i - start_location_prey[0])
-				y_difference = abs(j - start_location_prey[1])
-				if abs(i - x_difference) > largest_x:
-					largest_x = x_difference
-				if abs(j - y_difference) > largest_y:
-					largest_y = y_difference
+
+		#Find largest difference in x-axis and y-axis from start location of prey to border
+		largest_x = max( abs(start_location_prey[0] - 0), abs(start_location_prey[0] - (gridsize[0]-1)))
+		largest_y = max( abs(start_location_prey[1] - 0), abs(start_location_prey[1] - (gridsize[1]-1)))
+
 		#The prey's location is at 0,0, because in the encoded grid, each tile is a distance
 		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
@@ -272,11 +278,10 @@ class Game:
 			# Get maximum difference between grids
 			delta = np.amax(delta_grid)
 
+			# Pretty print dependent on verbose level
 			if verbose == 2 or (verbose == 1 and delta < 0.0001):
 				self.pretty_print(value_grid, [count, 'Value grid '])
-			#if count == 5:
-			#	return value_grid
-			#sys.exit()
+
 			count+=1
 			# Check for convergence
 			if delta < 0.0001:
@@ -286,6 +291,7 @@ class Game:
 		return value_grid
 
 	def pretty_print(self, matrix, label):
+		""" Function to pretty print matrices in terminal """
 		print "|----------", label[1], " in loop ", label[0], "----------|"
 		for row in matrix:
 			pretty_row = ['%.6f' %v +'|' for v in row]
@@ -294,19 +300,21 @@ class Game:
 			print ' |\n',
 
    	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid, encoding=False):
+		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
    		if(state == goal_state):
    			return 10
    		else:
    			i = state[0]
 	   		j = state[1]
 	   		[x_size, y_size] = grid_size
+			# Get all actions of predator
 	   		actions =  self.predator.get_policy().iteritems()
 			action_values = []
 			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 			
 			for action in actions:
 				prob_sum = 0
-				values = []
+
 				for new_state in new_states:
 					bool_preset_transition = False
 					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
@@ -347,7 +355,6 @@ class Game:
 					#Compute reward from s to s'
 					reward_value = self.reward_function(state, new_state, goal_state, action[0])
 					#Add this to the sum of state probabilities
-					values.append(transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]]))
 					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
 
 				#Append sum of state probabilities for this action times probability for this action to the action list
@@ -359,6 +366,9 @@ class Game:
 
 
 	def transition(self, old_state, new_state, goal_state, action):
+		""" Returns transition states"""
+
+		# TODO: Is this correct? Should east/west/north/south actions also be checked with appropriate states?
 		#If we're staying in the same place with a non-waiting action, the prob is 0
 		if old_state == new_state and action != 'Wait':
 			return 0
