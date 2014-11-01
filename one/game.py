@@ -137,6 +137,8 @@ class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
 		""" Initalize environment and agents """
 		# Initialize prey and predators
+		prey_predator_distance = self.xy_distance(predator_location, prey_location)
+		print prey_predator_distance
 		if(prey==None):
 			self.prey = Prey(prey_location)
 		else:
@@ -162,6 +164,11 @@ class Game:
 		self.environment.place_object(self.predator, self.predator.get_location())
 		if self.verbose > 0:
 			self.environment.print_grid()
+
+	def xy_distance(self, predator_location, prey_location):
+		x_distance = abs(predator_location[0] - prey_location[0])
+		y_distance = abs(predator_location[1] - prey_location[1])
+		return [x_distance, y_distance]
 
 	def euclidian(self, first_location, second_location):
 		distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
@@ -469,5 +476,5 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor)
-	game.value_encoded(discount_factor)
+	#game.value_iteration(discount_factor)
+	#game.value_encoded(discount_factor)
