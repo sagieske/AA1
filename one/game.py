@@ -7,12 +7,13 @@ import time
 
 '''Predator class, with policy'''
 class Predator:
-	def __init__(self, location):
+	def __init__(self, location, prey_predator_distance):
 		self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Predator(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
 		self.reward = 0
+		self.prey_predator_distance = prey_predator_distance
 
 	def __repr__(self):
 		""" Represent Predator as X """
@@ -147,7 +148,7 @@ class Game:
 			if reset:
 				self.prey.set_location(prey_location)
 		if(predator==None):
-			self.predator = Predator(predator_location)
+			self.predator = Predator(predator_location, prey_predator_distance)
 		else:
 			self.predator = predator
 			# Reset to start position and reset award value
@@ -191,9 +192,7 @@ class Game:
 				if abs(j - y_difference) > largest_y:
 					largest_y = y_difference
 		new_prey_location = [0,0]
-		new_prey_location[0] = start_location_prey[0]-1
-		new_prey_location[1] = start_location_prey[1]-1
-		self.value_iteration(discount_factor, new_prey_location, [largest_x, largest_y], encoding=True)
+		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True)
 
 	def wrap_state(self, state, gridsize, encoding):
 		if not encoding:
@@ -201,15 +200,7 @@ class Game:
 			state[0] = temp_state[0] % gridsize[0]
 			state[1] = temp_state[1] % gridsize[1]
 		else:
-			temp_state = state
-			if state[0] == -1:
-				state[0] = 0
-			elif state[0] == gridsize[0]:
-				state[0] = gridsize[0]-1
-			if state[1] == -1:
-				state[1] = 0
-			elif state[1] == gridsize[1]:
-				state[1] = gridsize[1]-1
+			temp_state = state 
 		return state
 
 	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False):
@@ -244,7 +235,10 @@ class Game:
 				# Get surrounding states
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 				for new_state in possible_new_states:
-					
+					#the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
+					if new_state[0] == -1 or new_state[0] == gridsize[0] or new_state[1] == -1 or new_state[1] == gridsize[1]:
+						print "NOPE for ", new_state
+						break
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 					# Get value for state
@@ -459,7 +453,7 @@ if __name__ == "__main__":
 	count_list = []
 	#Initialize re-usable prey and predator objects
 	prey = Prey([0,0])
-	predator = Predator([5,5])
+	predator = Predator([5,5], [5,5])
 	#Run N games
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
@@ -477,4 +471,4 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
 	#game.value_iteration(discount_factor)
-	#game.value_encoded(discount_factor)
+	game.value_encoded(discount_factor)
