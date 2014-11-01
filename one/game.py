@@ -183,6 +183,7 @@ class Game:
 		new_grid = np.zeros((x_size,y_size))
 		largest_x = 0
 		largest_y = 0
+		#Find largest x difference, y difference (THIS CAN BE MORE EFFICIENT)
 		for i in range(0, x_size):
 			for j in range(0, y_size):
 				x_difference = abs(i - start_location_prey[0])
@@ -191,7 +192,10 @@ class Game:
 					largest_x = x_difference
 				if abs(j - y_difference) > largest_y:
 					largest_y = y_difference
+		#The prey's location is at 0,0, because in the encoded grid, each tile is a distance
+		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
+		#Calculate value iteration (mostly) as usual
 		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True)
 
 	def wrap_state(self, state, gridsize, encoding):
@@ -235,10 +239,11 @@ class Game:
 				# Get surrounding states
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 				for new_state in possible_new_states:
-					#the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
-					if new_state[0] == -1 or new_state[0] == gridsize[0] or new_state[1] == -1 or new_state[1] == gridsize[1]:
-						print "NOPE for ", new_state
-						break
+					if(encoding):
+						#the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
+						if new_state[0] == -1 or new_state[0] == gridsize[0] or new_state[1] == -1 or new_state[1] == gridsize[1]:
+							print "NOPE for ", new_state
+							break
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 					# Get value for state
