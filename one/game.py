@@ -239,16 +239,26 @@ class Game:
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 				for new_state in possible_new_states:
 					if(encoding):
-						#the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
-						if new_state[0] == -1 or new_state[0] == gridsize[0] or new_state[1] == -1 or new_state[1] == gridsize[1]:
-							# skip this state
-							continue
+						# Mirror states
+						if new_state[0] == -1:
+							new_state[0] = 1
+						if new_state[1] == -1:
+							new_state[1] = 1
+						# If at border right or below, than use state itself as new state
+						if new_state[0] == gridsize[0]:
+							new_state[0] = i
+							#continue
+						if new_state[1] == gridsize[1]:
+							#continue
+							new_state[1] = j
+					
+						#print ">>> start get value %s, value now is: %.4f" %(str(new_state), value_grid[new_state[0]][new_state[1]])
 
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-
 					# Get value for state (dependent on encoding)
 					value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid,encoding)
+					#print "update grid on %s: %.5f -> %.5f" %(str(new_state), value_grid[new_state[0]][new_state[1]], value)
 					# Update grid
 					new_grid[new_state[0]][new_state[1]] = value
 
@@ -264,6 +274,8 @@ class Game:
 
 			if verbose == 2 or (verbose == 1 and delta < 0.0001):
 				self.pretty_print(value_grid, [count, 'Value grid '])
+			#if count == 5:
+			#	return value_grid
 			#sys.exit()
 			count+=1
 			# Check for convergence
@@ -291,9 +303,12 @@ class Game:
 	   		actions =  self.predator.get_policy().iteritems()
 			action_values = []
 			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+			
 			for action in actions:
 				prob_sum = 0
+				values = []
 				for new_state in new_states:
+					bool_preset_transition = False
 					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
 					if(encoding):
 						# Mirror states
@@ -301,24 +316,45 @@ class Game:
 							new_state[0] = 1
 						if new_state[1] == -1:
 							new_state[1] = 1
+
 						# If at border right or below, than use state itself as new state
+						"""
+						Need to preset transitions since state is adjusted for correct calculation and does not correspond to action:
+						Transition should be 1 when action is North/East/South/West since it is a movement to other place 
+						(off) the grid. However for correct calculation you need value of state itself. (which would look like action Wait)
+						Transition should be 0 when action is Wait.
+						"""
 						if new_state[0] == grid_size[0]:
 							new_state = state
+							# pre-set transition_value to 1 if action is not equal to wait
+							if action != 'Wait':
+								bool_preset_transition = True
+								transition_value = 1
+							#continue
 						if new_state[1] == grid_size[1]:
 							new_state = state
+							# pre-set transition_value to 1 if action is not equal to wait
+							if action != 'Wait':
+								bool_preset_transition = True
+								transition_value = 1
 
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-					#Compute transition value from s to s'
-					transition_value = self.transition(state, new_state, goal_state, action[0])
+
+					#Compute transition value from s to s' if not already set
+					if not bool_preset_transition:
+						transition_value = self.transition(state, new_state, goal_state, action[0])
 					#Compute reward from s to s'
 					reward_value = self.reward_function(state, new_state, goal_state, action[0])
 					#Add this to the sum of state probabilities
+					values.append(transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]]))
 					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
+
 				#Append sum of state probabilities for this action times probability for this action to the action list
 				action_values.append(prob_sum*action[1])
 			#The value for i,j is the max of all action_values
 			value = max(action_values)
+
 			return value
 
 
@@ -474,7 +510,9 @@ if __name__ == "__main__":
 	#Initialize re-usable prey and predator objects
 	prey = Prey([0,0])
 	predator = Predator([5,5], [5,5])
+	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 	#Run N games
+	"""
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
@@ -489,6 +527,7 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+	"""
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, verbose=verbose)
 	game.value_encoded(discount_factor, verbose=verbose)
