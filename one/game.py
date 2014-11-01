@@ -175,7 +175,7 @@ class Game:
 		distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
 		return distance
 
-	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11]):
+	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], verbose=0):
 		x_size = gridsize[0]
 		y_size = gridsize[1]
 		dist_end = self.euclidian(start_location_prey, gridsize)
@@ -196,7 +196,7 @@ class Game:
 		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
 		#Calculate value iteration (mostly) as usual
-		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True)
+		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True, verbose=verbose)
 
 	def wrap_state(self, state, gridsize, encoding):
 		if not encoding:
@@ -207,7 +207,7 @@ class Game:
 			temp_state = state 
 		return state
 
-	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False):
+	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs value iteration """
 		# Get start time
 		start_time = time.time()
@@ -230,7 +230,6 @@ class Game:
 		while(not convergence):
 			# Get all nonzero indices from value_grid
 			nonzero_indices = np.transpose(np.nonzero(value_grid))
-
 			# Calculate surrounding values for non zero elements
 			for item in nonzero_indices:
 				# Set indices
@@ -242,12 +241,14 @@ class Game:
 					if(encoding):
 						#the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
 						if new_state[0] == -1 or new_state[0] == gridsize[0] or new_state[1] == -1 or new_state[1] == gridsize[1]:
-							print "NOPE for ", new_state
-							break
+							# skip this state
+							continue
+
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-					# Get value for state
-					value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid)
+
+					# Get value for state (dependent on encoding)
+					value = self.get_value(new_state, start_location_prey, discount_factor, [x_size, y_size], value_grid,encoding)
 					# Update grid
 					new_grid[new_state[0]][new_state[1]] = value
 
@@ -258,11 +259,12 @@ class Game:
 			value_grid = new_grid
 			new_grid = np.zeros((x_size,y_size))
 
-			self.pretty_print(value_grid, [count, 'Value grid '])
-
 			# Get maximum difference between grids
 			delta = np.amax(delta_grid)
 
+			if verbose == 2 or (verbose == 1 and delta < 0.0001):
+				self.pretty_print(value_grid, [count, 'Value grid '])
+			#sys.exit()
 			count+=1
 			# Check for convergence
 			if delta < 0.0001:
@@ -292,17 +294,30 @@ class Game:
 			for action in actions:
 				prob_sum = 0
 				for new_state in new_states:
-							#Check for toroidal wrap
+					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
+					if(encoding):
+						# Mirror states
+						if new_state[0] == -1:
+							new_state[0] = 1
+						if new_state[1] == -1:
+							new_state[1] = 1
+						# If at border right or below, than use state itself as new state
+						if new_state[0] == grid_size[0]:
+							new_state = state
+						if new_state[1] == grid_size[1]:
+							new_state = state
+
+					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-							#Compute transition value from s to s'
+					#Compute transition value from s to s'
 					transition_value = self.transition(state, new_state, goal_state, action[0])
-							#Compute reward from s to s'
+					#Compute reward from s to s'
 					reward_value = self.reward_function(state, new_state, goal_state, action[0])
-							#Add this to the sum of state probabilities
+					#Add this to the sum of state probabilities
 					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
-						#Append sum of state probabilities for this action times probability for this action to the action list
+				#Append sum of state probabilities for this action times probability for this action to the action list
 				action_values.append(prob_sum*action[1])
-					#The value for i,j is the max of all action_values
+			#The value for i,j is the max of all action_values
 			value = max(action_values)
 			return value
 
@@ -475,5 +490,5 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	#Perform value_iteration over the policy
-	#game.value_iteration(discount_factor)
-	game.value_encoded(discount_factor)
+	game.value_iteration(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
