@@ -50,9 +50,26 @@ class Predator:
 		""" Set state of predator """
 		self.state = "Predator(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
+        def get_transformation(self, action):
+                """ Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
+                return self.actions[action]
+                
 	def update_reward(self, reward):
 		""" Add reward gained on time step to total reward """
 		self.reward += reward
+		
+	def update_policy(self, optimal_moves):
+		""" Update the policy for policy iteration, by only considering the optimal moves """
+		
+		new_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		
+		number_of_optimal_moves = float(len(optimal_moves))
+		
+		for a in optimal_moves:
+		    new_policy[a] = 1/number_of_optimal_moves
+
+		return new_policy
+	
 
 	def reset_reward(self):
 		""" Reset reward to inital value """
@@ -297,15 +314,7 @@ class Game:
 			return True
 		else:
 			return False
-
-	def pretty_print(self, matrix, label):
-		""" Function to pretty print matrices in terminal """
-		print "|----------", label[1], " in loop ", label[0], "----------|"
-		for row in matrix:
-			pretty_row = ['%.6f' %v +'|' for v in row]
-			for x in pretty_row:
-				print '| ', x[:7],
-			print ' |\n',
+        		
 
    	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid, encoding=False):
 		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
@@ -376,22 +385,185 @@ class Game:
 				actions_chosen.append(action)
 			#The value for i,j is the max of all action_values
 			value = max(action_values)
+
 			return value
 
+
+        def policy_evaluation(self, discount_factor, start_location_prey=[0,0], gridsize=[11,11], encoding=False, verbose=0):
+		""" Performs value iteration """
+		# Get start time
+		start_time = time.time()
+
+		#Initialize parameters
+		x_size = gridsize[0]
+		y_size = gridsize[1]
+		convergence = False
+
+		# Initialize grids
+		value_grid = np.zeros((x_size, y_size))
+		new_grid = np.zeros((x_size, y_size))
+		delta_grid = np.zeros((x_size,y_size))
+
+		# Set goal state reward
+		# value_grid[start_location_prey[0]][start_location_prey[1]] = 10
+                
+                policy = self.predator.get_policy()
+                                
+                print self.predator.get_location()
+                print self.prey.get_location()
+                                
+                
+		count = 0
+		# Continue value iteration until convergence has taken place
+		while(not convergence):
+			# Get all nonzero indices from value_grid
+			# nonzero_indices = np.transpose(np.nonzero(value_grid))
+			# Calculate surrounding values for non zero elements
+			for i in range(0, x_size):
+			    for j in range(0, y_size):
+				# Set indices
+				item = [i, j]
+				#i  = item[0]
+				#j = item[1]
+				    
+				#print ">>> start get value %s, value now is: %.4f" %(str(new_state), value_grid[new_state[0]][new_state[1]])
+
+                                
+				# Get value for state (dependent on encoding)
+				actions =  self.predator.get_policy().keys()
+                        
+                                value = 0; 
+				for action in actions:
+				    probability_value = self.get_policy_value(item, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, encoding)
+				    value = value + policy[action] * probability_value
+				#print "update grid on %s: %.5f -> %.5f" %(str(new_state), value_grid[new_state[0]][new_state[1]], value)
+				
+				# Update grid
+				new_grid[item[0]][item[1]] = value
+
+			# Get delta between old and new grid
+			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
+
+			# Update grids for next round
+			value_grid = new_grid
+			new_grid = np.zeros((x_size,y_size))
+
+			# Get maximum difference between grids
+			delta = np.amax(delta_grid)
+
+			# Pretty print dependent on verbose level
+			if verbose == 2 or (verbose == 1 and delta < 0.0001):
+				self.pretty_print(value_grid, [count, 'Value grid '])
+
+			count+=1
+			# Check for convergence
+			if delta < 0.0001:
+				convergence = True
+				stop_time = time.time()
+				print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+		return value_grid
+
+
+        
+
+
+        def get_policy_value(self, state, goal_state, discount_factor, grid_size, value_grid, action, encoding=False):
+		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
+                i = state[0]
+                j = state[1]
+  	   	[x_size, y_size] = grid_size
+ 		
+ 		# Get all actions of predator
+  	   	
+ 		new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+ 			
+ 		prob_sum = 0
+    
+    		for new_state in new_states:
+   		       bool_preset_transition = False
+   					
+   		       # Currently ignoring the encoding!!
+   		       # in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
+   					
+   		       if(encoding):
+                            # Mirror states
+                            if new_state[0] == -1:
+                                new_state[0] = 1
+ 			    if new_state[1] == -1:
+ 			        new_state[1] = 1
+                            
+                            # If at border right or below, than use state itself as new state
+				"""
+				Need to preset transitions since state is adjusted for correct calculation and does not correspond to action:
+				Transition should be 1 when action is North/East/South/West since it is a movement to other place 
+				(off) the grid. However for correct calculation you need value of state itself. (which would look like action Wait)
+				Transition should be 0 when action is Wait.
+				"""
+  		            if new_state[0] == grid_size[0]:
+  		                new_state = state
+ 			    # pre-set transition_value to 1 if action is not equal to wait
+     			        if action != 'Wait':
+ 			            bool_preset_transition = True
+    				    transition_value = 1
+ 			
+ 			    #continue
+ 			    if new_state[1] == grid_size[1]:
+ 				new_state = state
+         			# pre-set transition_value to 1 if action is not equal to wait
+         			if action != 'Wait':
+            			     bool_preset_transition = True
+            			     transition_value = 1
+            
+   		       #Check for toroidal wrap
+   		       new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+   		       
+   		       #Compute transition value from s to s' if not already set
+   		       if not bool_preset_transition:
+   		           transition_value = self.transition(state, new_state, goal_state, action)
+   		       
+   		       #Compute reward from s to s'
+   		       
+   		       reward_value = self.reward_function(state, new_state, goal_state, action)
+   		       
+   		       
+   		       #Add this to the sum of state probabilities
+   		       prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
+    
+ 		return prob_sum
+
+
+
+        def pretty_print(self, matrix, label):
+		""" Function to pretty print matrices in terminal """
+		print "|----------", label[1], " in loop ", label[0], "----------|"
+		for row in matrix:
+			pretty_row = ['%.6f' %v +'|' for v in row]
+			for x in pretty_row:
+				print '| ', x[:7],
+			print ' |\n',
+        
 
 	def transition(self, old_state, new_state, goal_state, action):
 		""" Returns transition states"""
 
 		# TODO: Is this correct? Should east/west/north/south actions also be checked with appropriate states?
 		#If we're staying in the same place with a non-waiting action, the prob is 0
-		if old_state == new_state and action != 'Wait':
-			return 0
+		#if old_state == new_state and action != 'Wait':
+		#	return 0
 		#If we're moving while using the wait action, the prob is 0
-		elif old_state != new_state and action == 'Wait':
-			return 0
+		#elif old_state != new_state and action == 'Wait':
+		#	return 0
 		#All other actions have transition probability of 1
+		#elif:
+		
+		new_location = self.get_new_state_location(old_state, action)
+		
+		if new_location == new_state:     
+		      return 1
 		else:
-			return 1
+		      return 0
+			    
+			
 
 	def reward_function(self, old_state, new_state, goal_state, action):
 		if(new_state == goal_state and old_state != goal_state):
@@ -482,6 +654,18 @@ class Game:
 		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
 		return new_location
 
+    
+        def get_new_state_location(self, old_location, action):
+		""" Returns new location of an object when performs the chosen move """
+		new_location = []
+		chosen_move = self.predator.get_transformation(action)
+		environment_size = self.environment.get_size()
+		# division by modulo makes board toroidal:
+		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
+		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
+		return new_location
+	  
+
 class Environment:
 
 	def __init__(self, size=[11,11]):
@@ -557,3 +741,5 @@ if __name__ == "__main__":
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, verbose=verbose)
 	game.value_encoded(discount_factor, verbose=verbose)
+
+        game.policy_evaluation(discount_factor, verbose = verbose)
