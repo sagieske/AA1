@@ -392,7 +392,7 @@ class Game:
 
 
         def policy_evaluation(self, discount_factor, start_location_prey=[0,0], gridsize=[11,11], encoding=False, verbose=0):
-		""" Performs value iteration """
+		""" Performs policy evaluation """
 		# Get start time
 		start_time = time.time()
 
@@ -409,6 +409,7 @@ class Game:
 		# Set goal state reward
 		# value_grid[start_location_prey[0]][start_location_prey[1]] = 10
                 
+                # Get the predator policy for further use
                 policy = self.predator.get_policy()
                                 
                 print self.predator.get_location()
@@ -418,30 +419,25 @@ class Game:
 		count = 0
 		# Continue value iteration until convergence has taken place
 		while(not convergence):
-			# Get all nonzero indices from value_grid
-			# nonzero_indices = np.transpose(np.nonzero(value_grid))
-			# Calculate surrounding values for non zero elements
+			# Calculate the new value for each state of the grid
 			for i in range(0, x_size):
 			    for j in range(0, y_size):
-				# Set indices
-				item = [i, j]
-				#i  = item[0]
-				#j = item[1]
+				# current state:
+				current_state = [i, j]
 				    
 				#print ">>> start get value %s, value now is: %.4f" %(str(new_state), value_grid[new_state[0]][new_state[1]])
 
-                                
 				# Get value for state (dependent on encoding)
 				actions =  self.predator.get_policy().keys()
                         
                                 value = 0; 
 				for action in actions:
-				    probability_value = self.get_policy_value(item, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, encoding)
+				    probability_value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, encoding)
 				    value = value + policy[action] * probability_value
 				#print "update grid on %s: %.5f -> %.5f" %(str(new_state), value_grid[new_state[0]][new_state[1]], value)
 				
 				# Update grid
-				new_grid[item[0]][item[1]] = value
+				new_grid[current_state[0]][current_state[1]] = value
 
 			# Get delta between old and new grid
 			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
@@ -471,17 +467,16 @@ class Game:
 
         def get_policy_value(self, state, goal_state, discount_factor, grid_size, value_grid, action, encoding=False):
 		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
+                """ Used for policy evaluation function """
                 i = state[0]
                 j = state[1]
   	   	[x_size, y_size] = grid_size
  		
  		# Get all actions of predator
-  	   	
- 		new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
- 			
+  	   	new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+ 					
  		prob_sum = 0
-    
-    		for new_state in new_states:
+                for new_state in new_states:
    		       bool_preset_transition = False
    					
    		       # Currently ignoring the encoding!!
@@ -524,7 +519,6 @@ class Game:
    		           transition_value = self.transition(state, new_state, goal_state, action)
    		       
    		       #Compute reward from s to s'
-   		       
    		       reward_value = self.reward_function(state, new_state, goal_state, action)
    		       
    		       
@@ -546,7 +540,7 @@ class Game:
         
 
 	def transition(self, old_state, new_state, goal_state, action):
-		""" Returns transition states"""
+		""" Returns transition states """
 
 		# TODO: Is this correct? Should east/west/north/south actions also be checked with appropriate states?
 		#If we're staying in the same place with a non-waiting action, the prob is 0
@@ -658,7 +652,7 @@ class Game:
 
     
         def get_new_state_location(self, old_location, action):
-		""" Returns new location of an object when performs the chosen move """
+		""" Returns new state given old state and an action (no object is used) """
 		new_location = []
 		chosen_move = self.predator.get_transformation(action)
 		environment_size = self.environment.get_size()
@@ -666,7 +660,27 @@ class Game:
 		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
 		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
 		return new_location
+
+		
+	def get_action(self, old_state, new_state):
+		""" Returns the action which should be used to obtain a specific new state from the old one """
+		actions = self.predator.get_policy().keys()
+		
+		# Loop through the actions and find which one yields the desired new_state
+		for action in actions:
+		      new_location = []
+		      chosen_move = self.predator.get_transformation(action)
+		      environment_size = self.environment.get_size()
+		      # division by modulo makes board toroidal:
+		      new_location.append((old_state[0] + chosen_move[0]) % environment_size[0])
+		      new_location.append((old_state[1] + chosen_move[1]) % environment_size[1])
+		      
+		      # Return the action which yields the new state
+		      if new_location == new_state:
+		          #print 'chosen_move: ', chosen_move, ' action: ', action 
+		          return action
 	  
+	      
 
 class Environment:
 
