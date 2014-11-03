@@ -290,6 +290,14 @@ class Game:
 				print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 		return value_grid
 
+	def next_to_goal(self, state, goal):
+		x_distance = abs(state[0]-goal[0])
+		y_distance = abs(state[1]-goal[1])
+		if x_distance + y_distance ==1:
+			return True
+		else:
+			return False
+
 	def pretty_print(self, matrix, label):
 		""" Function to pretty print matrices in terminal """
 		print "|----------", label[1], " in loop ", label[0], "----------|"
@@ -302,6 +310,8 @@ class Game:
    	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid, encoding=False):
 		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
    		if(state == goal_state):
+   			return 0
+   		elif (self.next_to_goal(state, goal_state)):
    			return 10
    		else:
    			i = state[0]
@@ -540,4 +550,4 @@ if __name__ == "__main__":
 	"""
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
