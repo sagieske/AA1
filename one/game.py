@@ -58,15 +58,15 @@ class Predator:
 		""" Add reward gained on time step to total reward """
 		self.reward += reward
 		
-	def update_policy(self, optimal_moves):
+	def get_optimal_policy(self, optimal_actions):
 		""" Update the policy for policy iteration, by only considering the optimal moves """
 		
 		new_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
 		
-		number_of_optimal_moves = float(len(optimal_moves))
+		number_of_optimal_actions = float(len(optimal_actions))
 		
-		for a in optimal_moves:
-		    new_policy[a] = 1/number_of_optimal_moves
+		for a in optimal_actions:
+		    new_policy[a] = 1/number_of_optimal_actions
 
 		return new_policy
 	
@@ -391,7 +391,7 @@ class Game:
 			return value
 
 
-        def policy_evaluation(self, discount_factor, start_location_prey=[0,0], gridsize=[11,11], encoding=False, verbose=0):
+        def policy_evaluation(self, discount_factor, start_location_prey=[2,3], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs policy evaluation """
 		# Get start time
 		start_time = time.time()
@@ -411,15 +411,12 @@ class Game:
                 
                 # Get the predator policy for further use
                 policy = self.predator.get_policy()
-                                
-                print self.predator.get_location()
-                print self.prey.get_location()
-                                
-                
+                         
 		count = 0
 		# Continue value iteration until convergence has taken place
 		while(not convergence):
 			# Calculate the new value for each state of the grid
+			
 			for i in range(0, x_size):
 			    for j in range(0, y_size):
 				# current state:
@@ -427,12 +424,12 @@ class Game:
 				    
 				#print ">>> start get value %s, value now is: %.4f" %(str(new_state), value_grid[new_state[0]][new_state[1]])
 
-				# Get value for state (dependent on encoding)
+				# Get possible actions
 				actions =  self.predator.get_policy().keys()
                         
                                 value = 0; 
 				for action in actions:
-				    probability_value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, encoding)
+				    probability_value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, True, encoding)
 				    value = value + policy[action] * probability_value
 				#print "update grid on %s: %.5f -> %.5f" %(str(new_state), value_grid[new_state[0]][new_state[1]], value)
 				
@@ -462,15 +459,149 @@ class Game:
 		return value_grid
 
 
-        
+        def policy_iteration(self, discount_factor, start_location_prey=[2,2], gridsize=[11,11], encoding=False, verbose=0):
+		""" Performs policy evaluation """
+		# Get start time
+		start_time = time.time()
+
+		#Initialize parameters
+		x_size = gridsize[0]
+		y_size = gridsize[1]
+		convergence = False
+
+		# Initialize grids
+		value_grid = np.zeros((x_size, y_size))
+		new_grid = np.zeros((x_size, y_size))
+		delta_grid = np.zeros((x_size,y_size))
 
 
-        def get_policy_value(self, state, goal_state, discount_factor, grid_size, value_grid, action, encoding=False):
+                # Get the predator policy for further use
+                old_policy = self.predator.get_policy()
+                
+                policy = [[old_policy for i in range(0, y_size)] for j in range(0, x_size)]
+
+                
+                #for i in range(0, x_size):
+                #    for j in range(0, y_size):
+                #        policy[i][j] = old_policy
+
+		count = 0
+                  
+                is_policy_stable = False
+                  				
+		while(not is_policy_stable):
+		      
+		      count += 1           
+		      while(not convergence):
+		          
+		        # Calculate the new value for each state of the grid
+			for i in range(0, x_size):
+			    for j in range(0, y_size):
+				# current state:
+				current_state = [i, j]
+				
+				# Compute the value by passing the corresponding policy
+				value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, policy[i][j], False, encoding)
+			        
+				# Update grid
+				new_grid[current_state[0]][current_state[1]] = value
+
+			# Get delta between old and new grid
+			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
+
+			# Update grids for next round
+			value_grid = new_grid
+			new_grid = np.zeros((x_size,y_size))
+
+			# Get maximum difference between grids
+			delta = np.amax(delta_grid)
+
+			# Pretty print dependent on verbose level
+			if verbose == 2 or (verbose == 1 and delta < 0.0001):
+				self.pretty_print(value_grid, [count, 'Value grid '])
+
+			# count+=1
+			
+			# Check for convergence
+			if delta < 0.0001:
+				convergence = True
+				#stop_time = time.time()
+				#print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+		
+		      
+		      # TODO: Fix the indentation above to be a bit more clear!
+		      
+		      # Update policy and check for convergence
+		      is_policy_stable = True   
+		      
+		      # First update the policy according to the new values:
+		      for i in range(0, x_size):
+			    for j in range(0, y_size):
+				# current state:
+				current_state = [i, j]
+				
+				neighbor_values = []
+				
+				new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				for state in new_states:
+				    state = self.wrap_state(state, [x_size, y_size], encoding)
+				    neighbor_values.append(value_grid[state[0]][state[1]])
+				    
+				optimal_value = max(neighbor_values)
+				                                                                        
+                                # Get all possible actions:
+				actions =  self.predator.get_policy().keys()
+                               
+                                # Find the optimal actions:
+                                optimal_actions = []   
+				for action in actions:
+                                    new_state = self.get_new_state_location(current_state, action)
+                                    #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
+                                    #print 'new_state: ', new_state
+                                    if value_grid[new_state[0]][new_state[1]] == optimal_value:
+                                        optimal_actions.append(action)
+                                
+                                # Update the policy:
+                                updated_policy = self.predator.get_optimal_policy(optimal_actions)
+                                
+                                print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
+                                
+                                if not updated_policy == policy[i][j]:
+                                    is_policy_stable = False
+                                    policy[i][j] = updated_policy
+                                    
+                                # FOR TESTING PURPOSE ONLY    
+                                print updated_policy
+                                		
+		#for i in range(0, x_size):
+	        #   for j in range(0, y_size):
+		#     print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
+                                
+		
+		if verbose == 2 or (verbose == 1 and delta < 0.0001):
+		      self.pretty_print(value_grid, [count, 'Value grid '])
+
+		
+		stop_time = time.time()
+	        print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+		
+		# Continue value iteration until convergence has taken place
+		return value_grid, policy
+
+
+
+
+        def get_policy_value(self, state, goal_state, discount_factor, grid_size, value_grid, action_or_policy, policy_evaluation, encoding=False):
 		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
                 """ Used for policy evaluation function """
                 i = state[0]
                 j = state[1]
   	   	[x_size, y_size] = grid_size
+ 		
+ 		# TODO: Find a prettier way to pass both action for policy evaluation and policy for policy iteration!!
+ 		# For now: set both action and policy to whatever was passed, so that we can use the same notation:
+ 		action = action_or_policy
+ 		policy = action_or_policy
  		
  		# Get all actions of predator
   	   	new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
@@ -516,7 +647,11 @@ class Game:
    		       
    		       #Compute transition value from s to s' if not already set
    		       if not bool_preset_transition:
-   		           transition_value = self.transition(state, new_state, goal_state, action)
+   		           if policy_evaluation:
+   		               transition_value = self.transition(state, new_state, goal_state, action)
+   		           else:
+   		               action = self.get_action(state, new_state)
+   		               transition_value = policy[action]    
    		       
    		       #Compute reward from s to s'
    		       reward_value = self.reward_function(state, new_state, goal_state, action)
@@ -756,7 +891,10 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	"""
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#game.value_iteration(discount_factor, verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
 
-        game.policy_evaluation(discount_factor, verbose = verbose)
+        #game.policy_evaluation(discount_factor, verbose = verbose)
+        
+        game.policy_iteration(discount_factor, verbose = verbose)
+        
