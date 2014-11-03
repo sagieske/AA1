@@ -309,8 +309,10 @@ class Game:
 
    	def get_value(self, state, goal_state, discount_factor, grid_size, value_grid, encoding=False):
 		""" Get value of a state by using surrounding states and their reward and transition function combined with the discount factor """
+		#If the state is the goal_state, the value is 0 because it is terminal
    		if(state == goal_state):
    			return 0
+   		#If the state is next to the goal_state, the value is 10 because that is the highest expected reward
    		elif (self.next_to_goal(state, goal_state)):
    			return 10
    		else:
@@ -550,4 +552,4 @@ if __name__ == "__main__":
 	"""
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
