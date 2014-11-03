@@ -312,7 +312,8 @@ class Game:
 		#If the state is the goal_state, the value is 0 because it is terminal
    		if(state == goal_state):
    			return 0
-   		#If the state is next to the goal_state, the value is 10 because that is the highest expected reward
+   		#If the state is next to the goal_state, the value is 10 because that is the highest expected reward,
+   		#and no matter the discount factor, the value of the corresponding next state is 0.
    		elif (self.next_to_goal(state, goal_state)):
    			return 10
    		else:
@@ -322,6 +323,7 @@ class Game:
 			# Get all actions of predator
 	   		actions =  self.predator.get_policy().iteritems()
 			action_values = []
+			actions_chosen = []
 			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 			
 			for action in actions:
@@ -371,9 +373,9 @@ class Game:
 
 				#Append sum of state probabilities for this action times probability for this action to the action list
 				action_values.append(prob_sum*action[1])
+				actions_chosen.append(action)
 			#The value for i,j is the max of all action_values
 			value = max(action_values)
-
 			return value
 
 
@@ -392,6 +394,8 @@ class Game:
 			return 1
 
 	def reward_function(self, old_state, new_state, goal_state, action):
+		if(new_state == goal_state and old_state != goal_state):
+			return 10
 		#All states have a reward of 0, except the terminal state
 		return 0
 
