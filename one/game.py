@@ -4,8 +4,6 @@ import sys
 import argparse
 import numpy as np
 import time
-from math import ceil, floor
-
 
 '''Predator class, with policy'''
 class Predator:
@@ -560,13 +558,7 @@ class Game:
                                     new_state = self.get_new_state_location(current_state, action)
                                     #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
                                     #print 'new_state: ', new_state
-                                    
-                                    
-                                    # We round the values so that poor old Python doesn't get confused from the rest of the numbers :)
-                                    round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
-                                    round_opt_value = floor(optimal_value * (10**3)) / float(10**3)
-                                    
-                                    if round_value == round_opt_value:
+                                    if value_grid[new_state[0]][new_state[1]] == optimal_value:
                                         optimal_actions.append(action)
                                 
                                 # Update the policy:
