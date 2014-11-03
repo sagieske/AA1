@@ -270,12 +270,10 @@ class Game:
 						# If at border right or below, than use state itself as new state
 						if new_state[0] == gridsize[0]:
 							new_state[0] = i
-							#continue
 						if new_state[1] == gridsize[1]:
-							#continue
 							new_state[1] = j
-					
-						#print ">>> start get value %s, value now is: %.4f" %(str(new_state), value_grid[new_state[0]][new_state[1]])
+
+
 
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
@@ -339,7 +337,7 @@ class Game:
 				prob_sum = 0
 
 				for new_state in new_states:
-					bool_preset_transition = False
+					#UPDATE FOR ADJUSTED TRANSITION FUNCTION:bool_preset_transition = False
 					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
 					if(encoding):
 						# Mirror states
@@ -355,26 +353,30 @@ class Game:
 						(off) the grid. However for correct calculation you need value of state itself. (which would look like action Wait)
 						Transition should be 0 when action is Wait.
 						"""
+						"""
+						UPDATE FOR ADJUSTED TRANSITION FUNCTION: states are not needed for calculation?
+						"""
 						if new_state[0] == grid_size[0]:
-							new_state = state
+							#new_state = state
 							# pre-set transition_value to 1 if action is not equal to wait
-							if action != 'Wait':
-								bool_preset_transition = True
-								transition_value = 1
-							#continue
+							#if action != 'Wait':
+							#	bool_preset_transition = True
+							#	transition_value = 1
+							continue
 						if new_state[1] == grid_size[1]:
-							new_state = state
+							#new_state = state
 							# pre-set transition_value to 1 if action is not equal to wait
-							if action != 'Wait':
-								bool_preset_transition = True
-								transition_value = 1
-
+							#if action != 'Wait':
+							#	bool_preset_transition = True
+							#	transition_value = 1
+							continue
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 
 					#Compute transition value from s to s' if not already set
-					if not bool_preset_transition:
-						transition_value = self.transition(state, new_state, goal_state, action[0])
+					#UPDATE FOR ADJUSTED TRANSITION FUNCTION:not needed: if not bool_preset_transition:
+					transition_value = self.transition(state, new_state, goal_state, action[0])
+
 					#Compute reward from s to s'
 					reward_value = self.reward_function(state, new_state, goal_state, action[0])
 					#Add this to the sum of state probabilities
@@ -722,6 +724,7 @@ if __name__ == "__main__":
 	predator = Predator([5,5], [5,5])
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 	#Run N games
+	#TODO: ONLY COMMENTED OUT FOR TESTING PURPOSES
 	"""
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
