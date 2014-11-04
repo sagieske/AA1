@@ -305,6 +305,11 @@ class Game:
 				convergence = True
 				stop_time = time.time()
 				print "Value iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+				print "Predator location: ", self.predator.get_location()
+				print "Prey location: ", start_location_prey
+				print "Discount factor: ", discount_factor
+		
+		
 		return value_grid
 
 	def next_to_goal(self, state, goal):
@@ -454,7 +459,9 @@ class Game:
 				stop_time = time.time()
 				print "Iterative policy evaluation converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 				print "Predator location: ", self.predator.get_location()
-				print "Prey location: ", self.prey.get_location()
+				print "Prey location: ", start_location_prey
+				print "Discount factor: ", discount_factor
+		
 		return value_grid
 
 
@@ -591,7 +598,8 @@ class Game:
 		stop_time = time.time()
 	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 		print "Predator location: ", self.predator.get_location()
-		print "Prey location: ", self.prey.get_location()
+		print "Prey location: ", start_location_prey
+		print "Discount factor: ", discount_factor
 		
 		# Yay! We are done! Return optimal value grid and policy!
 		return value_grid, policy
@@ -857,7 +865,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	N = 1
-	discount_factor = 0.9
+	discount_factor = 0.8
 	loops = 3
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
@@ -895,9 +903,9 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	"""
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	game.value_iteration(discount_factor, [0,0], verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
 
-        game.iterative_policy_evaluation(discount_factor, verbose = verbose)
-        game.policy_iteration(discount_factor, verbose = verbose)
+        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+        #game.policy_iteration(discount_factor, [5,5], verbose = verbose)
         
