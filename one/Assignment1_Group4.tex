@@ -1,0 +1,131 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{verbatim}
+
+%\usepackage{soul}
+
+\begin{document}
+
+\title{Autonomous Agents 1 \\ Assignment 1}
+
+\author{By Group 4: Gieske, Gornishka, Loor, Radscum}
+\maketitle
+
+\section*{Implementation}
+
+\noindent The current implementation consists of the following classes:
+\begin{description}
+	\item[Predator] \hfill \\ 
+	
+	\item[Prey] \hfill \\ 
+	
+	\item[Environment] \hfill \\ 
+	
+	\item[Game] \hfill \\ 
+	
+\end{description}
+
+
+\section*{Analysis}
+
+
+\subsection*{Simulator for the environment}
+
+
+\begin{center}
+	\begin{tabular}{  l ||  l }
+		Avarage run time & Standard deviation \\ 
+		\hline
+		 & %avarage run time and standart deviation to be filled here 	
+	\end{tabular}
+\end{center}
+
+\subsection*{Iterative policy evaluation}
+
+
+\begin{center}
+	\begin{tabular}{ l | l | l | l | l }
+		Predator & Prey & Value & Discount Factor & Iterations to converge \\ 
+		\hline
+		(0, 0) & (5, 5) & & 0.8 & \\
+		(2, 3) & (5, 4) & & 0.8 & \\
+		(2, 10) & (10, 0) & & 0.8 & \\
+		(10, 10) & (0, 0) & & 0.8 & \\	
+	\end{tabular}
+\end{center}
+
+
+\subsection*{Policy iteration}
+
+% Somehow print the whole grid for Prey(5,5)
+
+\begin{center}
+	\begin{tabular}{ l || l }
+		Discount Factor & Iterations to converge \\ 
+		\hline
+		0.1 & \\
+		0.5 & \\
+		0.7 & \\
+		0.9 & \\	
+	\end{tabular}
+\end{center}
+
+
+\subsection*{Value iteration}
+
+% Somehow print the whole grid for Prey(5,5)
+
+\begin{center}
+	\begin{tabular}{ l || l }
+		Discount Factor & Iterations to converge \\ 
+		\hline
+		0.1 & \\
+		0.5 & \\
+		0.7 & \\
+		0.9 & \\	
+	\end{tabular}
+\end{center}
+
+
+\subsection*{Smarter state-space encoding}
+
+
+
+
+\begin{comment}
+Sample table in case it's needed
+\begin{center}
+	\begin{tabular}{ l | l | l | l | l | l || l | l | l | l || l}
+		\textbf{K} & Sampling & C-space & VocabSize & TrainSize & Kernel & Airplanes & Cars & Faces & Motorbikes & MAP \\ 
+		\hline
+		400 & dense & gray & 100 & 300 & linear & 87 & 74 & 95 & 69 & 81 \\
+		800 & dense & gray & 100 & 300 & linear & 93 & 70 & 86 & 73 & 81 \\
+		1600 & dense & gray & 100 & 300 & linear & 88 & 72 & 86 & 64 & 78 \\
+		2000 & dense & gray & 100 & 300 & linear & 86 & 73 & 81 & 51 & 73 \\	
+		4000 & dense & gray & 100 & 300 & linear & 90 & 75 & 83 & 53 & 75 \\	
+	\end{tabular}
+\end{center}
+
+\end{comment}
+
+
+\section*{Conclusion}
+
+\section*{Files attached}
+
+\section*{Sources}
+
+% We don't have any sources so far, right? :/
+
+\begin{comment}
+\begin{itemize}
+	\item MatLab (http://www.mathworks.nl/products/matlab/)
+	\item VL\_Feat (http://www.vlfeat.org/)
+	\item LibSVM (http://www.csie.ntu.edu.tw/cjlin/libsvm/)
+	\item Caltech Vision Group (http://www.vision.caltech.edu/)
+\end{itemize}
+\end{comment}
+
+\end{document}
