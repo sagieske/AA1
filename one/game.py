@@ -575,7 +575,7 @@ class Game:
                               
                               # This seems uninformative. Changed temporarily!
                               #print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
-                              print i, ' ', j, ' old: ', policy[i][j], 'updated: ', updated_policy
+                              #print i, ' ', j, ' old: ', policy[i][j], 'updated: ', updated_policy
                                                                                           
                               # Check if policy is unstable
                               # If so, update the old policy and set stability flag to False!
@@ -586,14 +586,14 @@ class Game:
                                   policy[i][j] = updated_policy
                                     
                               # FOR TESTING PURPOSE ONLY    
-                              print updated_policy
+                              #print updated_policy
                                 		
 		#for i in range(0, x_size):
 	        #   for j in range(0, y_size):
 		#     print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
                                 
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
-		      self.pretty_print(value_grid, [count, 'Value grid '])
+		      self.policy_print(policy, value_grid)#, [count, 'Value grid ']
 
 		stop_time = time.time()
 	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
@@ -684,7 +684,33 @@ class Game:
 			for x in pretty_row:
 				print '| ', x[:7],
 			print ' |\n',
-        
+
+        # No doubt this can be implemented smarter, but I have no idea how
+        def policy_print(self, policy, value_grid):
+		""" Function to print policy matrices in terminal """
+		# Assume policy and value_grid are of same dimensions
+		policy_strings = self.policy_to_string(policy)
+		print "|---------- OPTIMAL POLICY ----------|"
+		for (row, pol) in zip(value_grid, policy_strings):
+			pretty_row = ['' + '%.6f' %v + '%s' %z + '' for v, z in zip(row, pol)]
+			for x in pretty_row:
+				print '| ', x[:7], x[8:],
+			print ' |\n',   
+
+        # No doubt this can be implemented smarter, but I have no idea how
+        def policy_to_string(self, policy):
+                """ Function to extract policy to characters => N = North, S = South, etc. """
+                # Initialize array with empty strings
+                policy_strings = [['' for i in range(0, len(policy))] for j in range(0, len(policy[0]))]
+                
+                # Iterate over policy array and store only the first letters of the optimal policy at said location
+                for i in range(0, len(policy)):
+                    for j in range(0, len(policy[0])):
+                        for key in policy[i][j]:
+                            key_value = policy[i][j][key]
+                            if (key_value > 0):
+                                policy_strings[i][j] = policy_strings[i][j] + key[0]
+                return policy_strings
 
 	def transition(self, old_state, new_state, goal_state, action):
 		""" Returns transition states """
@@ -904,8 +930,8 @@ if __name__ == "__main__":
 	"""
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, [0,0], verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
 
-        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
-        #game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+        game.policy_iteration(discount_factor, [5,5], verbose = verbose)
         
