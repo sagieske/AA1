@@ -32,7 +32,7 @@ class Predator:
 		# Split policy dictionary in list of keys and list of values
 		action_name, policy = zip(*self.policy.items())
 		# Get choice using probability distribution
-		choice_index = np.random.choice(list(action_name), 1, list(policy))[0]
+		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
 		return choice_index
 
 	def get_location(self):
