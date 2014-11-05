@@ -89,7 +89,6 @@ class Predator:
 	def get_policy(self):
 		""" Return the predator's policy """
 		location = self.location
-		print "policy for ", location, " is ", self.policy[location[0]][location[1]]
 		return self.policy[location[0]][location[1]]
 
 '''Prey class, with policy'''
@@ -317,15 +316,34 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 		
-		self.policy_from_values(value_grid)
+		policy_grid = np.zeros((x_size, y_size))
+		actions =  self.predator.get_policy().iteritems()
+		for i in range(0, x_size):
+			for j in range(0, y_size):
+				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				best_action = ""
+				best_value = 0
+				print "in state [", i,j,"]"
+				for action in actions:
+					#print " using action ", action
+					action_value = 0
+					for new_state in possible_new_states:
+						#print "  to go to ", new_state
+						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+						transition_value = self.transition([i,j], new_state, start_location_prey, action[0])
+						#print "  transition_value is ", transition_value
+						reward_value = self.reward_function([i,j], new_state, start_location_prey, action[0])
+						#print "  reward_value is ", reward_value
+						next_value = value_grid[new_state[0]][new_state[1]]
+						#print "  next value is ", next_value
+						action_value += transition_value * (reward_value + discount_factor * next_value)
+						#print "   the next action value is ", action_value
+					print "in location [", i, j, "] action ", action[0], " has value ", action_value
+					if action_value > best_value:
+						best_value = action_value
+						best_action = action[0]
+				print "Best action for [",i,j,"] is ", best_action, " with value ", best_value
 		return value_grid
-
-	def policy_from_values(self, value_grid):
-		self.pretty_print(value_grid, ["bla","bla"])
-		i = len(value_grid)
-		j = len(value_grid[0])
-		new_grid = np.zeros((i, j))
-		self.pretty_print(new_grid, ['newgrid', 0])
 
 	def next_to_goal(self, state, goal):
 		x_distance = abs(state[0]-goal[0])
@@ -784,7 +802,6 @@ class Game:
 		#elif:
 		
 		new_location = self.get_new_state_location(old_state, action)
-		
 		if new_location == new_state:     
 		      return 1
 		else:
@@ -970,7 +987,7 @@ if __name__ == "__main__":
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 	#Run N games
 	#TODO: ONLY COMMENTED OUT FOR TESTING PURPOSES
-	
+	'''
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
@@ -985,7 +1002,7 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-
+	'''
 	#Perform value_iteration over the policy
 	game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
