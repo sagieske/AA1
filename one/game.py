@@ -311,11 +311,11 @@ class Game:
 			# Get maximum difference between grids
 			delta = np.amax(delta_grid)
 
-			# Pretty print dependent on verbose level
-			if verbose == 2 or (verbose == 1 and delta < 0.0001):
-				self.pretty_print(value_grid, [count, 'Value grid '])
 
 			count+=1
+			# Pretty print dependent on verbose level
+			if verbose == 2 or (verbose == 1 and delta < 0.0001):
+				self.pretty_print_latex(value_grid, [count, 'Value Iteration Grid '])
 			# Check for convergence
 			if delta < 0.0001:
 				convergence = True
@@ -701,6 +701,49 @@ class Game:
 				print '| ', x[:7],
 			print ' |\n',
 
+        def pretty_print_latex(self, matrix, label, indices=True):
+		""" Function to pretty print matrices in terminal to copy to laTeX"""
+		print "|----------", label[1], " in iteration ", label[0], "----------|"
+		
+		# Begin tabular
+		if indices:
+			tab_array = ['l'] * (len(matrix)+1)
+		else:
+			tab_array = ['l'] * len(matrix)
+		tab = ' | '.join(tab_array)
+		print "\\begin{tabular}{ |"+ tab + "|}"
+
+		# Print title
+		print "\\hline"
+		multicolumn = len(matrix)
+		if indices:
+			multicolumn_str = str(len(matrix)+1)		
+		else:
+			multicolumn_str = str(len(matrix))
+		print "\multicolumn{"+ multicolumn_str +"}{|c|}{" + label[1] + " in loop " + str(label[0]) + "}\\\\"
+		print "\\hline"
+
+		# Indices x-axis
+		index = range(0,len(matrix))
+		index_str = ["%s" % str(x) for x in index]
+		index_str_line =  ' & '.join(index_str) + ' \\\\ \n'
+		if indices:
+			index_str_line = "Indices y\\textbackslash x &" + index_str_line
+		print index_str_line
+		
+		print "\\hline"
+		# Print rows
+		for index in range(0,len(matrix)):
+			pretty_row = ['%.6f' %v  for v in matrix[index]]
+			if indices:
+				pretty_row = [str(index)] + pretty_row
+			latex_row = ' & '.join(pretty_row)
+			latex_row_new = latex_row + ' \\\\'
+			print latex_row_new
+		# End tabular 
+		print "\\hline"
+		print "\\end{tabular}"
+
         # No doubt this can be implemented smarter, but I have no idea how
         def policy_print(self, policy, value_grid):
 		""" Function to print policy matrices in terminal """
@@ -906,7 +949,7 @@ if __name__ == "__main__":
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
 	args = parser.parse_args()
 
-	N = 1
+	N = 100
 	discount_factor = 0.8
 	loops = 3
 	if(vars(args)['runs'] is not None):
@@ -945,6 +988,7 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 
 	#Perform value_iteration over the policy
+<<<<<<< HEAD
 	#game.value_iteration(discount_factor, [0,0], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
@@ -968,3 +1012,12 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
         
+=======
+	game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
+
+        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+        game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+
+        
+>>>>>>> 1660389d2dab8f24834dba705a95c7b28e33a13c
