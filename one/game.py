@@ -34,15 +34,6 @@ class Predator:
 
 	def pick_action(self):
 		""" Use the probabilities in the policy to pick a move """
-		if(self.policy_given):
-			highest = 0
-			best = "North"
-			policy = self.get_policy()
-			for i in policy:
-				if policy[i] > highest:
-					highest = policy[i]
-					best = i
-			return best
 		# Split policy dictionary in list of keys and list of values
 		action_name, policy = zip(*self.get_policy().items())
 		# Get choice using probability distribution
@@ -988,7 +979,6 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 
 	#Perform value_iteration over the policy
-<<<<<<< HEAD
 	#game.value_iteration(discount_factor, [0,0], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
@@ -1012,12 +1002,3 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
         
-=======
-	game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
-
-        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
-        game.policy_iteration(discount_factor, [5,5], verbose = verbose)
-
-        
->>>>>>> 1660389d2dab8f24834dba705a95c7b28e33a13c
