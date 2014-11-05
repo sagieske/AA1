@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import time
 from math import ceil, floor
+import pdb
 
 
 '''Predator class, with policy'''
@@ -89,6 +90,7 @@ class Predator:
 	def get_policy(self):
 		""" Return the predator's policy """
 		location = self.location
+		#print "policy for ", location, " is ", self.policy[location[0]][location[1]]
 		return self.policy[location[0]][location[1]]
 
 '''Prey class, with policy'''
@@ -345,6 +347,13 @@ class Game:
 				print "Best action for [",i,j,"] is ", best_action, " with value ", best_value
 		return value_grid
 
+	def policy_from_values(self, value_grid):
+		self.pretty_print(value_grid, ["bla","bla"])
+		i = len(value_grid)
+		j = len(value_grid[0])
+		new_grid = np.zeros((i, j))
+		self.pretty_print(new_grid, ['newgrid', 0])
+
 	def next_to_goal(self, state, goal):
 		x_distance = abs(state[0]-goal[0])
 		y_distance = abs(state[1]-goal[1])
@@ -550,15 +559,19 @@ class Game:
 
 			  # Update grids for next round
 			  value_grid = new_grid
+			  
+		#	  # Pretty print dependent on verbose level
+		#          if verbose == 2 or (verbose == 1 and delta < 0.0001):
+		#	     self.pretty_print(value_grid, [count, 'Value grid '])
+		#          #pdb.set_trace()
+		#
+			  
 			  new_grid = np.zeros((x_size,y_size))
 
 			  # Get maximum difference between grids
 			  delta = np.amax(delta_grid)
 
-			  # Pretty print dependent on verbose level
-			  if verbose == 2 or (verbose == 1 and delta < 0.0001):
-			      self.pretty_print(value_grid, [count, 'Value grid '])
-
+			  
 			  # count+=1
 			
 			  # Check for convergence
@@ -567,6 +580,12 @@ class Game:
 			      #stop_time = time.time()
 			      #print "Converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 		
+		      # Pretty print dependent on verbose level
+		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
+			  self.pretty_print(value_grid, [count, 'Value grid '])
+		      #pdb.set_trace()
+		
+
 		      # Update policy and check for stability
 		      is_policy_stable = True   
 		      
@@ -579,9 +598,11 @@ class Game:
 		              
 		              # Get values of all neighbors
 		              new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-		              for state in new_states:
-		                  state = self.wrap_state(state, [x_size, y_size], encoding)
-		                  neighbor_values.append(value_grid[state[0]][state[1]])
+		              for new_state in new_states:
+		                  new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+		                  reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
+		                  value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+		                  neighbor_values.append(value)
 
                               # Get max value of all neighbors, leading to the optimal value
                               optimal_value = max(neighbor_values)
@@ -595,8 +616,14 @@ class Game:
                                   #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
                                   #print 'new_state: ', new_state
                                   
+                                  reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
+		                  value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+		                  
+		                  round_value = floor(value * (10**3)) / float(10**3)
+                                  
+                                  
                                   # We round the values so that poor old Python doesn't get confused from the rest of the numbers :)
-                                  round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
+                                  # round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
                                   round_opt_value = floor(optimal_value * (10**3)) / float(10**3)
                                     
                                   if round_value == round_opt_value:
@@ -615,8 +642,18 @@ class Game:
                               
                               
                               if not updated_policy == policy[i][j]:
+                                  #print 'POLICY UNSTABLE AT STATE: [', i, ', ', j, ']'
                                   is_policy_stable = False
                                   policy[i][j] = updated_policy
+                              
+                                  
+                      if not is_policy_stable:
+                              value_grid = np.zeros((x_size, y_size))
+                              #new_grid = np.zeros((x_size, y_size))
+                              #delta_grid = np.zeros((x_size,y_size))
+                              convergence = False
+      
+                                    
                                     
                               # FOR TESTING PURPOSE ONLY    
                               #print updated_policy
@@ -627,6 +664,8 @@ class Game:
                                 
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
 		      self.policy_print(policy, value_grid)#, [count, 'Value grid ']
+		      
+		      
 
 		stop_time = time.time()
 	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
@@ -802,6 +841,7 @@ class Game:
 		#elif:
 		
 		new_location = self.get_new_state_location(old_state, action)
+		
 		if new_location == new_state:     
 		      return 1
 		else:
