@@ -79,6 +79,10 @@ class Predator:
 		""" Return the predator's policy """
 		location = self.location
 		return self.policy[location[0]][location[1]]
+		
+	def get_action_keys(self):
+                return self.get_policy().keys() 		
+	
 
 '''Prey class, with policy'''
 class Prey:
@@ -156,7 +160,8 @@ class Prey:
 
 	def get_policy(self):
 		return self.policy
-
+		
+        
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
 		""" Initalize environment and agents """
@@ -537,67 +542,73 @@ class Game:
                     convergence = True
                     return value_grid, delta
 		      
-        def policy_improvement(self, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
-            x_size=gridsize[0]
-            y_size=gridsize[1]
+        def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
             
-            # Update policy and check for stability
-            is_policy_stable = True   
-            		      
-            # First update the policy according to the new values:
-            for i in range(0, x_size):
-                for j in range(0, y_size):
-                    # current state:
-                    current_state = [i, j]
-                    neighbor_values = []
-                    
-                    # Get values of all neighbors
-                    new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-                    for new_state in new_states:
-                        new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-                        reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
-                        value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
-                        neighbor_values.append(value)
-                        
-                    # Get max value of all neighbors, leading to the optimal value
-                    optimal_value = max(neighbor_values)
-                        
-                    # Get all possible actions:
-                    actions =  self.predator.get_policy().keys()
-                        
-                    # Find the optimal actions, based on the optimal value
-                    optimal_actions = []   
-                    for action in actions:
-                        new_state = self.get_new_state_location(current_state, action)
-                        #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
-                        #print 'new_state: ', new_state
-                        reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
-                        value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
-                            
-                        # We round the values so that poor old Python doesn't get confused from the rest of the numbers :)
-                        #round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
-                        round_value = floor(value * (10**3)) / float(10**3)
-                        round_opt_value = floor(optimal_value * (10**3)) / float(10**3)
-                                    
-                        if round_value == round_opt_value:
-                            # Store all optimal actions
-                            optimal_actions.append(action)
-                                
-                        # Update the policy based on optimal actions:
-                    updated_policy = self.get_optimal_policy(optimal_actions)
-                              
-                          # This seems uninformative. Changed temporarily!
-                          #print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
-                          #print i, ' ', j, ' old: ', policy[i][j], 'updated: ', updated_policy
-                                                                                          
-                    # Check if policy is unstable
-                    # If so, update the old policy and set stability flag to False!      
-                    if not updated_policy == policy[i][j]:
-                        #print 'POLICY UNSTABLE AT STATE: [', i, ', ', j, ']'
-                        is_policy_stable = False
-                        policy[i][j] = updated_policy
-                                        
-            return value_grid, is_policy_stable, policy
+            updated_policy_matrix = self.get_optimal_policy_matrix(discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False)
+            
+            is_policy_stable = updated_policy_matrix == policy
+            
+            
+            #x_size = gridsize[0]
+            #y_size = gridsize[1]
+            #
+            ## Update policy and check for stability
+            #is_policy_stable = True   
+            #		      
+            ## First update the policy according to the new values:
+            #for i in range(0, x_size):
+            #    for j in range(0, y_size):
+            #        # current state:
+            #        current_state = [i, j]
+            #        neighbor_values = []
+            #        
+            #        # Get values of all neighbors
+            #        new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+            #        for new_state in new_states:
+            #            new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+            #            reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
+            #            value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+            #            neighbor_values.append(value)
+            #            
+            #        # Get max value of all neighbors, leading to the optimal value
+            #        optimal_value = max(neighbor_values)
+            #            
+            #        # Get all possible actions:
+            #        actions =  self.predator.get_policy().keys()
+            #            
+            #        # Find the optimal actions, based on the optimal value
+            #        optimal_actions = []   
+            #        for action in actions:
+            #            new_state = self.get_new_state_location(current_state, action)
+            #            #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
+            #            #print 'new_state: ', new_state
+            #            reward = self.reward_function(current_state, new_state, start_location_prey, 'North')
+            #            value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+            #                
+            #            # We round the values so that poor old Python doesn't get confused from the rest of the numbers :)
+            #            #round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
+            #            round_value = floor(value * (10**3)) / float(10**3)
+            #            round_opt_value = floor(optimal_value * (10**3)) / float(10**3)
+            #                        
+            #            if round_value == round_opt_value:
+            #                # Store all optimal actions
+            #                optimal_actions.append(action)
+            #                    
+            #            # Update the policy based on optimal actions:
+            #        updated_policy = self.get_optimal_policy(optimal_actions)
+            #                  
+            #              # This seems uninformative. Changed temporarily!
+            #              #print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
+            #              #print i, ' ', j, ' old: ', policy[i][j], 'updated: ', updated_policy
+            #                                                                              
+            #        # Check if policy is unstable
+            #        # If so, update the old policy and set stability flag to False!      
+            #        if not updated_policy == policy[i][j]:
+            #            #print 'POLICY UNSTABLE AT STATE: [', i, ', ', j, ']'
+            #            is_policy_stable = False
+            #            policy[i][j] = updated_policy
+            #                            
+            return is_policy_stable, updated_policy_matrix
             
         def policy_iteration(self, discount_factor, start_location_prey=[2,2], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs policy evaluation """
@@ -629,7 +640,7 @@ class Game:
 		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
 			  self.pretty_print(value_grid, [count, 'Value grid '])
 			  
-		      value_grid, is_policy_stable, policy = self.policy_improvement(value_grid, policy, start_location_prey, gridsize, encoding)
+		      is_policy_stable, policy = self.policy_improvement(discount_factor, value_grid, policy, start_location_prey, gridsize, encoding)
 		      
                       # If policy is not stable, reset whatever necessary for the next round of policy iteration
 		      if not is_policy_stable:
@@ -964,7 +975,67 @@ class Game:
 		return new_policy
 	
 	  
-	      
+	def get_optimal_policy_matrix(self, discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False):
+            x_size=gridsize[0]
+            y_size=gridsize[1]
+            
+            # Declare the policy grid to be returned:
+            policy_grid = [[{} for k in range(0, y_size)] for l in range(0, x_size)]
+			      	      
+            
+            # Compute the new policy for each state:		      		      		      
+	    for i in range(0, x_size):
+                for j in range(0, y_size):
+                    
+                    current_state = [i, j]
+                    
+                    # Variables to save the current max value and the corresponding optimal moves
+                    current_max = 0
+                    current_optimal_actions = []
+                    
+                    # Generate the possible actions
+                    actions = self.predator.get_action_keys()
+                    
+                    # For each action, compute the corresponding 'weighted reward' and check if
+                    # it is optimal compared to the explored so far actions
+                    for action in actions:
+                        
+                        # In order to compute the reward, sum the corresponding rewards for each of the new states
+                        action_value = 0
+                        new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+                        
+                        # For each new state, compute the reward, multiply it by the corresponding transition function
+                        # and sum with the previous result:
+                        for new_state in new_states:
+                            new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+                            immediate_reward = self.reward_function(current_state, new_state, start_location_prey, action)
+                            overall_reward = immediate_reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+                            transition_value = self.transition(current_state, new_state, start_location_prey, action) 
+                            action_value +=  transition_value * overall_reward
+                        
+                        # Round the values in order to avoid errors in the presicion:
+                        round_action_value = floor(action_value * (10**3)) / float(10**3)
+                        round_max = floor(current_max * (10**3)) / float(10**3)
+                        
+                        # If a new max value is found, save it as maximal so far and reset the optimal actions       
+                        if round_action_value > round_max:
+                            current_max = action_value
+                            current_optimal_actions = [action]
+                        # If the new value is better, then check if it's equal to the current maximal   
+                        elif round_action_value == round_max:
+                            current_optimal_actions.append(action)
+                                
+		
+	            # Once the optimal actions for the state are found, update the policy         
+		    updated_policy = self.get_optimal_policy(current_optimal_actions)
+		    policy_grid[i][j] = updated_policy      
+            
+                                        
+            return policy_grid         
+                              
+                              
+            
+	            
 
 class Environment:
 
