@@ -297,6 +297,7 @@ class Game:
 
 			# Update grids for next round
 			value_grid = new_grid
+			self.pretty_print(value_grid, ["valgrid", count])
 			new_grid = np.zeros((x_size,y_size))
 
 			# Get maximum difference between grids
@@ -308,7 +309,7 @@ class Game:
 			if verbose == 2 or (verbose == 1 and delta < 0.0001):
 				self.pretty_print_latex(value_grid, [count, 'Value Iteration Grid '])
 			# Check for convergence
-			if delta < 0.0001:
+			if delta < 0.000001:
 				convergence = True
 				stop_time = time.time()
 				print "Value iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
@@ -316,8 +317,15 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 		
-		
+		self.policy_from_values(value_grid)
 		return value_grid
+
+	def policy_from_values(self, value_grid):
+		self.pretty_print(value_grid, ["bla","bla"])
+		i = len(value_grid)
+		j = len(value_grid[0])
+		new_grid = np.zeros((i, j))
+		self.pretty_print(new_grid, ['newgrid', 0])
 
 	def next_to_goal(self, state, goal):
 		x_distance = abs(state[0]-goal[0])
@@ -979,10 +987,11 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 
 	#Perform value_iteration over the policy
-	#game.value_iteration(discount_factor, [0,0], verbose=verbose)
+	game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
         #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	'''
 	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
 	prey = Prey([0,0])
 	predator = Predator([5,5], [5,5], policy=new_policy, policy_given=True)
@@ -1001,4 +1010,4 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-        
+	'''
