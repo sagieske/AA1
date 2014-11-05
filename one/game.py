@@ -9,13 +9,18 @@ from math import ceil, floor
 
 '''Predator class, with policy'''
 class Predator:
-	def __init__(self, location, prey_predator_distance):
-		self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
+	def __init__(self, location, prey_predator_distance, gridsize=[11,11], policy=None, policy_given=False):
+		self.policy_dict = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
+		if(policy is not None):
+			self.policy = policy
+		else:
+			self.policy = [[self.policy_dict for i in range(0, gridsize[1])] for j in range(0, gridsize[0])]
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Predator(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
 		self.reward = 0
 		self.prey_predator_distance = prey_predator_distance
+		self.policy_given = policy_given
 
 	def __repr__(self):
 		""" Represent Predator as X """
@@ -29,8 +34,17 @@ class Predator:
 
 	def pick_action(self):
 		""" Use the probabilities in the policy to pick a move """
+		if(self.policy_given):
+			highest = 0
+			best = "North"
+			policy = self.get_policy()
+			for i in policy:
+				if policy[i] > highest:
+					highest = policy[i]
+					best = i
+			return best
 		# Split policy dictionary in list of keys and list of values
-		action_name, policy = zip(*self.policy.items())
+		action_name, policy = zip(*self.get_policy().items())
 		# Get choice using probability distribution
 		choice_index = np.random.choice(list(action_name), 1, list(policy))[0]
 		return choice_index
@@ -52,9 +66,9 @@ class Predator:
 		""" Set state of predator """
 		self.state = "Predator(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
 
-        def get_transformation(self, action):
-                """ Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
-                return self.actions[action]
+	def get_transformation(self, action):
+		""" Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
+		return self.actions[action]
                 
 	def update_reward(self, reward):
 		""" Add reward gained on time step to total reward """
@@ -83,7 +97,9 @@ class Predator:
 
 	def get_policy(self):
 		""" Return the predator's policy """
-		return self.policy
+		location = self.location
+		print "policy for ", location, " is ", self.policy[location[0]][location[1]]
+		return self.policy[location[0]][location[1]]
 
 '''Prey class, with policy'''
 class Prey:
@@ -912,7 +928,7 @@ if __name__ == "__main__":
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 	#Run N games
 	#TODO: ONLY COMMENTED OUT FOR TESTING PURPOSES
-	"""
+	
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
@@ -927,11 +943,28 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-	"""
-	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, [0,0], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
 
-        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
-        game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#Perform value_iteration over the policy
+	#game.value_iteration(discount_factor, [0,0], verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
+
+        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	prey = Prey([0,0])
+	predator = Predator([5,5], [5,5], policy=new_policy, policy_given=True)
+	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+	for x in range(0, N):
+	# Start game and put prey and predator at initial starting position
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+		rounds = game.get_rounds()
+		count += rounds
+		count_list.append(rounds)
+		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
+	#Calculate average steps needed to catch prey
+	average = float(count/N)
+	#Calculate corresponding standard deviation
+	var_list = [(x-average)**2 for x in count_list]
+	variance = float(sum(var_list)/len(var_list))
+	standard_deviation = math.sqrt(variance)
+	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
         
