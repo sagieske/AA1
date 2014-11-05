@@ -786,7 +786,7 @@ class Game:
 			#print z
 			#pdb.set_trace()
 			for x in pretty_row:
-				print '| ', x[:7], x[8:],
+				print '| ', x[:7], x[7:],
 			print ' |\n',   
 
         # No doubt this can be implemented smarter, but I have no idea how
@@ -801,7 +801,14 @@ class Game:
                         for key in policy[i][j]:
                             key_value = policy[i][j][key]
                             if (key_value > 0):
-                                policy_strings[i][j] = policy_strings[i][j] + key[0]
+                                if key == "Wait":
+                                    # Print 'H' of 'Hold' instead of 'Wait'
+                                    policy_strings[i][j] = policy_strings[i][j] + 'H'
+                                else:
+                                    policy_strings[i][j] = policy_strings[i][j] + key[0]
+                        print 'policy: ', policy[i][j]            
+                        print 'policy string: ', policy_strings[i][j]
+                        #pdb.set_trace()
                 return policy_strings
 
 	def transition(self, old_state, new_state, goal_state, action):
