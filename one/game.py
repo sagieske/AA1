@@ -93,9 +93,12 @@ class Predator:
 
 '''Prey class, with policy'''
 class Prey:
-	def __init__(self, location):
+	def __init__(self, location, policy=None):
 		""" Initialize Prey with standard policy """
-		self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
+		if(policy is not None):
+			self.policy = policy
+		else:
+			self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0],'West': [0,-1], 'Wait':[0,0]}
 		self.location = location
 		self.state = "Prey(" + str(self.location[0]) + "," + str(self.location[1]) + ")"
@@ -119,7 +122,7 @@ class Prey:
 		# Split policy dictionary in list of keys and list of values
 		action_name, policy = zip(*self.policy.items())
 		# Get choice using probability distribution
-		choice_index = np.random.choice(list(action_name), 1, list(policy))[0]
+		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
 		return choice_index
 
 	def pick_action_restricted(self, blocked_moves):
@@ -158,6 +161,9 @@ class Prey:
 	def set_state(self, new_location):
 		""" Set state of prey """
 		self.state = "Prey(" + str(new_location[0]) + "," + str(new_location[1]) + ")"	
+
+	def get_policy(self):
+		return self.policy
 
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
@@ -316,34 +322,37 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 		
-		policy_grid = np.zeros((x_size, y_size))
-		actions =  self.predator.get_policy().iteritems()
+		
+		actions =  self.predator.get_policy().keys()
+		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
+		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
 		for i in range(0, x_size):
 			for j in range(0, y_size):
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
 				best_action = ""
 				best_value = 0
+				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
 				print "in state [", i,j,"]"
 				for action in actions:
-					#print " using action ", action
 					action_value = 0
 					for new_state in possible_new_states:
 						#print "  to go to ", new_state
 						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-						transition_value = self.transition([i,j], new_state, start_location_prey, action[0])
+						transition_value = self.transition([i,j], new_state, start_location_prey, action)
 						#print "  transition_value is ", transition_value
-						reward_value = self.reward_function([i,j], new_state, start_location_prey, action[0])
+						reward_value = self.reward_function([i,j], new_state, start_location_prey, action)
 						#print "  reward_value is ", reward_value
 						next_value = value_grid[new_state[0]][new_state[1]]
 						#print "  next value is ", next_value
 						action_value += transition_value * (reward_value + discount_factor * next_value)
 						#print "   the next action value is ", action_value
-					print "in location [", i, j, "] action ", action[0], " has value ", action_value
 					if action_value > best_value:
 						best_value = action_value
-						best_action = action[0]
-				print "Best action for [",i,j,"] is ", best_action, " with value ", best_value
-		return value_grid
+						best_action = action
+				old_policy[best_action] = 1
+				print old_policy
+				policy_grid[i][j] = old_policy
+		return value_grid, policy_grid
 
 	def next_to_goal(self, state, goal):
 		x_distance = abs(state[0]-goal[0])
@@ -1004,14 +1013,14 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	'''
 	#Perform value_iteration over the policy
-	game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
         #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
-	'''
-	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
-	prey = Prey([0,0])
-	predator = Predator([5,5], [5,5], policy=new_policy, policy_given=True)
+	
+	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	prey = Prey([0,0], policy = {"North":0, "West":0, "East":0, "South":0, "Wait":1})
+	predator = Predator([5,5], [5,5], policy=policy_grid, policy_given=True)
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 	for x in range(0, N):
 	# Start game and put prey and predator at initial starting position
@@ -1027,4 +1036,4 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-	'''
+
