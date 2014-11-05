@@ -701,9 +701,9 @@ class Game:
 		print "\\hline"
 		multicolumn = len(matrix)
 		if indices:
-			multicolumn_str = str(len(matrix))		
+			multicolumn_str = str(len(matrix)+1)		
 		else:
-			multicolumn_str = str(len(matrix)+1)
+			multicolumn_str = str(len(matrix))
 		print "\multicolumn{"+ multicolumn_str +"}{|c|}{" + label[1] + " in loop " + str(label[0]) + "}\\\\"
 		print "\\hline"
 
