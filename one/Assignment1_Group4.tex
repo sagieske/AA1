@@ -15,17 +15,42 @@
 \author{By Group 4: Gieske, Gornishka, Loor, Radscum}
 \maketitle
 
+\pagebreak
+
+\section*{Introduction}
+This report discusses a predator versus prey Markov Decision Process (MDP). In order to analyze this MDP, it was implemented. This MDP consists of an 11 $\times$ 11 toroidal grid. The predator and the prey are placed on the grid, after which the  predator must catch the prey. Both can move vertically and horizontally across the grid as well as stay put until the next time step. Describing the movements about the grid as North, East, South, West and Wait, the policies of the predator and the prey are as follows:
+\begin{center}
+	\begin{tabular}{ | l | l | l | l | l | l |}
+	\hline
+	& North & East & South & West & Wait\\
+	\hline
+	Predator & 0.2 & 0.2 & 0.2 & 0.2 & 0.2 \\ 
+	\hline
+	Prey & 0.05 & 0.05 & 0.05 & 0.05 & 0.8 \\
+	\hline
+	\end{tabular}
+\end{center}
+The predator and prey move about on the grid as specified but the policy. However, the prey does not move towards the predator. After the prey is caught, the episode ends and the game is reverted to starting positions. Catching the prey gives a reward of 10, 0 otherwise.
+
+This implementation contains an execution of the game, policy evaluation, policy iteration and value iteration. The performance of these functions are analyzed in order to research the behaviour of the agents. The results of these functions are also compared with one another as part of analyzation.
+
+\pagebreak
+
 \section*{Implementation}
 
 \noindent The current implementation consists of the following classes:
 \begin{description}
 	\item[Predator] \hfill \\ 
+	This class implements the predator. It contains the policy and actions as described in the introduction.
 	
 	\item[Prey] \hfill \\ 
+	This class implements the prey. It contains the policy and actions as described in the introduction.
 	
 	\item[Environment] \hfill \\ 
+	This class implements the environment. This is a toroidal 11 $\times$ 11 grid. Objects, in this case the prey and predator, can be placed on this environment and move about.
 	
 	\item[Game] \hfill \\ 
+	This class implements the game itself. It is possible to start the game. It also performs policy evaluation, policy iteration and value iteration.
 	
 \end{description}
 
@@ -45,7 +70,24 @@
 \end{center}
 
 \subsection*{Iterative policy evaluation}
-% Somehow print the whole grid for Prey(5,5)
+As described in the assignment, policy evaluation must be executed. Policy evaluation is a stationary algorithm which evaluates the agent's policy. The algorithm used is described in Barto and Sutton [source], section 4.1. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey. The locations of the predator are marked green and the locations of the prey are marked red to increase readability. The following cases have been analyzed, using a stationary prey:
+\begin{center}
+	\begin{tabular}{ | l | l | l |}
+	\hline
+	Case & Predator & Prey\\
+	\hline
+	1 & (0,0) & (5,5)\\ 
+	\hline
+	2 & (2,3) & (5,4)\\ 
+	\hline
+	3 & (2,10) & (10,0)\\ 
+	\hline
+	4 & (10,10) & (0,0)\\ 
+	\hline
+	\end{tabular}
+\end{center}
+
+Starting with case 1, the following result is calculated:
 
 \begin{center}
 \scalebox{0.7}
@@ -73,6 +115,8 @@
 	}
 \end{center}
 
+In this case, it can be seen that moving in a diagonal direction gets the agent to the prey fastest. This takes ten steps. It can also be seen that this is the maximum distance between the predator and the prey.
+
 \begin{center}
 \scalebox{0.7}
 	{
@@ -98,6 +142,8 @@
 	\end{tabular}
 	}
 \end{center}
+
+With the agent starting at (2,3) and the prey located at (5,4), it will take the predator four steps to reach the prey.
 
 \begin{center}
 \scalebox{0.7}
@@ -126,6 +172,8 @@
 	}
 \end{center}
 
+With the agent starting at (2,10) and the prey at (10,0), it will take the agent four steps to reach the prey. This means that the distance between the predator and the prey is the same as in the previous case. The fact that the grid is toroidal makes this so.
+
 \begin{center}
 \scalebox{0.7}
 	{
@@ -153,6 +201,8 @@
 	}
 \end{center}
 
+The agent starts at (10,10) and the prey is located at (0,0). It takes the agent two steps to catch the prey. Using the property that the grid is toroidal minimizes the distance between the agent and the prey. However, it is not possible for the agent to move diagonally in one step.
+
 \begin{center}
 	\begin{tabular}{ l | l | l | l | l }
 		Predator & Prey & Value & Discount Factor & Iterations to converge \\ 
@@ -164,6 +214,7 @@
 	\end{tabular}
 \end{center}
 
+The table above proves that policy evaluation to converge always takes equally long for the same size of the grid. This makes sense, as the size of the grid has not changed.
 
 % Temporarily printing in order to compare 
 
@@ -178,9 +229,10 @@
 	\end{tabular}
 \end{center}
 
-
+The discount factor appears to affect the number of iterations necessary to converge. This makes sense as the discount factor discounts the value of a state. A small discount value discounts the value of the state quite radically, leading to quick conversion. However, this quick conversion leaves many states with a random policy. This makes the convergence radical and most likely undesired. Using a higher discount value leads to more iterations before convergence. With a less radical discount, policy evaluation can be optimized in such a way that every state has a value. The discount factor should, however, not be too large. This will lead to faster convergence. Do note that in order to reach convergence, the discount factor must lie between 0-1.
 
 \subsection*{Policy iteration}
+Policy iteration is a stationary algorithm to find the optimal policy. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal (deterministic) policy. The table below shows the results for policy iteration with the prey located at (5,5). As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive.
 % Somehow print the whole grid for Prey(5,5)
 \begin{center}
 \scalebox{0.6}
@@ -204,11 +256,14 @@
 8 & 5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  EN &  17.7776  N &  14.2220  WN &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN  \\
 9 & 4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  N &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN  \\
 10 & 3.7281  EN &  4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  N &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN &  3.7281  WN  \\
-
-
 	\end{tabular}
 	}
 \end{center}
+
+As described in the introduction, the agent can move North, South, East, West and Wait. To keep notation as clear and concise as possible, only the first letter of the optimal policy is printed. For clarity, the state 'Wait' is renamed to 'Hold' and is depicted as 'H' where applicable. 
+Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. This creates an optimal, deterministic policy.
+
+% Is it correct that (5,5) can go to North, East, South, West? 
 
 % Temporarily printing only these examples in order to compare
 % Iterative policy evaluation and policy iteration yield exactly the same solution (at least for discount factor = 0.8). 

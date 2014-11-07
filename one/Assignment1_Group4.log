@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.9.5)  6 NOV 2014 21:41
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.9.5)  7 NOV 2014 23:20
 entering extended mode
 **Assignment1_Group4.tex
 (C:\Users\Cassandra\Documents\GitHub\AA1\one\Assignment1_Group4.tex
@@ -265,55 +265,37 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 16.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-Underfull \hbox (badness 10000) in paragraph at lines 22--23
+) [1
 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 24--25
-
- []
+{C:/Users/Cassandra/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 115.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 26--27
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
-
- []
-
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 73.
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omscmr.fd"
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 73.
- [1
-
-{C:/Users/Cassandra/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2] [3]
-
-(C:\Users\Cassandra\Documents\GitHub\AA1\one\Assignment1_Group4.aux) ) 
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 115.
+ [3] [4] [5]
+[6] (C:\Users\Cassandra\Documents\GitHub\AA1\one\Assignment1_Group4.aux) ) 
 Here is how much of TeX's memory you used:
  3122 strings out of 493921
  39918 string characters out of 3144865
- 133605 words of memory out of 3000000
+ 130605 words of memory out of 3000000
  6386 multiletter control sequences out of 15000+200000
  11503 words of font info for 45 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
- 34i,8n,35p,258b,213s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Progr
-am Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Program
- Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program F
-iles (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program File
-s (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files (
-x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program Files (x86
-)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on Assignment1_Group4.pdf (3 pages, 88976 bytes).
+ 34i,8n,35p,782b,213s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/P
+rogram Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pro
+gram Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Progr
+am Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program 
+Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Fil
+es (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program Files 
+(x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+Output written on Assignment1_Group4.pdf (6 pages, 100142 bytes).
 PDF statistics:
- 36 PDF objects out of 1000 (max. 8388607)
+ 45 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
