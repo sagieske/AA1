@@ -1,10 +1,11 @@
 \documentclass{article}
-
+\newcommand{\tab}[1]{\hspace{10 mm}\rlap{#1}}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{verbatim}
 \usepackage{graphicx}
 \usepackage{xcolor,colortbl}
+\usepackage[]{algorithm2e}
 
 %\usepackage{soul}
 
@@ -35,6 +36,69 @@ The predator and prey move about on the grid as specified but the policy. Howeve
 This implementation contains an execution of the game, policy evaluation, policy iteration and value iteration. The performance of these functions are analyzed in order to research the behaviour of the agents. The results of these functions are also compared with one another as part of analyzation.
 
 \pagebreak
+
+\section*{Theory}
+\subsection*{Iterative policy evaluation}
+Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. It uses the following algorithm as described in Barto and Sutton [source]: \\
+
+\begin{algorithm}[H]
+Input $\pi$, the policy to be evaluated \\
+Initialize an array v(s) = 0, for all s $\in S^{+}$ \\
+Repeat \\
+\tab{$\Delta \leftarrow 0$} \\
+\tab{For each $s \in S$:} \\
+\tab{temp $\leftarrow$ v(s)} \\
+\tab{v(s) $\leftarrow \; \sum_a \pi(a|s) \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$} \\
+\tab{$\Delta \leftarrow max(\Delta, | temp - v(s) |)$} \\ 
+until $\Delta < \theta $(a small positive number)\\
+Output v $\approx $ v(s)\\
+\end{algorithm}
+
+Where: \\
+$\pi(a|s)$ is an action chosen, given the state. \\
+$p(s'|s, a)$ is a transition function. \\
+$r(s, a, s')$ is a reward function. \\
+$\gamma v(s')$ is the discounted state. \\ % is it?
+
+\subsection*{Policy improvement}
+Policy improvement is used to find an optimal, deterministic policy. This is, again a stationary function. Again, from Barto and Sutton [source]:\\
+
+\begin{algorithm}[H]
+1. Initialization \\
+\hspace{4 mm} v(s) $ín \mathcal{R}$ and $\pi(s) \in \mathcal{A}(s)$  arbitrarily for all s $\in$ S \\
+
+2. Policy evaluation \\
+\hspace{4 mm} Repeat \\
+\tab{$\Delta \leftarrow 0$} \\
+\tab{For each $s \in S$:} \\
+\tab{temp $\leftarrow$ v(s)} \\
+\tab{v(s) $\leftarrow \; \sum_{s'} p(s'|s, \pi(s))[r(s, a, s') + \gamma v(s')]$} \\
+\tab{$\Delta \leftarrow max(\Delta, | temp - v(s) |)$} \\ 
+\hspace{4 mm} until $\Delta < \theta $(a small positive number)\\
+
+3. Policy improvement \\
+\hspace{4 mm} Policy stable $\leftarrow$ true \\
+\hspace{4 mm} For each s $\in$ S: \\
+\tab{temp $\leftarrow \pi(s)$} \\  
+\tab{v(s) $\leftarrow \; arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$} \\
+\hspace{4 mm} if $temp \neq \pi(s)$, policy stable $\leftarrow$ false
+\end{algorithm}
+
+\subsection*{Value iteration}
+
+\begin{algorithm}[H]
+From Barto and Sutton [source]\\
+Repeat \\
+$\Delta \leftarrow 0$ \\
+For each s $\in$ S: \\
+\tab{$temp \leftarrow v(s)$} \\
+\tab{$v(s) \leftarrow \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$} \\
+\tab{$\Delta \leftarrow max(temp, |v(s)|)$} \\
+until $\Delta \leftarrow \theta$ (a small positive number)\\
+
+Output a deterministic policy $\pi$, such that \\
+$\pi (s) = arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$
+\end{algorithm}
 
 \section*{Implementation}
 
