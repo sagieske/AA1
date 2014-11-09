@@ -11,6 +11,11 @@ def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
 		y_distance = min(y_distance, grid_size[1] - y_distance)
 	return [x_distance, y_distance]
 
+def euclidian(first_location, second_location):
+	"""  Calculates euclidian distance"""
+	distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
+	return distance
+
 def pretty_print(matrix, label=None, dec=7):
 	""" Function to pretty print matrices in terminal """
 	# Get max size of value 

@@ -58,17 +58,14 @@ class Game:
 				full_grid[x,y] = encoded_grid[distance[0], distance[1]]
 		return full_grid
 
-	def euclidian(self, first_location, second_location):
-		"""  Calculates euclidian distance"""
-		distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
-		return distance
+
 
 	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], verbose=0):
 		""" Use smaller state-space encoding in order to only save 1/3 """
 		x_size = gridsize[0]
 		y_size = gridsize[1]
-		dist_end = self.euclidian(start_location_prey, gridsize)
-		dist_begin = self.euclidian(start_location_prey, [0,0])
+		dist_end = helpers.euclidian(start_location_prey, gridsize)
+		dist_begin = helpers.euclidian(start_location_prey, [0,0])
 		new_grid = np.zeros((x_size,y_size))
 		largest_x = 0
 		largest_y = 0
