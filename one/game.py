@@ -739,7 +739,7 @@ class Game:
 		return new_location
 
     
-        def get_new_state_location(self, old_location, action):
+	def get_new_state_location(self, old_location, action):
 		""" Returns new state given old state and an action (no object is used) """
 		new_location = []
 		chosen_move = self.predator.get_transformation(action)
@@ -782,66 +782,56 @@ class Game:
 	
 	  
 	def get_optimal_policy_matrix(self, discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False):
-            x_size=gridsize[0]
-            y_size=gridsize[1]
-            
-            # Declare the policy grid to be returned:
-            policy_grid = [[{} for k in range(0, y_size)] for l in range(0, x_size)]
-			      	      
-            
-            # Compute the new policy for each state:		      		      		      
-	    for i in range(0, x_size):
-                for j in range(0, y_size):
-                    
-                    current_state = [i, j]
-                    
-                    # Variables to save the current max value and the corresponding optimal moves
-                    current_max = 0
-                    current_optimal_actions = []
-                    
-                    # Generate the possible actions
-                    actions = self.predator.get_action_keys()
-                    
-                    # For each action, compute the corresponding 'weighted reward' and check if
-                    # it is optimal compared to the explored so far actions
-                    for action in actions:
+		x_size=gridsize[0]
+		y_size=gridsize[1]
+
+		# Declare the policy grid to be returned:
+		policy_grid = [[{} for k in range(0, y_size)] for l in range(0, x_size)]
+
+		# Compute the new policy for each state:		      		      		      
+		for i in range(0, x_size):
+			for j in range(0, y_size):
+				
+				current_state = [i, j]
+				# Variables to save the current max value and the corresponding optimal moves
+				current_max = 0
+				current_optimal_actions = []
+				# Generate the possible actions
+				actions = self.predator.get_action_keys()
+				# For each action, compute the corresponding 'weighted reward' and check if
+				# it is optimal compared to the explored so far actions
+				for action in actions:
+					# In order to compute the reward, sum the corresponding rewards for each of the new states
+					action_value = 0
+					new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
                         
-                        # In order to compute the reward, sum the corresponding rewards for each of the new states
-                        action_value = 0
-                        new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+					# For each new state, compute the reward, multiply it by the corresponding transition function
+					# and sum with the previous result:
+					for new_state in new_states:
+						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+						immediate_reward = self.reward_function(current_state, new_state, start_location_prey)
+						overall_reward = immediate_reward + discount_factor * value_grid[new_state[0]][new_state[1]]
+						transition_value = self.transition(current_state, new_state, start_location_prey, action) 
+						action_value +=  transition_value * overall_reward
                         
-                        # For each new state, compute the reward, multiply it by the corresponding transition function
-                        # and sum with the previous result:
-                        for new_state in new_states:
-                            new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-                            immediate_reward = self.reward_function(current_state, new_state, start_location_prey)
-                            overall_reward = immediate_reward + discount_factor * value_grid[new_state[0]][new_state[1]]
-                            transition_value = self.transition(current_state, new_state, start_location_prey, action) 
-                            action_value +=  transition_value * overall_reward
-                        
-                        # Round the values in order to avoid errors in the presicion:
-                        round_action_value = floor(action_value * (10**3)) / float(10**3)
-                        round_max = floor(current_max * (10**3)) / float(10**3)
-                        
-                        # If a new max value is found, save it as maximal so far and reset the optimal actions       
-                        if round_action_value > round_max:
-                            current_max = action_value
-                            current_optimal_actions = [action]
-                        # If the new value is better, then check if it's equal to the current maximal   
-                        elif round_action_value == round_max:
-                            current_optimal_actions.append(action)
-                                
-		
-	            # Once the optimal actions for the state are found, update the policy         
-		    updated_policy = self.get_optimal_policy(current_optimal_actions)
-		    policy_grid[i][j] = updated_policy      
-            
-                                        
-            return policy_grid         
-                              
-                              
-            
-	            
+					# Round the values in order to avoid errors in the presicion:
+					round_action_value = floor(action_value * (10**3)) / float(10**3)
+					round_max = floor(current_max * (10**3)) / float(10**3)
+					# If a new max value is found, save it as maximal so far and reset the optimal actions       
+					if round_action_value > round_max:
+						current_max = action_value
+						current_optimal_actions = [action]
+					# If the new value is better, then check if it's equal to the current maximal   
+					elif round_action_value == round_max:
+						current_optimal_actions.append(action)
+
+		# Once the optimal actions for the state are found, update the policy         
+		updated_policy = self.get_optimal_policy(current_optimal_actions)
+		policy_grid[i][j] = updated_policy      
+
+		return policy_grid
+
+
 
 class Environment:
 
