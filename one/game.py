@@ -59,7 +59,6 @@ class Game:
 		return full_grid
 
 
-
 	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], verbose=0):
 		""" Use smaller state-space encoding in order to only save 1/3 """
 		x_size = gridsize[0]
@@ -99,6 +98,8 @@ class Game:
 		# Set x and y to true grid size (encoded gridsize can be smaller)
 		x_size = true_gridsize[0]
 		y_size = true_gridsize[1]
+
+		# TODO: calculate only partial policy grid and use get_rotation to flip the grid?
 
 		actions =  self.predator.get_policy().keys()
 		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
