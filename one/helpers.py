@@ -12,6 +12,12 @@ def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
 		y_distance = min(y_distance, grid_size[1] - y_distance)
 	return [x_distance, y_distance]
 
+def get_rotation(predator_location, prey_location):
+	""" Returns unit vector of distance to predator location using prey_location as center """
+	x_rotation = predator_location[0] - prey_location[0] 
+	y_rotation = predator_location[1] - prey_location[1] 
+	return [cmp(x_rotation,0), cmp(y_rotation,0)]
+
 def euclidian(first_location, second_location):
 	"""  Calculates euclidian distance"""
 	distance = math.sqrt((first_location[0]-second_location[0])**2 + (first_location[1]-second_location[1])**2)
