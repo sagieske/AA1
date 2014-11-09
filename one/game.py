@@ -118,21 +118,12 @@ class Game:
 				j = item[1]
 				# Get surrounding states
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+
 				for new_state in possible_new_states:
 					if(encoding):
-						# Mirror states
-						if new_state[0] == -1:
-							new_state[0] = 1
-						if new_state[1] == -1:
-							new_state[1] = 1
-						# If at border right or below, than use state itself as new state
-						if new_state[0] == gridsize[0]:
-							new_state[0] = i
-						if new_state[1] == gridsize[1]:
-							new_state[1] = j
-
-
-
+						# new states fall from grid, do not compute
+						if new_state[0] == -1 or new_state[1] == -1 or new_state[0] == gridsize[0] or new_state[1] == gridsize[1]:
+							continue
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 					# Get value for state (dependent on encoding)
@@ -140,6 +131,7 @@ class Game:
 					#print "update grid on %s: %.5f -> %.5f" %(str(new_state), value_grid[new_state[0]][new_state[1]], value)
 					# Update grid
 					new_grid[new_state[0]][new_state[1]] = value
+
 
 			# Get delta between old and new grid
 			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
@@ -165,37 +157,42 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 		
-		# Grid is converged
-		actions =  self.predator.get_policy().keys()
-		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
-		for i in range(0, x_size):
-			for j in range(0, y_size):
-				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-				best_action = ""
-				best_value = 0
-				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-				#print "in state [", i,j,"]"
-				for action in actions:
-					action_value = 0
-					for new_state in possible_new_states:
-						#print "  to go to ", new_state
-						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-						transition_value = self.transition([i,j], new_state, start_location_prey, action)
-						#print "  transition_value is ", transition_value
-						reward_value = self.reward_function([i,j], new_state, start_location_prey)
-						#print "  reward_value is ", reward_value
-						next_value = value_grid[new_state[0]][new_state[1]]
-						#print "  next value is ", next_value
-						action_value += transition_value * (reward_value + discount_factor * next_value)
-						#print "   the next action value is ", action_value
-					if action_value > best_value:
-						best_value = action_value
-						best_action = action
-				old_policy[best_action] = 1
-				policy_grid[i][j] = old_policy
+		# Grid is converged (continue first only if not encoded)
+		if not encoding:
+			actions =  self.predator.get_policy().keys()
+			old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
+			policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
+			for i in range(0, x_size):
+				for j in range(0, y_size):
+					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+					best_action = ""
+					best_value = 0
+					old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
+					#print "in state [", i,j,"]"
+					for action in actions:
+						action_value = 0
+						for new_state in possible_new_states:
+							#print "  to go to ", new_state
+							new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+							transition_value = self.transition([i,j], new_state, start_location_prey, action)
+							#print "  transition_value is ", transition_value
+							reward_value = self.reward_function([i,j], new_state, start_location_prey)
+							#print "  reward_value is ", reward_value
+							next_value = value_grid[new_state[0]][new_state[1]]
+							#print "  next value is ", next_value
+							action_value += transition_value * (reward_value + discount_factor * next_value)
+							#print "   the next action value is ", action_value
+						if action_value > best_value:
+							best_value = action_value
+							best_action = action
+					old_policy[best_action] = 1
+					policy_grid[i][j] = old_policy
 
-		self.print_policy_grid(policy_grid)
+			self.print_policy_grid(policy_grid)
+
+		# needed(for now) since needs to return policy grid
+		else:
+			policy_grid = None
 		return value_grid, policy_grid
 
 	def print_policy_grid(self, policy_grid):
@@ -216,9 +213,10 @@ class Game:
 			print row_string
 
 	
-	def next_to_goal(self, state, goal):
-		x_distance = abs(state[0]-goal[0])
-		y_distance = abs(state[1]-goal[1])
+	def next_to_goal(self, state, goal_state):
+		""" Function checks if state is next to goal state"""
+		x_distance = abs(state[0]- goal_state[0])
+		y_distance = abs(state[1]- goal_state[1])
 		if x_distance + y_distance ==1:
 			return True
 		else:
@@ -243,12 +241,11 @@ class Game:
 			action_values = []
 			actions_chosen = []
 			new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-			
+
 			for action in actions:
 				prob_sum = 0
 
 				for new_state in new_states:
-					#UPDATE FOR ADJUSTED TRANSITION FUNCTION:bool_preset_transition = False
 					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
 					if(encoding):
 						# Mirror states
@@ -257,45 +254,26 @@ class Game:
 						if new_state[1] == -1:
 							new_state[1] = 1
 
-						# If at border right or below, than use state itself as new state
-						"""
-						Need to preset transitions since state is adjusted for correct calculation and does not correspond to action:
-						Transition should be 1 when action is North/East/South/West since it is a movement to other place 
-						(off) the grid. However for correct calculation you need value of state itself. (which would look like action Wait)
-						Transition should be 0 when action is Wait.
-						"""
-						"""
-						UPDATE FOR ADJUSTED TRANSITION FUNCTION: states are not needed for calculation?
-						"""
-						if new_state[0] == grid_size[0]:
-							#new_state = state
-							# pre-set transition_value to 1 if action is not equal to wait
-							#if action != 'Wait':
-							#	bool_preset_transition = True
-							#	transition_value = 1
+						# If at border right or below, then skip
+						if new_state[0] == grid_size[0] or new_state[1] == grid_size[1]:
 							continue
-						if new_state[1] == grid_size[1]:
-							#new_state = state
-							# pre-set transition_value to 1 if action is not equal to wait
-							#if action != 'Wait':
-							#	bool_preset_transition = True
-							#	transition_value = 1
-							continue
+
 					#Check for toroidal wrap
 					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 
 					#Compute transition value from s to s' if not already set
-					#UPDATE FOR ADJUSTED TRANSITION FUNCTION:not needed: if not bool_preset_transition:
 					transition_value = self.transition(state, new_state, goal_state, action[0])
 
 					#Compute reward from s to s'
 					reward_value = self.reward_function(state, new_state, goal_state)
+
 					#Add this to the sum of state probabilities
 					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
 
-				#Append sum of state probabilities for this action times probability for this action to the action list
+				#Append sum of state probabilities for this action times probability for this action to the action list]
 				action_values.append(prob_sum*action[1])
 				actions_chosen.append(action)
+
 			#The value for i,j is the max of all action_values
 			value = max(action_values)
 
@@ -908,7 +886,7 @@ if __name__ == "__main__":
 	'''
 	#Perform value_iteration over the policy
 	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
 
     #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 	

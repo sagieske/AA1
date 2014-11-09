@@ -1,11 +1,15 @@
-def pretty_print(matrix, label):
+import numpy as np
+
+def pretty_print(matrix, label, dec=7):
 	""" Function to pretty print matrices in terminal """
+	# Get max size of value 
+	max_value = '%i' %(np.amax(matrix))
 	print "|----------", label[1], " in loop ", label[0], "----------|"
+	# Create string to pad float
+	f_string = '%' +str(dec+len(max_value)+1)+'.'+str(dec)+'f'
 	for row in matrix:
-		pretty_row = ['%.6f' %v +'|' for v in row]
-		for x in pretty_row:
-			print '| ', x[:7],
-		print ' |\n',
+		pretty_row = [f_string %v for v in row]
+		print '| ', ' | '.join(pretty_row), ' |'
 
 def pretty_print_latex(matrix, label, indices=True):
 	""" Function to pretty print matrices in terminal to copy to laTeX"""
