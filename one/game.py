@@ -337,7 +337,7 @@ class Game:
 						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 						transition_value = self.transition([i,j], new_state, start_location_prey, action)
 						#print "  transition_value is ", transition_value
-						reward_value = self.reward_function([i,j], new_state, start_location_prey, action)
+						reward_value = self.reward_function([i,j], new_state, start_location_prey)
 						#print "  reward_value is ", reward_value
 						next_value = value_grid[new_state[0]][new_state[1]]
 						#print "  next value is ", next_value
@@ -424,7 +424,7 @@ class Game:
 					transition_value = self.transition(state, new_state, goal_state, action[0])
 
 					#Compute reward from s to s'
-					reward_value = self.reward_function(state, new_state, goal_state, action[0])
+					reward_value = self.reward_function(state, new_state, goal_state)
 					#Add this to the sum of state probabilities
 					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
 
@@ -727,7 +727,7 @@ class Game:
    		               transition_value = policy[action]    
    		       
    		       #Compute reward from s to s'
-   		       reward_value = self.reward_function(state, new_state, goal_state, action)
+   		       reward_value = self.reward_function(state, new_state, goal_state)
    		       
    		       #Add this to the sum of state probabilities
    		       prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
@@ -824,18 +824,9 @@ class Game:
 
 	def transition(self, old_state, new_state, goal_state, action):
 		""" Returns transition states """
-
-		# TODO: Is this correct? Should east/west/north/south actions also be checked with appropriate states?
-		#If we're staying in the same place with a non-waiting action, the prob is 0
-		#if old_state == new_state and action != 'Wait':
-		#	return 0
-		#If we're moving while using the wait action, the prob is 0
-		#elif old_state != new_state and action == 'Wait':
-		#	return 0
-		#All other actions have transition probability of 1
-		#elif:
-		
+		# Get location of new state
 		new_location = self.get_new_state_location(old_state, action)
+		# Check if transition from old state to new state is possible using action
 		if new_location == new_state:     
 		      return 1
 		else:
@@ -843,7 +834,8 @@ class Game:
 			    
 			
 
-	def reward_function(self, old_state, new_state, goal_state, action):
+	def reward_function(self, old_state, new_state, goal_state):
+		""" Returns reward at transition to goal state """
 		if(new_state == goal_state and old_state != goal_state):
 			return 10
 		#All states have a reward of 0, except the terminal state
@@ -1008,7 +1000,7 @@ class Game:
                         # and sum with the previous result:
                         for new_state in new_states:
                             new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-                            immediate_reward = self.reward_function(current_state, new_state, start_location_prey, action)
+                            immediate_reward = self.reward_function(current_state, new_state, start_location_prey)
                             overall_reward = immediate_reward + discount_factor * value_grid[new_state[0]][new_state[1]]
                             transition_value = self.transition(current_state, new_state, start_location_prey, action) 
                             action_value +=  transition_value * overall_reward
