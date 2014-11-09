@@ -78,7 +78,7 @@ class Game:
 		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
 		#Calculate value iteration (mostly) as usual
-		self.value_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose, true_goal=start_location_prey, true_gridsize=gridsize)
+		self.value_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose, true_goal_state=start_location_prey, true_gridsize=gridsize)
 
 	def wrap_state(self, state, gridsize, encoding):
 		""" Wrap states for non-encoding for toroidal grid"""
@@ -90,12 +90,13 @@ class Game:
 		return state
 
 
-	def value_iteration(self,discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal=[5,5], true_gridsize=[11,11]):
+	def value_iteration(self,discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal_state=[5,5], true_gridsize=[11,11]):
 		""" Calculates value iteration. First gets value grid at convergence, then calculates max policy"""
 
 		# Get value grid
-		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=epsilon, true_goal=[5,5])
+		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=epsilon, true_goal_state=[5,5])
 
+		# Set x and y to true grid size (encoded gridsize can be smaller)
 		x_size = true_gridsize[0]
 		y_size = true_gridsize[1]
 
@@ -114,11 +115,10 @@ class Game:
 					for new_state in possible_new_states:
 						#print "  to go to ", new_state
 						new_state = self.wrap_state(new_state, [x_size, y_size], False)
-						transition_value = self.transition([i,j], new_state, start_location_prey, action)
+						transition_value = self.transition([i,j], new_state, true_goal_state, action)
 						#print "  transition_value is ", transition_value
-						reward_value = self.reward_function([i,j], new_state, start_location_prey)
+						reward_value = self.reward_function([i,j], new_state, true_goal_state)
 						#print "  reward_value is ", reward_value
-
 						next_value = value_grid[new_state[0]][new_state[1]]
 						#print "  next value is ", next_value
 						action_value += transition_value * (reward_value + discount_factor * next_value)
@@ -134,7 +134,7 @@ class Game:
 
 
 
-	def get_value_grid(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal=[5,5]):
+	def get_value_grid(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal_state=[5,5]):
 		""" Calculates value grid until convergence. Returns full grid """
 		# Get start time
 		start_time = time.time()
@@ -204,7 +204,7 @@ class Game:
 				print "Discount factor: ", discount_factor
 
 		if encoding:
-			value_grid = self.full_grid_from_encoding(true_goal, value_grid)
+			value_grid = self.full_grid_from_encoding(true_goal_state, value_grid)
 			helpers.pretty_print(value_grid, label=['encoded full grid'])
 		return value_grid
 
