@@ -16,7 +16,7 @@ class Game:
 		self.environment = Environment()
 
 		# Initialize prey and predators
-		prey_predator_distance = self.xy_distance(predator_location, prey_location, self.environment.get_size())
+		prey_predator_distance = helpers.xy_distance(predator_location, prey_location, self.environment.get_size())
 		print prey_predator_distance
 		if(prey==None):
 			self.prey = Prey(prey_location)
@@ -43,16 +43,20 @@ class Game:
 		if self.verbose > 0:
 			self.environment.print_grid()
 
-	def xy_distance(self, predator_location, prey_location, grid_size, toroidal=True):
-		""" Calculate xy distance using a toroidal grid"""
-		x_distance = abs(predator_location[0] - prey_location[0])
-		y_distance = abs(predator_location[1] - prey_location[1])
 
-		if toroidal:
-			# Make use of toroidal grid
-			x_distance = min(x_distance, grid_size[0] - x_distance)
-			y_distance = min(y_distance, grid_size[1] - y_distance)
-		return [x_distance, y_distance]
+
+	def full_grid_from_encoding(self, goal_state, encoded_grid, gridsize=[11,11]):
+		""" Create full grid from partial grid created by encoded state space"""
+		full_grid = np.zeros((gridsize[0],gridsize[1]))
+
+		# Fill in full grid
+		for x in range(0,gridsize[0]):
+			for y in range(0,gridsize[1]):
+				# Get relative distance
+				distance = helpers.xy_distance([x,y], goal_state, gridsize)
+				# Get value from encoded grid using relative distance
+				full_grid[x,y] = encoded_grid[distance[0], distance[1]]
+		return full_grid
 
 	def euclidian(self, first_location, second_location):
 		"""  Calculates euclidian distance"""
@@ -77,7 +81,7 @@ class Game:
 		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
 		#Calculate value iteration (mostly) as usual
-		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True, verbose=verbose)
+		self.value_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose, true_goal=start_location_prey, true_gridsize=gridsize)
 
 	def wrap_state(self, state, gridsize, encoding):
 		""" Wrap states for non-encoding for toroidal grid"""
@@ -88,8 +92,53 @@ class Game:
 			state[1] = temp_state[1] % gridsize[1]
 		return state
 
-	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001):
-		""" Performs value iteration """
+
+	def value_iteration(self,discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal=[5,5], true_gridsize=[11,11]):
+		""" Calculates value iteration. First gets value grid at convergence, then calculates max policy"""
+
+		# Get value grid
+		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=epsilon, true_goal=[5,5])
+
+		x_size = true_gridsize[0]
+		y_size = true_gridsize[1]
+
+		actions =  self.predator.get_policy().keys()
+		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
+		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
+		for i in range(0, x_size):
+			for j in range(0, y_size):
+				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				best_action = ""
+				best_value = 0
+				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
+				#print "in state [", i,j,"]"
+				for action in actions:
+					action_value = 0
+					for new_state in possible_new_states:
+						#print "  to go to ", new_state
+						new_state = self.wrap_state(new_state, [x_size, y_size], False)
+						transition_value = self.transition([i,j], new_state, start_location_prey, action)
+						#print "  transition_value is ", transition_value
+						reward_value = self.reward_function([i,j], new_state, start_location_prey)
+						#print "  reward_value is ", reward_value
+
+						next_value = value_grid[new_state[0]][new_state[1]]
+						#print "  next value is ", next_value
+						action_value += transition_value * (reward_value + discount_factor * next_value)
+						#print "   the next action value is ", action_value
+					if action_value > best_value:
+						best_value = action_value
+						best_action = action
+				old_policy[best_action] = 1
+				policy_grid[i][j] = old_policy
+		self.print_policy_grid(policy_grid)
+		# needed(for now) since needs to return policy grid
+		return value_grid, policy_grid
+
+
+
+	def get_value_grid(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal=[5,5]):
+		""" Calculates value grid until convergence. Returns full grid """
 		# Get start time
 		start_time = time.time()
 
@@ -147,7 +196,7 @@ class Game:
 			count+=1
 			# Pretty print dependent on verbose level
 			if verbose == 2 or (verbose == 1 and delta < epsilon):
-				helpers.pretty_print(value_grid, [count, 'Value Iteration Grid '])
+				helpers.pretty_print(value_grid, label=[count, 'Value Iteration Grid '])
 			# Check for convergence
 			if delta < epsilon:
 				convergence = True
@@ -156,44 +205,12 @@ class Game:
 				print "Predator location: ", self.predator.get_location()
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
-		
-		# Grid is converged (continue first only if not encoded)
-		if not encoding:
-			actions =  self.predator.get_policy().keys()
-			old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-			policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
-			for i in range(0, x_size):
-				for j in range(0, y_size):
-					possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-					best_action = ""
-					best_value = 0
-					old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-					#print "in state [", i,j,"]"
-					for action in actions:
-						action_value = 0
-						for new_state in possible_new_states:
-							#print "  to go to ", new_state
-							new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-							transition_value = self.transition([i,j], new_state, start_location_prey, action)
-							#print "  transition_value is ", transition_value
-							reward_value = self.reward_function([i,j], new_state, start_location_prey)
-							#print "  reward_value is ", reward_value
-							next_value = value_grid[new_state[0]][new_state[1]]
-							#print "  next value is ", next_value
-							action_value += transition_value * (reward_value + discount_factor * next_value)
-							#print "   the next action value is ", action_value
-						if action_value > best_value:
-							best_value = action_value
-							best_action = action
-					old_policy[best_action] = 1
-					policy_grid[i][j] = old_policy
 
-			self.print_policy_grid(policy_grid)
+		if encoding:
+			value_grid = self.full_grid_from_encoding(true_goal, value_grid)
+			helpers.pretty_print(value_grid, label=['encoded full grid'])
+		return value_grid
 
-		# needed(for now) since needs to return policy grid
-		else:
-			policy_grid = None
-		return value_grid, policy_grid
 
 	def print_policy_grid(self, policy_grid):
 		""" Print policy grid using symbols """
@@ -332,7 +349,7 @@ class Game:
 
 			# Pretty print dependent on verbose level
 			if verbose == 2 or (verbose == 1 and delta < 0.0001):
-				helpers.pretty_print(value_grid, [count, 'Value grid '])
+				helpers.pretty_print(value_grid, label=[count, 'Value grid '])
 
 			count+=1
 			# Check for convergence
@@ -481,7 +498,7 @@ class Game:
 		          
 		      # Pretty print value grid, dependent on verbose level
 		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
-			  	helpers.pretty_print(value_grid, [count, 'Value grid '])
+			  	helpers.pretty_print(value_grid, label=[count, 'Value grid '])
 			  
 		      is_policy_stable, policy = self.policy_improvement(discount_factor, value_grid, policy, start_location_prey, gridsize, encoding)
 		      
