@@ -1,10 +1,25 @@
 import numpy as np
 
-def pretty_print(matrix, label, dec=7):
+def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
+	""" Calculate xy distance using a toroidal grid"""
+	x_distance = abs(predator_location[0] - prey_location[0])
+	y_distance = abs(predator_location[1] - prey_location[1])
+
+	if toroidal:
+		# Make use of toroidal grid
+		x_distance = min(x_distance, grid_size[0] - x_distance)
+		y_distance = min(y_distance, grid_size[1] - y_distance)
+	return [x_distance, y_distance]
+
+def pretty_print(matrix, label=None, dec=7):
 	""" Function to pretty print matrices in terminal """
 	# Get max size of value 
 	max_value = '%i' %(np.amax(matrix))
-	print "|----------", label[1], " in loop ", label[0], "----------|"
+	if label is not None:
+		if len(label) == 1:
+			print "|----------", label[0], "----------|"
+		elif len(label) == 2:
+			print "|----------", label[1], " in loop ", label[0], "----------|"
 	# Create string to pad float
 	f_string = '%' +str(dec+len(max_value)+1)+'.'+str(dec)+'f'
 	for row in matrix:
