@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
 	""" Calculate xy distance using a toroidal grid"""
