@@ -7,6 +7,7 @@ import time
 from math import ceil, floor
 import pdb
 from agents import Predator, Prey
+import helpers
 
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
@@ -79,15 +80,15 @@ class Game:
 		self.value_iteration(discount_factor, new_prey_location, [largest_x+1, largest_y+1], encoding=True, verbose=verbose)
 
 	def wrap_state(self, state, gridsize, encoding):
+		""" Wrap states for non-encoding for toroidal grid"""
+		# Only wrap for non-encoding
 		if not encoding:
 			temp_state = state
 			state[0] = temp_state[0] % gridsize[0]
 			state[1] = temp_state[1] % gridsize[1]
-		else:
-			temp_state = state 
 		return state
 
-	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0):
+	def value_iteration(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001):
 		""" Performs value iteration """
 		# Get start time
 		start_time = time.time()
@@ -145,7 +146,6 @@ class Game:
 
 			# Update grids for next round
 			value_grid = new_grid
-			self.pretty_print(value_grid, ["valgrid", count])
 			new_grid = np.zeros((x_size,y_size))
 
 			# Get maximum difference between grids
@@ -154,10 +154,10 @@ class Game:
 
 			count+=1
 			# Pretty print dependent on verbose level
-			if verbose == 2 or (verbose == 1 and delta < 0.0001):
-				self.pretty_print_latex(value_grid, [count, 'Value Iteration Grid '])
+			if verbose == 2 or (verbose == 1 and delta < epsilon):
+				helpers.pretty_print(value_grid, [count, 'Value Iteration Grid '])
 			# Check for convergence
-			if delta < 0.000001:
+			if delta < epsilon:
 				convergence = True
 				stop_time = time.time()
 				print "Value iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
@@ -165,7 +165,7 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 		
-		
+		# Grid is converged
 		actions =  self.predator.get_policy().keys()
 		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
 		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
@@ -175,7 +175,7 @@ class Game:
 				best_action = ""
 				best_value = 0
 				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-				print "in state [", i,j,"]"
+				#print "in state [", i,j,"]"
 				for action in actions:
 					action_value = 0
 					for new_state in possible_new_states:
@@ -193,10 +193,29 @@ class Game:
 						best_value = action_value
 						best_action = action
 				old_policy[best_action] = 1
-				print old_policy
 				policy_grid[i][j] = old_policy
+
+		self.print_policy_grid(policy_grid)
 		return value_grid, policy_grid
 
+	def print_policy_grid(self, policy_grid):
+		""" Print policy grid using symbols """
+		symbols =  {'North': '^', 'East': '>', 'South': 'v','West': '<', 'Wait': '0'}		
+		for row in policy_grid:
+			# Create string per row
+			row_string = []
+			for item in row:
+				item_string = ''
+				# Get movement and translate to symbol
+				for key, value in item.iteritems():
+					if value != 0:
+						item_string += symbols[key]
+				row_string.append(item_string)
+			# pretty borders
+			row_string = '|  ' + '  |  '.join(row_string) +  '  |' 
+			print row_string
+
+	
 	def next_to_goal(self, state, goal):
 		x_distance = abs(state[0]-goal[0])
 		y_distance = abs(state[1]-goal[1])
@@ -335,7 +354,7 @@ class Game:
 
 			# Pretty print dependent on verbose level
 			if verbose == 2 or (verbose == 1 and delta < 0.0001):
-				self.pretty_print(value_grid, [count, 'Value grid '])
+				helpers.pretty_print(value_grid, [count, 'Value grid '])
 
 			count+=1
 			# Check for convergence
@@ -484,7 +503,7 @@ class Game:
 		          
 		      # Pretty print value grid, dependent on verbose level
 		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
-			  self.pretty_print(value_grid, [count, 'Value grid '])
+			  	helpers.pretty_print(value_grid, [count, 'Value grid '])
 			  
 		      is_policy_stable, policy = self.policy_improvement(discount_factor, value_grid, policy, start_location_prey, gridsize, encoding)
 		      
@@ -580,60 +599,9 @@ class Game:
     
  		return prob_sum
 
-        def pretty_print(self, matrix, label):
-		""" Function to pretty print matrices in terminal """
-		print "|----------", label[1], " in loop ", label[0], "----------|"
-		for row in matrix:
-			pretty_row = ['%.6f' %v +'|' for v in row]
-			for x in pretty_row:
-				print '| ', x[:7],
-			print ' |\n',
 
-        def pretty_print_latex(self, matrix, label, indices=True):
-		""" Function to pretty print matrices in terminal to copy to laTeX"""
-		print "|----------", label[1], " in iteration ", label[0], "----------|"
-		
-		# Begin tabular
-		if indices:
-			tab_array = ['l'] * (len(matrix)+1)
-		else:
-			tab_array = ['l'] * len(matrix)
-		tab = ' | '.join(tab_array)
-		print "\\begin{tabular}{ |"+ tab + "|}"
-
-		# Print title
-		print "\\hline"
-		multicolumn = len(matrix)
-		if indices:
-			multicolumn_str = str(len(matrix)+1)		
-		else:
-			multicolumn_str = str(len(matrix))
-		print "\multicolumn{"+ multicolumn_str +"}{|c|}{" + label[1] + " in loop " + str(label[0]) + "}\\\\"
-		print "\\hline"
-
-		# Indices x-axis
-		index = range(0,len(matrix))
-		index_str = ["%s" % str(x) for x in index]
-		index_str_line =  ' & '.join(index_str) + ' \\\\ \n'
-		if indices:
-			index_str_line = "Indices y\\textbackslash x &" + index_str_line
-		print index_str_line
-		
-		print "\\hline"
-		# Print rows
-		for index in range(0,len(matrix)):
-			pretty_row = ['%.6f' %v  for v in matrix[index]]
-			if indices:
-				pretty_row = [str(index)] + pretty_row
-			latex_row = ' & '.join(pretty_row)
-			latex_row_new = latex_row + ' \\\\'
-			print latex_row_new
-		# End tabular 
-		print "\\hline"
-		print "\\end{tabular}"
-
-        # No doubt this can be implemented smarter, but I have no idea how
-        def policy_print(self, policy, value_grid):
+	# No doubt this can be implemented smarter, but I have no idea how
+	def policy_print(self, policy, value_grid):
 		""" Function to print policy matrices in terminal """
 		# Assume policy and value_grid are of same dimensions
 		policy_strings = self.policy_to_string(policy)
@@ -647,26 +615,26 @@ class Game:
 			print ' |\n',   
 
         # No doubt this can be implemented smarter, but I have no idea how
-        def policy_to_string(self, policy):
-                """ Function to extract policy to characters => N = North, S = South, etc. """
-                # Initialize array with empty strings
-                policy_strings = [['' for i in range(0, len(policy))] for j in range(0, len(policy[0]))]
-                
-                # Iterate over policy array and store only the first letters of the optimal policy at said location
-                for i in range(0, len(policy)):
-                    for j in range(0, len(policy[0])):
-                        for key in policy[i][j]:
-                            key_value = policy[i][j][key]
-                            if (key_value > 0):
-                                if key == "Wait":
-                                    # Print 'H' of 'Hold' instead of 'Wait'
-                                    policy_strings[i][j] = policy_strings[i][j] + 'H'
-                                else:
-                                    policy_strings[i][j] = policy_strings[i][j] + key[0]
-                        print 'policy: ', policy[i][j]            
-                        print 'policy string: ', policy_strings[i][j]
-                        #pdb.set_trace()
-                return policy_strings
+	def policy_to_string(self, policy):
+		""" Function to extract policy to characters => N = North, S = South, etc. """
+		# Initialize array with empty strings
+		policy_strings = [['' for i in range(0, len(policy))] for j in range(0, len(policy[0]))]
+		
+		# Iterate over policy array and store only the first letters of the optimal policy at said location
+		for i in range(0, len(policy)):
+			for j in range(0, len(policy[0])):
+				for key in policy[i][j]:
+					key_value = policy[i][j][key]
+					if (key_value > 0):
+						if key == "Wait":
+						# Print 'H' of 'Hold' instead of 'Wait'
+							policy_strings[i][j] = policy_strings[i][j] + 'H'
+						else:
+							policy_strings[i][j] = policy_strings[i][j] + key[0]
+ 					print 'policy: ', policy[i][j]            
+					print 'policy string: ', policy_strings[i][j]
+				#pdb.set_trace()
+		return policy_strings
 
 	def transition(self, old_state, new_state, goal_state, action):
 		""" Returns transition states """
@@ -949,10 +917,10 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	'''
 	#Perform value_iteration over the policy
-	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
-        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+    #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 	
 	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
 	'''
@@ -976,4 +944,4 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
         '''
         
-        game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#game.policy_iteration(discount_factor, [5,5], verbose = verbose)
