@@ -870,10 +870,10 @@ if __name__ == "__main__":
 	'''
 	#Perform value_iteration over the policy
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
 
 
         #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	
-	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
