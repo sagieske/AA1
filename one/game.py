@@ -371,28 +371,33 @@ class Game:
 				for j in range(0, y_size):
 					# current state:
 					current_state = [i, j]
-
+					action = helpers.get_optimal_action(policy[i][j])
+					q_value = self.q_value(current_state, action, value_grid, discount_factor, start_location_prey, [x_size, y_size], encoding=False)
+					print "qV: ", q_value
 					# Compute the value by passing the corresponding policy
 					value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, policy[i][j], False, encoding)
+					print "V: ", value
 				
 				        # Update grid
-				        new_grid[current_state[0]][current_state[1]] = value
+				        new_grid[current_state[0]][current_state[1]] = q_value
 
 			# Get delta between old and new grid
 			delta_grid = abs(np.array(new_grid) - np.array(value_grid))
+			helpers.pretty_print(new_grid)
 			# Update grids for next round
 			value_grid = new_grid
 			new_grid = np.zeros((x_size,y_size))
 			# Get maximum difference between grids
 			delta = np.amax(delta_grid)
 			# Check for convergence
-			if delta < 0.0001:
+			if delta < 0.01:
 				convergence = True
 				print helpers.pretty_print(value_grid, label=[count, 'Value grid '])
 				return value_grid, delta
 		      
 	def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
 		""" Performs policy improvement """
+		print "IMPROVEMENT"
 		# Get the optimal policies in a matrix
 		updated_policy_matrix = self.get_optimal_policy_matrix(discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False)
 		# Check if we have reached convergence
@@ -849,9 +854,10 @@ if __name__ == "__main__":
 	'''
 	#Perform value_iteration over the policy
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	game.value_encoded(discount_factor, verbose=verbose)
 
 	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
-
+	#self, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False
+	#game.policy_iteration(discount_factor)
 	
 	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
