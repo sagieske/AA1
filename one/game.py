@@ -100,35 +100,45 @@ class Game:
 		y_size = true_gridsize[1]
 
 		# TODO: calculate only partial policy grid and use get_rotation to flip the grid?
-
+		# Get all actions
 		actions =  self.predator.get_policy().keys()
+		# Initialize old polidy
 		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
 		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
+
+		# Calculate best policy for every position in grid
 		for i in range(0, x_size):
 			for j in range(0, y_size):
+				# Get new states
 				possible_new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
+				# Initialize values
 				best_action = ""
 				best_value = 0
 				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
-				#print "in state [", i,j,"]"
+				# Calculate values for all possible actions from state. Update best value when value for action is higher
 				for action in actions:
 					action_value = 0
+					# Calculate combined value from all possible new states for current state
 					for new_state in possible_new_states:
-						#print "  to go to ", new_state
+						# check for wrapping
 						new_state = self.wrap_state(new_state, [x_size, y_size], False)
+						# Get transition value and reward to new state from current state
 						transition_value = self.transition([i,j], new_state, true_goal_state, action)
-						#print "  transition_value is ", transition_value
 						reward_value = self.reward_function([i,j], new_state, true_goal_state)
-						#print "  reward_value is ", reward_value
+						# Get value grid value from new state
 						next_value = value_grid[new_state[0]][new_state[1]]
-						#print "  next value is ", next_value
+						# Increase action value with values from new state
 						action_value += transition_value * (reward_value + discount_factor * next_value)
-						#print "   the next action value is ", action_value
+					# Set as best value if action value is higher than best encountered value for this action
 					if action_value > best_value:
 						best_value = action_value
 						best_action = action
+				# Only set best action to probability of 1 (rest is zero)
 				old_policy[best_action] = 1
+				# Update policy grid
 				policy_grid[i][j] = old_policy
+
+		# print grid
 		self.print_policy_grid(policy_grid)
 		# needed(for now) since needs to return policy grid
 		return value_grid, policy_grid
@@ -358,7 +368,6 @@ class Game:
 				print "Predator location: ", self.predator.get_location()
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
-		
 		return value_grid
 
 
@@ -903,31 +912,11 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	'''
 	#Perform value_iteration over the policy
-	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	game.value_encoded(discount_factor, verbose=verbose)
 
+
         game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+
 	
 	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
-	'''
-	prey = Prey([0,0], policy = {"North":0.05, "West":0.05, "East":0.05, "South":0.05, "Wait":0.8})
-	predator = Predator([5,5], [5,5], policy=policy_grid, policy_given=True)
-	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-	for x in range(0, N):
-	# Start game and put prey and predator at initial starting position
-		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-		rounds = game.get_rounds()
-		count += rounds
-		count_list.append(rounds)
-		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
-	#Calculate average steps needed to catch prey
-	average = float(count/N)
-	#Calculate corresponding standard deviation
-	var_list = [(x-average)**2 for x in count_list]
-	variance = float(sum(var_list)/len(var_list))
-	standard_deviation = math.sqrt(variance)
-	
-	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-        '''
-        
-	game.policy_iteration(discount_factor, [5,5], verbose = verbose)
