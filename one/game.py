@@ -97,7 +97,7 @@ class Game:
 		action_value = 0
 		for new_state in possible_new_states:
 			# check for wrapping
-			new_state = self.wrap_state(new_state, [x_size, y_size], False)
+			new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
 			# Get transition value and reward to new state from current state
 			transition_value = self.transition(state, new_state, goal_state, action)
 			reward_value = self.reward_function(state, new_state, goal_state)
@@ -275,34 +275,8 @@ class Game:
 
 			for action in actions:
 				prob_sum = 0
-
-				for new_state in new_states:
-					# in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
-					if(encoding):
-						# Mirror states
-						if new_state[0] == -1:
-							new_state[0] = 1
-						if new_state[1] == -1:
-							new_state[1] = 1
-
-						# If at border right or below, then skip
-						if new_state[0] == grid_size[0] or new_state[1] == grid_size[1]:
-							continue
-
-					#Check for toroidal wrap
-					new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-
-					#Compute transition value from s to s' if not already set
-					transition_value = self.transition(state, new_state, goal_state, action[0])
-
-					#Compute reward from s to s'
-					reward_value = self.reward_function(state, new_state, goal_state)
-
-					#Add this to the sum of state probabilities
-					prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
-
-				#Append sum of state probabilities for this action times probability for this action to the action list]
-				action_values.append(prob_sum*action[1])
+				q_value = self.q_value([i,j], action[0], value_grid, discount_factor, goal_state, grid_size, False)
+				action_values.append(q_value*action[1])
 				actions_chosen.append(action)
 
 			#The value for i,j is the max of all action_values
@@ -418,18 +392,15 @@ class Game:
 				return value_grid, delta
 		      
 	def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
-                """ Performs policy improvement """
-                
-                # Get the optimal policies in a matrix
+		""" Performs policy improvement """
+		# Get the optimal policies in a matrix
 		updated_policy_matrix = self.get_optimal_policy_matrix(discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False)
-                
-                # Check if we have reached convergence
+		# Check if we have reached convergence
 		is_policy_stable = updated_policy_matrix == policy
-            
-                # Return whether the policy is stable and updated policy matrix
+		# Return whether the policy is stable and updated policy matrix
 		return is_policy_stable, updated_policy_matrix
 
-        def policy_iteration(self, discount_factor, start_location_prey=[2,2], gridsize=[11,11], encoding=False, verbose=0):
+	def policy_iteration(self, discount_factor, start_location_prey=[2,2], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs policy evaluation """
 		# Get start time
 		start_time = time.time()
