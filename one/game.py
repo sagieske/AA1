@@ -61,6 +61,7 @@ class Game:
 
 	def value_encoded(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], verbose=0):
 		""" Use smaller state-space encoding in order to only save 1/3 """
+		print "gridsize"
 		x_size = gridsize[0]
 		y_size = gridsize[1]
 		dist_end = helpers.euclidian(start_location_prey, gridsize)
@@ -93,11 +94,22 @@ class Game:
 		""" Calculates value iteration. First gets value grid at convergence, then calculates max policy"""
 
 		# Get value grid
-		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=epsilon, true_goal_state=[5,5])
+		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=epsilon, true_goal_state=true_goal_state)
+
+		# DEBUG ENCODING
+		#true_gridsize= gridsize
+		#true_goal_state = start_location_prey
+		# Reset encoding
+		#encoding = False
+
+		#if encoding:
+		#	value_grid = self.full_grid_from_encoding(true_goal_state, value_grid)
+		#	helpers.pretty_print(value_grid, label=['encoded full grid'])
+
 
 		# Set x and y to true grid size (encoded gridsize can be smaller)
-		x_size = true_gridsize[0]
-		y_size = true_gridsize[1]
+		x_size = gridsize[0]
+		y_size = gridsize[1]
 
 		# TODO: calculate only partial policy grid and use get_rotation to flip the grid?
 		# Get all actions
@@ -119,27 +131,50 @@ class Game:
 				for action in actions:
 					action_value = 0
 					# Calculate combined value from all possible new states for current state
+					test_states = []
 					for new_state in possible_new_states:
 						# check for wrapping
-						new_state = self.wrap_state(new_state, [x_size, y_size], False)
+						new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
+						# Skip impossible states
+						if new_state[0] == -1 or new_state[1] == -1 or new_state[0] == gridsize[0] or new_state[1] == gridsize[1]:
+							continue
+						test_states.append(new_state)
 						# Get transition value and reward to new state from current state
-						transition_value = self.transition([i,j], new_state, true_goal_state, action)
-						reward_value = self.reward_function([i,j], new_state, true_goal_state)
+						transition_value = self.transition([i,j], new_state, start_location_prey, action)
+
+						reward_value = self.reward_function([i,j], new_state, start_location_prey)
 						# Get value grid value from new state
 						next_value = value_grid[new_state[0]][new_state[1]]
 						# Increase action value with values from new state
 						action_value += transition_value * (reward_value + discount_factor * next_value)
+						
 					# Set as best value if action value is higher than best encountered value for this action
 					if action_value > best_value:
 						best_value = action_value
 						best_action = action
-				# Only set best action to probability of 1 (rest is zero)
+			
+				# Only set best action to probability of 1 (rest is zero). If multiple actions are best, first one is picked!
+
+				if best_action == '':
+					best_action = 'Wait'
+					print "something is going wrong"
 				old_policy[best_action] = 1
 				# Update policy grid
 				policy_grid[i][j] = old_policy
 
+
+
+
+		# TODO: FLIP POLICY GRID
+		if encoding:
+			# TODO: EDIT
+			policy_grid = helpers.full_policy_grid_from_encoding(true_goal_state, policy_grid, gridsize=true_gridsize)
 		# print grid
 		self.print_policy_grid(policy_grid)
+
+
+
+
 		# needed(for now) since needs to return policy grid
 		return value_grid, policy_grid
 
@@ -214,15 +249,12 @@ class Game:
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
 
-		if encoding:
-			value_grid = self.full_grid_from_encoding(true_goal_state, value_grid)
-			helpers.pretty_print(value_grid, label=['encoded full grid'])
 		return value_grid
 
 
 	def print_policy_grid(self, policy_grid):
 		""" Print policy grid using symbols """
-		symbols =  {'North': '^', 'East': '>', 'South': 'v','West': '<', 'Wait': '0'}		
+		symbols =  {'North': '^', 'East': '>', 'South': 'v','West': '<', 'Wait': 'X'}		
 		for row in policy_grid:
 			# Create string per row
 			row_string = []
@@ -767,7 +799,6 @@ class Game:
 		      
 		      # Return the action which yields the new state
 		      if new_location == new_state:
-		          #print 'chosen_move: ', chosen_move, ' action: ', action 
 		          return action
 		          
 	def get_optimal_policy(self, optimal_actions):
@@ -909,8 +940,11 @@ if __name__ == "__main__":
 	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	'''
 	#Perform value_iteration over the policy
-	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#TODO: DEBUG TO SET GOAL STATE AND GRID SIZE AT DIFFERENT SIZES
+	goal_state = [5,5]
+	grid_size = [11,11]
+	value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
+	game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
 
 	#game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 	
