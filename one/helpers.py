@@ -79,3 +79,11 @@ def pretty_print_latex(matrix, label, indices=True):
 	print "\\hline"
 	print "\\end{tabular}"
 
+def get_optimal_action(policy):
+    """ Use the probabilities in the policy to pick the optimal move """
+    # Split policy dictionary in list of keys and list of values
+    action_name, policy = zip(*policy.items())
+    # Get choice using probability distribution
+    #print policy
+    choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
+    return choice_index

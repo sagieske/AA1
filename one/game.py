@@ -485,7 +485,7 @@ class Game:
  			    if new_state[1] == -1:
  			        new_state[1] = 1
                             
-                            # If at border right or below, than use state itself as new state
+                            # If at border right or below, then use state itself as new state
 				"""
 				Need to preset transitions since state is adjusted for correct calculation and does not correspond to action:
 				Transition should be 1 when action is North/East/South/West since it is a movement to other place 
@@ -518,7 +518,15 @@ class Game:
    		               transition_value = self.transition(state, new_state, goal_state, action)
    		           else:
    		               action = self.get_action(state, new_state)
-   		               transition_value = policy[action]    
+   		               #print 'policy: ', policy
+   		               #optimal_action =  helpers.get_optimal_action(policy)
+   		               #print 'optimal action: ', optimal_action
+   		               transition_value = policy[action] #self.transition(state, new_state, goal_state, optimal_action)
+   		           #if not policy_evaluation:
+   		           #    action = helpers.get_optimal_action(policy)
+   		           
+   		           #transition_value = self.transition(state, new_state, goal_state, action)
+   		           #print 'transition_value: ', transition_value
    		       
    		       #Compute reward from s to s'
    		       reward_value = self.reward_function(state, new_state, goal_state)
@@ -841,10 +849,10 @@ if __name__ == "__main__":
 	'''
 	#Perform value_iteration over the policy
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
 
 
-        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	
 	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
