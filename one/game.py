@@ -319,8 +319,8 @@ class Game:
                                 # Calculate value
                                 value = 0; 
 				for action in actions:
-				    probability_value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, True, encoding)
-				    value = value + policy[action] * probability_value
+				    q_value = self.q_value(current_state, action, value_grid, discount_factor, start_location_prey, [x_size, y_size], False)
+				    value = value + policy[action] * q_value
 				
 				# Update grid
 				new_grid[current_state[0]][current_state[1]] = value
@@ -425,7 +425,7 @@ class Game:
                 # Perform policy iteration until convergence				
 		while(not is_policy_stable):
 		      count += 1
-		      
+
 		      # Perform policy evaluation
 		      value_grid, delta = self.policy_evaluation(value_grid, policy, start_location_prey, gridsize, encoding)
 		          
@@ -440,7 +440,7 @@ class Game:
 		      if not is_policy_stable:
 		          value_grid = np.zeros((x_size, y_size))
                         
-                policy[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])            
+                policy[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])
                 # print extra information, depending on verbose level
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
 		      self.policy_print(policy, value_grid)
@@ -851,8 +851,7 @@ if __name__ == "__main__":
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
-
-        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	
 	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
