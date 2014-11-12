@@ -9,6 +9,8 @@ import pdb
 from agents import Predator, Prey
 import helpers
 
+# TODO SHARON!! There is a problem with enccoding when true_goal state is changed
+
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
 		""" Initalize environment and agents """
@@ -881,7 +883,7 @@ if __name__ == "__main__":
 	#Perform value_iteration over the policy
 
 	#TODO: DEBUG TO SET GOAL STATE AND GRID SIZE AT DIFFERENT SIZES
-	goal_state = [5,5]
+	goal_state = [2,2]
 	grid_size = [11,11]
 	value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
 	game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
