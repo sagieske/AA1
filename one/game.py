@@ -102,7 +102,7 @@ class Game:
 		# TODO: calculate only partial policy grid and use get_rotation to flip the grid?
 		# Get all actions
 		actions =  self.predator.get_policy().keys()
-		# Initialize old polidy
+		# Initialize old policy
 		old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
 		policy_grid = [[old_policy for k in range(0, y_size)] for l in range(0, x_size)]
 
@@ -412,73 +412,17 @@ class Game:
 				return value_grid, delta
 		      
 	def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
-            
+                """ Performs policy improvement """
+                
+                # Get the optimal policies in a matrix
 		updated_policy_matrix = self.get_optimal_policy_matrix(discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False)
-            
+                
+                # Check if we have reached convergence
 		is_policy_stable = updated_policy_matrix == policy
             
-            
-		#x_size = gridsize[0]
-		#y_size = gridsize[1]
-		#
-		## Update policy and check for stability
-		#is_policy_stable = True   
-		#		      
-		## First update the policy according to the new values:
-		#for i in range(0, x_size):
-		#    for j in range(0, y_size):
-		#        # current state:
-		#        current_state = [i, j]
-		#        neighbor_values = []
-		#        
-		#        # Get values of all neighbors
-		#        new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-		#        for new_state in new_states:
-		#            new_state = self.wrap_state(new_state, [x_size, y_size], encoding)
-		#            reward = self.reward_function(current_state, new_state, start_location_prey)
-		#            value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
-		#            neighbor_values.append(value)
-		#            
-		#        # Get max value of all neighbors, leading to the optimal value
-		#        optimal_value = max(neighbor_values)
-		#            
-		#        # Get all possible actions:
-		#        actions =  self.predator.get_policy().keys()
-		#            
-		#        # Find the optimal actions, based on the optimal value
-		#        optimal_actions = []   
-		#        for action in actions:
-		#            new_state = self.get_new_state_location(current_state, action)
-		#            #print 'value[new_state]: ', value_grid[new_state], ', optimal_value: ', optimal_value
-		#            #print 'new_state: ', new_state
-		#            reward = self.reward_function(current_state, new_state, start_location_prey)
-		#            value = reward + discount_factor * value_grid[new_state[0]][new_state[1]]
-		#                
-		#            # We round the values so that poor old Python doesn't get confused from the rest of the numbers :)
-		#            #round_value = floor(value_grid[new_state[0]][new_state[1]] * (10**3)) / float(10**3)
-		#            round_value = floor(value * (10**3)) / float(10**3)
-		#            round_opt_value = floor(optimal_value * (10**3)) / float(10**3)
-		#                        
-		#            if round_value == round_opt_value:
-		#                # Store all optimal actions
-		#                optimal_actions.append(action)
-		#	                    
-		#            # Update the policy based on optimal actions:
-		#        updated_policy = self.get_optimal_policy(optimal_actions)
-		#                  
-		#              # This seems uninformative. Changed temporarily!
-		#              #print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
-		#              #print i, ' ', j, ' old: ', policy[i][j], 'updated: ', updated_policy
-		#                                                                              
-		#        # Check if policy is unstable
-		#        # If so, update the old policy and set stability flag to False!      
-		#        if not updated_policy == policy[i][j]:
-		#            #print 'POLICY UNSTABLE AT STATE: [', i, ', ', j, ']'
-		#            is_policy_stable = False
-		#            policy[i][j] = updated_policy
-		                            
+                # Return whether the policy is stable and updated policy matrix
 		return is_policy_stable, updated_policy_matrix
-            
+
         def policy_iteration(self, discount_factor, start_location_prey=[2,2], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs policy evaluation """
 		# Get start time
@@ -497,31 +441,34 @@ class Game:
                 # Initialize policies on grid a "policy grid"
                 policy = [[old_policy for i in range(0, y_size)] for j in range(0, x_size)]
 
+                #Initialize variables to keep track of where we are
 		count = 0
                 is_policy_stable = False
                 
                 # Perform policy iteration until convergence				
 		while(not is_policy_stable):
 		      count += 1
+		      
+		      # Perform policy evaluation
 		      value_grid, delta = self.policy_evaluation(value_grid, policy, start_location_prey, gridsize, encoding)
 		          
 		      # Pretty print value grid, dependent on verbose level
 		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
 			  	helpers.pretty_print(value_grid, label=[count, 'Value grid '])
-			  
+		      
+		      # Perform policy improvement
 		      is_policy_stable, policy = self.policy_improvement(discount_factor, value_grid, policy, start_location_prey, gridsize, encoding)
 		      
                       # If policy is not stable, reset whatever necessary for the next round of policy iteration
 		      if not is_policy_stable:
 		          value_grid = np.zeros((x_size, y_size))
-                                		
-		#for i in range(0, x_size):
-	        #   for j in range(0, y_size):
-		#     print i, ' ', j, ' old: ', updated_policy, 'updated: ', updated_policy
                                 
+                # print extra information, depending on verbose level
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
 		      self.policy_print(policy, value_grid)
 
+                # Stop tracking time! 
+                # Print information about this function
 		stop_time = time.time()
 	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 		print "Predator location: ", self.predator.get_location()
@@ -786,6 +733,9 @@ class Game:
 	
 	  
 	def get_optimal_policy_matrix(self, discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False):
+	        """ Calculate the optimal policies per state and return the grid """
+	        
+	        # Initialize grid
 		x_size=gridsize[0]
 		y_size=gridsize[1]
 
@@ -795,7 +745,7 @@ class Game:
 		# Compute the new policy for each state:		      		      		      
 		for i in range(0, x_size):
 			for j in range(0, y_size):
-				
+				# Initialize current state
 				current_state = [i, j]
 				# Variables to save the current max value and the corresponding optimal moves
 				current_max = 0
@@ -833,7 +783,8 @@ class Game:
                                 # Once the optimal actions for the state are found, update the policy         
                                 updated_policy = self.get_optimal_policy(current_optimal_actions)
                                 policy_grid[i][j] = updated_policy      
-
+                                
+                policy_grid[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])
 		return policy_grid
 
 
@@ -913,10 +864,10 @@ if __name__ == "__main__":
 	'''
 	#Perform value_iteration over the policy
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
 
 
-        game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	
 	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
