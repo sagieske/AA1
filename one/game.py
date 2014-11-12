@@ -462,7 +462,8 @@ class Game:
                       # If policy is not stable, reset whatever necessary for the next round of policy iteration
 		      if not is_policy_stable:
 		          value_grid = np.zeros((x_size, y_size))
-                                
+                        
+                policy[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])            
                 # print extra information, depending on verbose level
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
 		      self.policy_print(policy, value_grid)
@@ -783,8 +784,7 @@ class Game:
                                 # Once the optimal actions for the state are found, update the policy         
                                 updated_policy = self.get_optimal_policy(current_optimal_actions)
                                 policy_grid[i][j] = updated_policy      
-                                
-                policy_grid[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])
+                #policy_grid[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])
 		return policy_grid
 
 
