@@ -88,6 +88,24 @@ class Game:
 			state[1] = temp_state[1] % gridsize[1]
 		return state
 
+	def q_value(self, state, action, value_grid, discount_factor, goal_state, grid_size, encoding=False):
+		x = state[0]
+		y = state[1]
+		x_size = grid_size[0]
+		y_size = grid_size[1]
+		possible_new_states = [[x,y], [x+1,y], [x-1,y], [x,y+1], [x,y-1]]
+		action_value = 0
+		for new_state in possible_new_states:
+			# check for wrapping
+			new_state = self.wrap_state(new_state, [x_size, y_size], False)
+			# Get transition value and reward to new state from current state
+			transition_value = self.transition(state, new_state, goal_state, action)
+			reward_value = self.reward_function(state, new_state, goal_state)
+			#Get value for new state:
+			new_value = value_grid[new_state[0]][new_state[1]]
+			# Increase action value with values from new state
+			action_value += transition_value * (reward_value + discount_factor * new_value)
+		return action_value
 
 	def value_iteration(self,discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0, epsilon=0.000001, true_goal_state=[5,5], true_gridsize=[11,11]):
 		""" Calculates value iteration. First gets value grid at convergence, then calculates max policy"""
@@ -117,21 +135,9 @@ class Game:
 				old_policy = {"North":0, "West":0, "East":0, "South":0, "Wait":0}
 				# Calculate values for all possible actions from state. Update best value when value for action is higher
 				for action in actions:
-					action_value = 0
-					# Calculate combined value from all possible new states for current state
-					for new_state in possible_new_states:
-						# check for wrapping
-						new_state = self.wrap_state(new_state, [x_size, y_size], False)
-						# Get transition value and reward to new state from current state
-						transition_value = self.transition([i,j], new_state, true_goal_state, action)
-						reward_value = self.reward_function([i,j], new_state, true_goal_state)
-						# Get value grid value from new state
-						next_value = value_grid[new_state[0]][new_state[1]]
-						# Increase action value with values from new state
-						action_value += transition_value * (reward_value + discount_factor * next_value)
-					# Set as best value if action value is higher than best encountered value for this action
-					if action_value > best_value:
-						best_value = action_value
+					q_value = self.q_value([i,j], action, value_grid, discount_factor, true_goal_state, true_gridsize)
+					if q_value > best_value:
+						best_value = q_value
 						best_action = action
 				# Only set best action to probability of 1 (rest is zero)
 				old_policy[best_action] = 1
