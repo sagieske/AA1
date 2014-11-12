@@ -319,8 +319,8 @@ class Game:
                                 # Calculate value
                                 value = 0; 
 				for action in actions:
-				    probability_value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, action, True, encoding)
-				    value = value + policy[action] * probability_value
+				    q_value = self.q_value(current_state, action, value_grid, discount_factor, start_location_prey, [x_size, y_size], False)
+				    value = value + policy[action] * q_value
 				
 				# Update grid
 				new_grid[current_state[0]][current_state[1]] = value
@@ -844,7 +844,7 @@ if __name__ == "__main__":
 	game.value_encoded(discount_factor, verbose=verbose)
 
 
-        #game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	
 	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
