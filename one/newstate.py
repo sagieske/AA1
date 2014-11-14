@@ -11,7 +11,7 @@ import helpers
 
 class Environment:
 
-	def __init__(self, size=[3,3]):
+	def __init__(self, size=[4,4]):
 		"""Initialize environment of given size"""
 		self.size = size
 		self.grid = [[ ' ' for i in range(0, size[0])] for y in range(0, size[1])]
@@ -586,14 +586,16 @@ if __name__ == "__main__":
 	predator = Predator([0,0], [5,5])
 	
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-	grid_size = [3,3]
-	optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.9)
+	grid_size = [4,4]
+	#optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
+	optimal_policy = game.policy_iteration(grid_size, 0.001, 0.8)
+	#optimal_policy = game.value_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.policy_evaluation(grid_size, 0.01, 0.8)
 	predator = Predator([0,0], [3,3], policy=optimal_policy)
 
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-	for x in range(0, 1):
+	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=grid_size, prey_location=[2,2])
 		rounds = game.get_rounds()
