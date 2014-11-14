@@ -13,22 +13,19 @@
 
 \title{Autonomous Agents 1 \\ Assignment 1}
 
-\author{By Group 4: Gieske, Gornishka, Loor, Radscum}
+\author{By Group 4: Gieske, Gornishka, Koster, Loor}
 \maketitle
 
 \pagebreak
 
 \section*{Introduction}
-This report discusses a predator versus prey Markov Decision Process (MDP) implementation, focused on single agent planning. The planning is focused on the predator. This MDP consists of an 11 $\times$ 11 toroidal grid. The predator and the prey are placed on the grid, after which the  predator must catch the prey. Both can move vertically and horizontally across the grid as well as stay wait at their current location until the next time step. Describing the movements about the grid as North, East, South, West and Wait, the policies of the predator and the prey are as follows:
+This report discusses a predator versus prey Markov Decision Process (MDP) implementation, focused on single agent planning. The planning is focused on the predator. This MDP consists of an 11 $\times$ 11 toroidal grid. The predator and the prey are placed on the grid, after which the  predator must catch the prey. Both can move vertically and horizontally across the grid as well as wait at their current location until the next time step. Describing the movements about the grid as North, East, South, West and Wait, the policies of the predator and the prey are as follows:
 \begin{center}
 	\begin{tabular}{ | l | l | l | l | l | l |}
-	\hline
-	& North & East & South & West & Wait\\
+	Agent & North & East & South & West & Wait\\
 	\hline
 	Predator & 0.2 & 0.2 & 0.2 & 0.2 & 0.2 \\ 
-	\hline
 	Prey & 0.05 & 0.05 & 0.05 & 0.05 & 0.8 \\
-	\hline
 	\end{tabular}
 \end{center}
 The predator and prey move about on the grid as specified by the policy. However, the prey does not move towards the predator. After the prey is caught, the episode ends and the game is reverted to starting positions. Catching the prey gives an immediate reward of 10, 0 otherwise.
@@ -39,7 +36,7 @@ This implementation contains an execution of the game, policy evaluation, policy
 
 \section*{Theory}
 \subsection*{Iterative policy evaluation}
-Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey.  It uses the following algorithm as described in Barto and Sutton [source]: \\ \\
+Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey.  It uses the following algorithm as described in Barto and Sutton [1]: \\ \\
 
 \begin{algorithm}[H]
 Input $\pi$, the policy to be evaluated \\
@@ -64,7 +61,7 @@ $\gamma$ is a discount factor.\\
 This algorithm gives the agent insight in the consequences taking each action has. This can help the agent in deciding which action to take according to its policy. 
 
 \subsection*{Policy improvement}
-Policy improvement is used to find an optimal, deterministic policy. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal policy. As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive. Again, from Barto and Sutton [source]:\\
+Policy improvement is used to find an optimal, deterministic policy. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal policy. As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive. Again, from Barto and Sutton [1]:\\
 
 \begin{algorithm}[H]
 1. Initialization \\
@@ -93,7 +90,7 @@ This algorithm is also used to help the agent decide which action to take accord
 This algorithm is a quicker version of policy improvement. Where policy improvement first performs policy evaluation an then computed the optimal policy, value iteration performs these steps together. This makes value iteration quicker and computationally less expensive than policy improvement.
 
 \begin{algorithm}[H]
-From Barto and Sutton [source]\\
+From Barto and Sutton [1]\\
 Repeat \\
 $\Delta \leftarrow 0$ \\
 For each s $\in$ S: \\
@@ -141,17 +138,12 @@ After performing this algorithm, the results can also be used for agent planning
 As described in the assignment, policy evaluation is implemented. The results will be analyzed in terms of agent (predator) and goal state (prey) locations. The following cases have been analyzed: %  The locations of the predator are marked green and the locations of the prey are marked red to increase readability.
 \begin{center}
 	\begin{tabular}{ | l | l | l | l | l | l |}
-	\hline
 	Case & Discount Factor & Predator & Value & Prey & Value\\
 	\hline
 	1 & (0,0) & 0.8 & 0.003357 & (5,5) & 2.850622 \\ 
-	\hline
 	2 & (2,3) & 0.8 & 0.198928 & (5,4) & 2.850622 \\ 
-	\hline
 	3 & (2,10) & 0.8 & 0.198928 & (10,0) & 2.850622 \\ 
-	\hline
 	4 & (10,10) & 0.8 & 1.650667 & (0,0) & 2.850622 \\ 
-	\hline
 	\end{tabular}
 \end{center}
 
@@ -316,34 +308,31 @@ The discount factor appears to affect the number of iterations necessary to conv
 \subsection*{Policy iteration}
 Policy iteration is an algorithm for finding the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
 % Somehow print the whole grid for Prey(5,5)
-\begin{center}
-\scalebox{0.6}
-	{
-		\begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
-		\hline
-		\multicolumn{11}{|c|}{Policy Iteration Grid  in loop 3, discount 0.8}\\
-		\hline
-		Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ 
 
-% readability is non-existent, maybe only keep the policy? (NESWH) -- FIX WITH NEW FUNCTION TO BE IMPLEMENTED
+\begin{center}
+\begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
 \hline
-0 & 3.7281  ES &  4.6602  ES &  5.8252  ES &  7.2816  ES &  9.1020  ES &  11.3776  S &  9.1020  WS &  7.2816  WS &  5.8252  WS &  4.6602  WS &  3.7281  WS  \\
-1 & 4.6602  ES &  5.8252  ES &  7.2816  ES &  9.1020  ES &  11.3776  ES &  14.2220  S &  11.3776  WS &  9.1020  WS &  7.2816  WS &  5.8252  WS &  4.6602  WS  \\
-2 & 5.8252  ES &  7.2816  ES &  9.1020  ES &  11.3776  ES &  14.2220  ES &  17.7776  S &  14.2220  WS &  11.3776  WS &  9.1020  WS &  7.2816  WS &  5.8252  WS  \\
-3 & 7.2816  ES &  9.1020  ES &  11.3776  ES &  14.2220  ES &  17.7776  ES &  22.2220  S &  17.7776  WS &  14.2220  WS &  11.3776  WS &  9.1020  WS &  7.2816  WS  \\
-4 & 9.1020  ES &  11.3776  ES &  14.2220  ES &  17.7776  ES &  22.2220  ES &  27.7776  S &  22.2220  WS &  17.7776  WS &  14.2220  WS &  11.3776  WS &  9.1020  WS  \\
-5 & 11.3776  E &  14.2220  E &  17.7776  E &  22.2220  E &  27.7776  E &  \cellcolor{red!40}22.2220  WENS &  27.7776  W &  22.2220  W &  17.7776  W &  14.2220  W &  11.3776  W  \\
-6 & 9.1020  EN &  11.3776  EN &  14.2220  EN &  17.7776  EN &  22.2220  EN &  27.7776  N &  22.2220  WN &  17.7776  WN &  14.2220  WN &  11.3776  WN &  9.1020  WN  \\
-7 & 7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  EN &  17.7776  EN &  22.2220  N &  17.7776  WN &  14.2220  WN &  11.3776  WN &  9.1020  WN &  7.2816  WN  \\
-8 & 5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  EN &  17.7776  N &  14.2220  WN &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN  \\
-9 & 4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  N &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN  \\
-10 & 3.7281  EN &  4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  N &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN &  3.7281  WN  \\
+\multicolumn{12}{|c|}{Policy Iteration Grid in loop 7}\\
 \hline
-	\end{tabular}
-	}
+Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ 
+
+\hline
+0 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & v & \textless & \textless & \textless & \textless & \textless\\
+1 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & v & \textless & \textless & \textless & \textless & \textless\\
+2 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & v & \textless & \textless & \textless & \textless & \textless\\
+3 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & v & \textless & \textless & \textless & \textless & \textless\\
+4 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & v & \textless & \textless & \textless & \textless & \textless\\
+5 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & X & \textless & \textless & \textless & \textless & \textless\\
+6 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & \textasciicircum & \textless & \textless & \textless & \textless & \textless\\
+7 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & \textasciicircum & \textless & \textless & \textless & \textless & \textless\\
+8 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & \textasciicircum & \textless & \textless & \textless & \textless & \textless\\
+9 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & \textasciicircum & \textless & \textless & \textless & \textless & \textless\\
+10 & \textgreater & \textgreater & \textgreater & \textgreater & \textgreater & \textasciicircum & \textless & \textless & \textless & \textless & \textless\\
+\hline
+\end{tabular}
 \end{center}
 
-As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal (E - `East', W - `West', S - `South', N - `North'). Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
+As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal. Policy iteration can assign multiple optimal transitions to a state. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
 
 \iffalse
 % WILL BECOME OBSOLETE
@@ -355,7 +344,8 @@ As described in the introduction, the agent can move North, South, East, West an
 % Temporarily printing only these examples in order to compare
 % Iterative policy evaluation and policy iteration yield exactly the same solution (at least for discount factor = 0.8). 
 % Is this expected behavior? 
-
+\iffalse
+% I think this is obsolete
 \begin{center}
 	\begin{tabular}{ l | l | l | l | l }
 		Predator & Prey & Value & Discount Factor & Iterations to converge \\ 
@@ -366,8 +356,9 @@ As described in the introduction, the agent can move North, South, East, West an
 		(10, 10) & (0, 0) & 1.65066 & 0.8 & 2 \\	
 	\end{tabular}
 \end{center}
+\fi
 
-It takes a few iterations to converge. These are always the same. This can be expected as policy evaluation always takes the same amount of time and policy improvement is applied to the entirety of the grid. This means that each computation is essentially the same and should take the same amount of time
+It takes a few iterations to converge. These are always the same. This can be expected as policy evaluation always takes the same amount of time and policy improvement is applied to the entirety of the grid. This means that each computation is essentially the same and should take the same amount of time.
 % Since it's always 2, maybe it would be interesting to also print the number of iterations it takes for the value grid to 
 % converge for both the policy update iteration
 
@@ -433,7 +424,7 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 \end{center}
 
 \subsection*{Smarter state-space encoding}
-%Sorry, gwerlls. Idunno jack about this. 
+State space encoding was implemented to improve performance of the functions. This makes computation of policy evaluation, policy iteration and value iteration faster. By taking into account the distance between the predator and the prey, there are less states to computed than the entire grid. As the prey can be anywhere on the grid, the grid is also toroidal. In the case of an 11 $\times$ 11 grid, the maximum distance between the predator and the prey is 5. This is a smaller area to analyze than the entire 11 $\times$ 11 grid.
 
 
 \section*{Conclusion}
@@ -442,16 +433,18 @@ Performing policy evaluation gives detailed insight in the which actions the age
 The discount factors of these algorithms have also been evaluated. It has shown that a low discount factor (0.1) leads to quick convergence, but is quite radical. Many states in the state space will contain random policies. As this is not the goal of planning algorithms, this is undesired. Too high a discount rate (0.9) will lead to slow convergence, but each state will be evaluated and have optimal actions to take. This does take longer than often is necessary. This leads to the conclusion that, in this case, a learning rate of about 0.7 or 0.8 is optimal.
 
 \section*{Files attached}
-
+\begin{itemize}
+\item game.py
+\item agents.py
+\item helpers.py \ldots
+\end{itemize}
 \section*{Sources}
 
 % We don't have any sources so far, right? :/
 % -- Ah, young grasshopper! But we do! :D
 
-\begin{comment}
 \begin{itemize}
-	\item [1] Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html)
+	\item [1] Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html) \ldots
 \end{itemize}
-\end{comment}
 
 \end{document}
