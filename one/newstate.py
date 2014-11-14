@@ -71,9 +71,9 @@ class Game:
 							#print "q_value: ", highest_q
 
 			delta_grid = abs(np.array(v_grid) - np.array(temp_grid))
-			helpers.pretty_print(delta_grid[:][:][1][2], label=['delta'])
-			helpers.pretty_print(temp_grid[:][:][1][2], label = ['temp'])
-			helpers.pretty_print(v_grid[:][:][1][2], label=['v'])
+			helpers.pretty_print(delta_grid[:][:][5][5], label=['delta'])
+			helpers.pretty_print(temp_grid[:][:][5][5], label = ['temp'])
+			helpers.pretty_print(v_grid[:][:][5][5], label=['v'])
 			temp_grid = v_grid
 			v_grid = np.zeros((x_length, y_length, x_length, y_length))
 			
@@ -82,7 +82,7 @@ class Game:
 			print delta
 			print "LOOP: ", loop, "\n"
 			
-			if(delta < epsilon):
+			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
 
 	def get_new_state_location(self, old_location, action):
@@ -121,6 +121,8 @@ class Game:
 
 		if(new_predator_state == new_location):
 			is_allowed = 1
+		elif(new_prey_state == old_predator_state):
+			is_allowed = 0
 		else:
 			is_allowed = 0
 		if(new_prey_state == old_prey_state):
@@ -129,7 +131,18 @@ class Game:
 			prey_probability = 0.05
 		return is_allowed * prey_probability
 
+	def predator_transition(self, old_state, new_state, action):
+		new_location = self.get_new_state_location(old_state, action)
+		if(new_state == new_location):
+			return 1
+		else:
+			return 0
 
+	def prey_transition(self, old_state, new_state, action):
+		if old_state == new_state:
+			return 0.8
+		else:
+			return 0.05
 
 	def q_value(self, state, action, value_grid, discount_factor, grid_size):
 		i = state[0] 
@@ -139,19 +152,26 @@ class Game:
 		if([i,j] == [k,l]):
 			return 0
 		q_value = 0
-		for a in range(i-1, i+2, 1):
-			for b in range(j-1, j+2, 1):
-				for c in range(k-1, k+2, 1):
-					for d in range(l-1, l+2, 1):
-						[a,b] = self.wrap_state([a,b], grid_size, False)
-						[c,d] = self.wrap_state([c,d], grid_size, False)
-
-						transition = self.transition(state, [a,b,c,d], action)
-						reward = self.reward(state, [a,b,c,d], action)
-						q_value += transition * (reward + discount_factor * value_grid[a][b][c][d])
-						#if q_value> 10:
-						#	print "q: ", q_value, " state: ", a,b,c,d, " reward: ", reward, " transition: ", transition
-						
+		possible_new_predator = [[i,j], [i+1,j], [i,j+1], [i-1,j], [i,j-1]]
+		possible_new_prey = [[k,l], [k+1,l], [k,l+1], [k-1,l], [k,l-1]]
+		for new_state in possible_new_predator:
+			new_state = self.wrap_state(new_state, grid_size, False)
+			reward = self.reward(state, [new_state[0], new_state[1], k, l], action)
+			transition_pred = self.predator_transition([i,j], new_state, action)
+			#If the reward is 10, the value of the next state is 0 (because: terminal)
+			if (reward == 10 and transition_pred == 1):
+				return 10
+			#If the action cannot lead to the next state, the entire value will be 0
+			else:
+				for new_prey in possible_new_prey:
+					new_prey = self.wrap_state(new_prey, grid_size, False)
+					if(new_prey == new_state):
+						continue
+					if(new_state == [k,l]):
+						transition_prey = 0.8
+					else:
+						transition_prey = 0.05
+					q_value += transition_prey*transition_pred * discount_factor * value_grid[new_state[0]][new_state[1]][new_prey[0]][new_prey[1]]
 		return q_value
 
  
@@ -328,5 +348,5 @@ if __name__ == "__main__":
 
 	goal_state = [5,5]
 	grid_size = [11,11]
-	game.value_iteration(grid_size, 0.0001, 0.9)
+	game.value_iteration(grid_size, 0.00001, 0.9)
 
