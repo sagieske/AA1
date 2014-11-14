@@ -222,6 +222,8 @@ class Game:
 			policy_grid = helpers.full_policy_grid_from_encoding(true_goal_state, policy_grid, gridsize=true_gridsize)
 		# print grid
 		self.print_policy_grid(policy_grid)
+		helpers.policy_print_latex(policy_grid, label=[count, 'Value Iteration - Policy Grid'])
+		
 
 
 
@@ -295,6 +297,7 @@ class Game:
 			if delta < epsilon:
 				convergence = True
 				stop_time = time.time()
+				helpers.pretty_print_latex(value_grid, label=[count, 'Value Iteration - Value Grid'])
 				print "Value iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 				print "Predator location: ", self.predator.get_location()
 				print "Prey location: ", start_location_prey
@@ -532,6 +535,7 @@ class Game:
 		      # print optimal grid
 		      #printable_policy = self.policy_to_string(policy)
 		      helpers.policy_print_latex(policy, label=[count, 'Policy Iteration Grid'])
+		      helpers.pretty_print_latex(value_grid, label=[count, 'Policy Iteration - Value Grid'])
 		# Print information about this function
 		if not encoding: 
 		        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
@@ -901,15 +905,15 @@ if __name__ == "__main__":
 	#TODO: DEBUG TO SET GOAL STATE AND GRID SIZE AT DIFFERENT SIZES
 	goal_state = [2,2]
 	grid_size = [11,11]
-	#value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
 	#game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
 
-	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 	
 	predator.set_location([0,0])
 	#game.iterative_policy_evaluation(discount_factor, [5,5], verbose = verbose, encoding=False)
 	#game.iterative_policy_evaluation_encoded(discount_factor, [0,0], verbose = verbose)
 	
-	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
 	#game.policy_iteration_encoded(discount_factor, [5,5], verbose = verbose)

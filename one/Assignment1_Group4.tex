@@ -144,10 +144,10 @@ As described in the assignment, policy evaluation is implemented. The results wi
 	\begin{tabular}{ |l | l | l | l | l | l | l| }
 		Case & Predator & Value & Prey & Value & Discount Factor & Iterations to converge \\ 
 		\hline
-		1 & (0, 0) & 0.00335 & (5, 5) & 2.850622 & 0.8 & 33 \\
-		2 & (2, 3) & 0.19892 & (5, 4) & 2.850622 & 0.8 & 33 \\
-		3 & (2, 10) & 0.19892 & (10, 0) & 2.850622 & 0.8 & 33 \\
-		4 & (10, 10) & 1.65066 & (0, 0) & 2.850622 & 0.8 & 33 \\	
+		1 & (0, 0) & 0.0033573 & (5, 5) & 2.850622 & 0.8 & 33 \\
+		2 & (2, 3) & 0.1989275 & (5, 4) & 2.850622 & 0.8 & 33 \\
+		3 & (2, 10) & 0.1989275 & (10, 0) & 2.850622 & 0.8 & 33 \\
+		4 & (10, 10) & 1.6506673 & (0, 0) & 2.850622 & 0.8 & 33 \\	
 	\end{tabular}
 \end{center}
 
@@ -170,6 +170,7 @@ Case 4 has the agent starting at (10,10) and the prey located at (0,0). The dist
 		0.1 & 5 \\
 		0.5 & 13 \\
 		0.7 & 22 \\
+		0.8 & 33 \\
 		0.9 & 64 \\	
 	\end{tabular}
 \end{center}
@@ -240,6 +241,7 @@ It takes a few iterations to converge. These are always the same. This can be ex
 		0.1 & 6 \\
 		0.5 & 7 \\
 		0.7 & 7 \\
+		0.8 & 7 \\	
 		0.9 & 7 \\	
 	\end{tabular}
 \end{center}
@@ -258,7 +260,7 @@ Prey is located at (5, 5)
 \scalebox{0.7}{
 \begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
 \hline
-\multicolumn{12}{|c|}{v in loop 4}\\
+\multicolumn{12}{|c|}{Value Iteration Grid in loop 4}\\
 \hline
 Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 
@@ -303,11 +305,11 @@ State space encoding was implemented to improve performance. By taking into acco
 	\begin{tabular}{ |l | l | l | l | l | l| }
 		Case & Discount factor & Time to converge & Avg. \# steps to catch pray & Standart deviation & Discount Factor\\ 
 		\hline
-		1 & 0.1 & 11.0183360577 s & (5, 5) & 20 & 15.4767567662 \\
-		2 & 0.5 & 0.19892 & (5, 4) & 21 & 0.8 \\
-		3 & 0.7 & 0.19892 & (10, 0) & 16 & 0.8 \\
-		4 & 0.8 & 1.65066 & (0, 0) & 18 & 0.8 \\	
-		4 & 0.9 & 1.65066 & (0, 0) & 19 & 0.8 \\	
+		1 & 0.1 & 11.0183360577 s & 20 & 20 & 15.4767567662 \\
+		2 & 0.5 & 0.19892 & 21 & 21 & 0.8 \\
+		3 & 0.7 & 0.19892 & 16 & 16 & 0.8 \\
+		4 & 0.8 & 1.65066 & 18 & 18 & 0.8 \\	
+		4 & 0.9 & 1.65066 & 19 & 19 & 0.8 \\	
 	\end{tabular}
 \end{center}
 
@@ -323,7 +325,7 @@ Smarter state-space encoding does indeed improve performance.
 \section*{Files attached}
 \begin{itemize}
 \item -newstate.py
-\item agents_new.py
+\item agents\_new.py
 \item helpers.py \ldots
 \end{itemize}
 \section*{Sources}
