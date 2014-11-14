@@ -5,7 +5,14 @@ import sys
 import time
 
 def timer(start_time, name):
-	""" Stops timer and prints total time of function"""
+	""" Stops timer and prints total time of function
+	PUT THIS IN BEGINNING OF FUNCTION:
+	# start timer
+	start_time = time.time()
+
+	AT END OF FUNCTION:
+	helpers.timer(start_time, <function_name>)
+	"""
 	end_time = time.time() - start_time
 	print name, " - time taken: ", end_time
 
