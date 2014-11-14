@@ -325,7 +325,8 @@ class Game:
 		convergence = False
 
 		# Initialize grids
-		value_grid = np.zeros((x_size, y_size))
+		value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=0.00002, true_goal_state=start_location_prey)
+		#value_grid = np.zeros((x_size, y_size))
 		new_grid = np.zeros((x_size, y_size))
 		delta_grid = np.zeros((x_size,y_size))
                 
@@ -377,6 +378,11 @@ class Game:
 				print "Predator location: ", self.predator.get_location()
 				print "Prey location: ", start_location_prey
 				print "Discount factor: ", discount_factor
+				
+		
+		if encoding:
+			self.full_grid_from_encoding(start_location_prey, value_grid, gridsize=gridsize)
+				
 		return value_grid
 
 
@@ -894,9 +900,9 @@ if __name__ == "__main__":
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
-	#game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose, encoding=False)
 
 	#self, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False
 	#game.policy_iteration(discount_factor)
 	
-	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
