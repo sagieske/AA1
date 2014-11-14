@@ -227,7 +227,35 @@ class Game:
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
 
-		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])			
+		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])
+		optimal_policy = self.policy_from_grid(temp_grid, grid_size, False)
+		return optimal_policy
+
+	def policy_from_grid(self, grid, grid_size, encoding):
+		example_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		x_length = grid_size[0]
+		y_length = grid_size[1]
+		new_policy_grid = [[[[example_policy for i in range(0, y_length)] for j in range(0, x_length)] for k in range(0, y_length)] for l in range(0, x_length)]
+		actions = example_policy.keys()  
+		for i in range(0, x_length):
+				for j in range(0, y_length):
+					for k in range(0, x_length):
+						for l in range(0, y_length):
+							best_action_value = 0
+							best_action = ""
+							best_actions = []
+							for action in actions:
+								[x,y] = self.get_new_state_location([i,j], action)
+								[x,y] = self.wrap_state([x,y], grid_size, encoding)
+								action_value = grid[x][y][k][l]
+								if(action_value > best_action_value):
+									best_action_value = action_value
+									best_action = action
+									best_actions.append(action)
+							new_policy = self.create_optimal_policy(best_actions)
+							new_policy_grid[i][j][k][l] = new_policy
+							print i,j,k,l, " : ", new_policy
+		return new_policy_grid
 
 	def encoded_value_iteration(self, grid_size, epsilon, discount_factor):
 		x_length = grid_size[0]
@@ -276,6 +304,7 @@ class Game:
 				converged = True
 
 		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])	
+
 
 
 	def get_new_state_location(self, old_location, action):
@@ -360,7 +389,7 @@ class Game:
 					new_prey = self.wrap_state(new_prey, grid_size, False)
 					if(new_prey == new_state):
 						continue
-					if(new_state == [k,l]):
+					if(new_prey == [k,l]):
 						transition_prey = 0.8
 					else:
 						transition_prey = 0.05
@@ -520,18 +549,19 @@ if __name__ == "__main__":
 	count = 0
 	count_list = []
 	#Initialize re-usable prey and predator objects
-	prey = Prey([5,5])
+	prey = Prey([2,2])
 	predator = Predator([0,0], [5,5])
-	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-
-	grid_size = [5,5]
-	#game.value_iteration(grid_size, 0.00001, 0.9)
-	#game.policy_evaluation(grid_size, 0.0001, 0.8)
 	
+	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+	grid_size = [4,4]
+	optimal_policy = game.value_iteration(grid_size, 0.01, 0.9)
+	#game.policy_evaluation(grid_size, 0.0001, 0.8)
+	predator = Predator([0,0], [3,3], policy=optimal_policy)
 
-	'''for x in range(0, N):
+	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+	for x in range(0, 1):
 		# Start game and put prey and predator at initial starting position
-		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[11,11], prey_location=[5,5])
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=grid_size, prey_location=[2,2])
 		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
@@ -543,7 +573,8 @@ if __name__ == "__main__":
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
 	old_result= "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-
+	print old_result
+	'''
 	new_policy = game.policy_iteration([5,5], 0.0001, 0.8)
 	predator = Predator([0,0], [3,3], policy = new_policy)
 	prey = Prey([3,3])
@@ -570,5 +601,5 @@ if __name__ == "__main__":
 	print old_result
 	print "Average amount of time steps needed before catch with new policy over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	'''
-	game.policy_evaluation([11,11], 0.0001, discount_factor)
-	game.encoded_policy_evaluation([11,11], 0.00001, discount_factor)
+	#game.policy_evaluation([11,11], 0.0001, discount_factor)
+	#game.encoded_policy_evaluation([11,11], 0.00001, discount_factor)
