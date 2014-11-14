@@ -58,12 +58,13 @@ Where: \\
 $\pi(a|s)$ is an action chosen, given the state. \\
 $p(s'|s, a)$ is a transition function. \\
 $r(s, a, s')$ is a reward function. \\
-$\gamma v(s')$ is the discounted state. \\ % is it?
+$v(s')$ is the value of the new state. \\ % is it?
+$\gamma$ is a discount factor.\\ 
 
-This algorithm gives the agent insight in the consequences taking each action has. Thican help the agent in deciding which action to take according to its policy. 
+This algorithm gives the agent insight in the consequences taking each action has. This can help the agent in deciding which action to take according to its policy. 
 
 \subsection*{Policy improvement}
-Policy improvement is used to find an optimal, deterministic policy. This is, again a stationary function. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal policy. As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive. Again, from Barto and Sutton [source]:\\
+Policy improvement is used to find an optimal, deterministic policy. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal policy. As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive. Again, from Barto and Sutton [source]:\\
 
 \begin{algorithm}[H]
 1. Initialization \\
@@ -111,10 +112,10 @@ After performing this algorithm, the results can also be used for agent planning
 \noindent The current implementation consists of the following files:
 \begin{description}
 	\item[Agents] \hfill \\ 
-	This file implements the agents, the prey class and the predator class. Both agents have a policy and actions as described in the introduction as well as other functions to get and set data. As the predator is the agent this implementation focuses on, this class contains more functions than the prey.
+	This file contains implementions of the agents, the prey class and the predator class. Both agents have a policy and actions as described in the introduction as well as other functions to get and set data. As the predator is the agent this implementation focuses on, this class contains more functions than the prey.
 	
 	\item[Helpers] \hfill \\ 
-	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be assigned to a specific class.
+	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
 	
 	\item[Game] \hfill \\ 
 	This file contains the game and the environment classes. The environment of the game as well as the rules are implemented in this class. The game class contains the implementation of running the game as well as the agent planning algorithms.
@@ -313,7 +314,7 @@ The table above proves that policy evaluation to converge always takes equally l
 The discount factor appears to affect the number of iterations necessary to converge. This makes sense as the discount factor discounts the value of a state. A small discount value discounts the value of the state quite radically, leading to quick conversion. However, this quick conversion leaves many states with a random policy. This is most likely undesired. Using a higher discount value leads to more iterations before convergence. With a less radical discount, policy evaluation can be optimized in such a way that every state has a value. The discount factor should, however, not be too large. This will lead to faster convergence. Do note that in order to reach convergence, the discount factor must lie between 0-1.
 
 \subsection*{Policy iteration}
-Policy iteration is a stationary algorithm to find the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
+Policy iteration is an algorithm for finding the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
 % Somehow print the whole grid for Prey(5,5)
 \begin{center}
 \scalebox{0.6}
@@ -342,7 +343,7 @@ Policy iteration is a stationary algorithm to find the optimal policy. After per
 	}
 \end{center}
 
-As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal. Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
+As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal (E - `East', W - `West', S - `South', N - `North'). Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
 
 \iffalse
 % WILL BECOME OBSOLETE
