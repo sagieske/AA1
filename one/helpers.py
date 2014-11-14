@@ -46,6 +46,60 @@ def pretty_print(matrix, label=None, dec=7):
 		pretty_row = [f_string %v for v in row]
 		print '| ', ' | '.join(pretty_row), ' |'
 
+def policy_print_latex(policy_grid, label, indices=True):
+	""" Function to pretty print policies in terminal to copy to laTeX"""
+	#also only print one optimal function
+	symbols =  {'North': '^', 'East': '>', 'South': 'v','West': '<', 'Wait': 'X'}
+	
+	if indices:
+		tab_array = ['l'] * (len(policy_grid)+1)
+	else:
+		tab_array = ['l'] * len(policy_grid)
+
+	tab_array = ['l'] * len(policy_grid)
+	tab = ' | '.join(tab_array)
+	print "\\begin{tabular}{ |"+ tab + "|}"
+	# Print title
+	print "\\hline"
+	multicolumn = len(policy_grid)
+	if indices:
+		multicolumn_str = str(len(policy_grid)+1)		
+	else:
+		multicolumn_str = str(len(policy_grid))
+	print "\multicolumn{"+ multicolumn_str +"}{|c|}{" + label[1] + " in loop " + str(label[0]) + "}\\\\"
+	print "\\hline"
+	# Indices x-axis
+	index = range(0,len(policy_grid))
+	index_str = ["%s" % str(x) for x in index]
+	index_str_line =  ' & '.join(index_str) + ' \\\\ \n'
+	if indices:
+		index_str_line = "Indices y\\textbackslash x &" + index_str_line
+	print index_str_line
+	
+	print "\\hline"
+	# Print rows
+	index = 0
+	for row in policy_grid:
+		# Create string per row
+		row_string = []
+		for item in row:
+			item_string = ''
+			# Get movement and translate to symbol
+			for key, value in item.iteritems():
+				if value != 0:
+					item_string += symbols[key]
+					break;
+			row_string.append(item_string)
+		# pretty borders
+		row_string = ' & '.join(row_string)
+		if indices:
+			row_string = str(index) + ' & ' + row_string
+		print row_string
+		index = index + 1
+	print "\\hline"
+	print "\\end{tabular}"
+
+
 def pretty_print_latex(matrix, label, indices=True):
 	""" Function to pretty print matrices in terminal to copy to laTeX"""
 	print "|----------", label[1], " in iteration ", label[0], "----------|"
@@ -156,6 +210,6 @@ def get_optimal_action(policy):
     
     for each in policy.keys():
         if policy[each] == optimal:
-            print each
+            #print each
             return each
 
