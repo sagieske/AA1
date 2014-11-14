@@ -19,7 +19,7 @@
 \pagebreak
 
 \section*{Introduction}
-This report discusses a predator versus prey Markov Decision Process (MDP). In order to analyze this MDP, it was implemented. This MDP consists of an 11 $\times$ 11 toroidal grid. The predator and the prey are placed on the grid, after which the  predator must catch the prey. Both can move vertically and horizontally across the grid as well as stay put until the next time step. Describing the movements about the grid as North, East, South, West and Wait, the policies of the predator and the prey are as follows:
+This report discusses a predator versus prey Markov Decision Process (MDP) implementation, focused on single agent planning. The planning is focused on the predator. This MDP consists of an 11 $\times$ 11 toroidal grid. The predator and the prey are placed on the grid, after which the  predator must catch the prey. Both can move vertically and horizontally across the grid as well as stay wait at their current location until the next time step. Describing the movements about the grid as North, East, South, West and Wait, the policies of the predator and the prey are as follows:
 \begin{center}
 	\begin{tabular}{ | l | l | l | l | l | l |}
 	\hline
@@ -31,7 +31,7 @@ This report discusses a predator versus prey Markov Decision Process (MDP). In o
 	\hline
 	\end{tabular}
 \end{center}
-The predator and prey move about on the grid as specified but the policy. However, the prey does not move towards the predator. After the prey is caught, the episode ends and the game is reverted to starting positions. Catching the prey gives a reward of 10, 0 otherwise.
+The predator and prey move about on the grid as specified by the policy. However, the prey does not move towards the predator. After the prey is caught, the episode ends and the game is reverted to starting positions. Catching the prey gives an immediate reward of 10, 0 otherwise.
 
 This implementation contains an execution of the game, policy evaluation, policy iteration and value iteration. The performance of these functions are analyzed in order to research the behaviour of the agents. The results of these functions are also compared with one another as part of analyzation.
 
@@ -39,7 +39,7 @@ This implementation contains an execution of the game, policy evaluation, policy
 
 \section*{Theory}
 \subsection*{Iterative policy evaluation}
-Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. It uses the following algorithm as described in Barto and Sutton [source]: \\
+Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey.  It uses the following algorithm as described in Barto and Sutton [source]: \\
 
 \begin{algorithm}[H]
 Input $\pi$, the policy to be evaluated \\
@@ -60,8 +60,10 @@ $p(s'|s, a)$ is a transition function. \\
 $r(s, a, s')$ is a reward function. \\
 $\gamma v(s')$ is the discounted state. \\ % is it?
 
+This algorithm can help the agent in deciding which action to take according to its policy. 
+
 \subsection*{Policy improvement}
-Policy improvement is used to find an optimal, deterministic policy. This is, again a stationary function. Again, from Barto and Sutton [source]:\\
+Policy improvement is used to find an optimal, deterministic policy. This is, again a stationary function. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal policy. As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive. Again, from Barto and Sutton [source]:\\
 
 \begin{algorithm}[H]
 1. Initialization \\
@@ -84,7 +86,10 @@ Policy improvement is used to find an optimal, deterministic policy. This is, ag
 \hspace{4 mm} if $temp \neq \pi(s)$, policy stable $\leftarrow$ false
 \end{algorithm}
 
+This algorithm is also used to help the agent decide which action to take according to its policy. The difference with iterative policy evaluation, however, is that the policy is updated after the full grid is evaluated. This leads to a finite, static policy, as this is a stationary function.
+
 \subsection*{Value iteration}
+This algorithm is a quicker version of policy improvement. Where policy improvement first performs policy evaluation an then computed the optimal policy, value iteration performs these steps together. This makes value iteration quicker and computationally less expensive than policy improvement.
 
 \begin{algorithm}[H]
 From Barto and Sutton [source]\\
@@ -99,22 +104,20 @@ until $\Delta \leftarrow \theta$ (a small positive number)\\
 Output a deterministic policy $\pi$, such that \\
 $\pi (s) = arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$
 \end{algorithm}
+After performing this algorithm, the results can also be used for agent planning.
 
 \section*{Implementation}
 
-\noindent The current implementation consists of the following classes:
+\noindent The current implementation consists of the following files:
 \begin{description}
-	\item[Predator] \hfill \\ 
-	This class implements the predator. It contains the policy and actions as described in the introduction.
+	\item[Agents] \hfill \\ 
+	This file implements the agents, the prey class and the predator class. Both agents have a policy and actions as described in the introduction as well as other functions to get and set data. As the predator is the agent this implementation focuses on, this class contains more functions than the prey.
 	
-	\item[Prey] \hfill \\ 
-	This class implements the prey. It contains the policy and actions as described in the introduction.
-	
-	\item[Environment] \hfill \\ 
-	This class implements the environment. This is a toroidal 11 $\times$ 11 grid. Objects, in this case the prey and predator, can be placed on this environment and move about.
+	\item[Helpers] \hfill \\ 
+	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be assigned to a specific class.
 	
 	\item[Game] \hfill \\ 
-	This class implements the game itself. It is possible to start the game. It also performs policy evaluation, policy iteration and value iteration.
+	This file contains the game and the environment classes. The environment of the game as well as the rules are implemented in this class. The game class contains the implementation of running the game as well as the agent planning algorithms.
 	
 \end{description}
 
@@ -134,7 +137,7 @@ $\pi (s) = arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$
 \end{center}
 
 \subsection*{Iterative policy evaluation}
-As described in the assignment, policy evaluation must be executed. Policy evaluation is a stationary algorithm which evaluates the agent's policy. The algorithm used is described in Barto and Sutton [source], section 4.1. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey. The locations of the predator are marked green and the locations of the prey are marked red to increase readability. The following cases have been analyzed, using a stationary prey:
+As described in the assignment, policy evaluation is implemented. The locations of the predator are marked green and the locations of the prey are marked red to increase readability. The results will be analyzed in terms of agent (predator) and goal state (prey) locations. The following cases have been analyzed:
 \begin{center}
 	\begin{tabular}{ | l | l | l |}
 	\hline
@@ -179,7 +182,7 @@ Starting with case 1, the following result is calculated:
 	}
 \end{center}
 
-In this case, it can be seen that moving in a diagonal direction gets the agent to the prey fastest. This takes ten steps. It can also be seen that this is the maximum distance between the predator and the prey.
+This is the maximum distance between the predator and the prey. In this case, it can be seen that moving in a diagonal direction gets the agent to the prey fastest. Since this is not possible, the predator can move in a horizontal - vertical fashion to reach the goal state. This takes at least ten timesteps. As this is the maximum distance between the predator and the prey, it will take relatively long for the predator to catch the prey.
 
 \begin{center}
 \scalebox{0.7}
@@ -207,7 +210,7 @@ In this case, it can be seen that moving in a diagonal direction gets the agent 
 	}
 \end{center}
 
-With the agent starting at (2,3) and the prey located at (5,4), it will take the predator four steps to reach the prey.
+With the agent starting at (2,3) and the prey located at (5,4), the predator is near the goal state. In the best case scenario, it will take the predator at least four timesteps to reach the goal state. After moving South for two consecutive timesteps, the agent can choose to move East or South in order to optimize the immediate reward. However, that does assume an optimal policy, while the predator has a random policy % does this make sense? Idunno
 
 \begin{center}
 \scalebox{0.7}
@@ -236,7 +239,7 @@ With the agent starting at (2,3) and the prey located at (5,4), it will take the
 	}
 \end{center}
 
-With the agent starting at (2,10) and the prey at (10,0), it will take the agent four steps to reach the prey. This means that the distance between the predator and the prey is the same as in the previous case. The fact that the grid is toroidal makes this so.
+With the agent starting at (2,10) and the prey at (10,0), it will take the agent four steps to reach the prey. This shows the effects of the toroidal grid. The advantage of the toroidal grid, in this case, is that the distance between the agent and the goal state is exactly the same as in the previous case. This means that the maximum distance between the agent and the goal state is always a minimum of ten timesteps.
 
 \begin{center}
 \scalebox{0.7}
@@ -265,7 +268,7 @@ With the agent starting at (2,10) and the prey at (10,0), it will take the agent
 	}
 \end{center}
 
-The agent starts at (10,10) and the prey is located at (0,0). It takes the agent two steps to catch the prey. Using the property that the grid is toroidal minimizes the distance between the agent and the prey. However, it is not possible for the agent to move diagonally in one step.
+The agent starts at (10,10) and the prey is located at (0,0). It takes the agent at least two steps to catch the prey. Using the property that the grid is toroidal minimizes the distance between the agent and the prey. 
 
 \begin{center}
 	\begin{tabular}{ l | l | l | l | l }
@@ -296,7 +299,7 @@ The table above proves that policy evaluation to converge always takes equally l
 The discount factor appears to affect the number of iterations necessary to converge. This makes sense as the discount factor discounts the value of a state. A small discount value discounts the value of the state quite radically, leading to quick conversion. However, this quick conversion leaves many states with a random policy. This makes the convergence radical and most likely undesired. Using a higher discount value leads to more iterations before convergence. With a less radical discount, policy evaluation can be optimized in such a way that every state has a value. The discount factor should, however, not be too large. This will lead to faster convergence. Do note that in order to reach convergence, the discount factor must lie between 0-1.
 
 \subsection*{Policy iteration}
-Policy iteration is a stationary algorithm to find the optimal policy. This algorithm exists of two steps: policy evaluation and policy iteration. Policy evaluation is demonstrated in the previous section. Policy iteration finds the optimal (deterministic) policy. The table below shows the results for policy iteration with the prey located at (5,5). As this algorithm first performs policy evaluation until convergence and then performs policy improvement, this algorithm is relatively slow and computationally expensive.
+Policy iteration is a stationary algorithm to find the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
 % Somehow print the whole grid for Prey(5,5)
 \begin{center}
 \scalebox{0.6}
@@ -320,12 +323,14 @@ Policy iteration is a stationary algorithm to find the optimal policy. This algo
 8 & 5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  EN &  17.7776  N &  14.2220  WN &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN  \\
 9 & 4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  EN &  14.2220  N &  11.3776  WN &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN  \\
 10 & 3.7281  EN &  4.6602  EN &  5.8252  EN &  7.2816  EN &  9.1020  EN &  11.3776  N &  9.1020  WN &  7.2816  WN &  5.8252  WN &  4.6602  WN &  3.7281  WN  \\
+\hline
 	\end{tabular}
 	}
 \end{center}
 
+As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal. Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. This creates an optimal, deterministic policy.
+
 As described in the introduction, the agent can move North, South, East, West and Wait. To keep notation as clear and concise as possible, only the first letter of the optimal policy is printed. For clarity, the state 'Wait' is renamed to 'Hold' and is depicted as 'H' where applicable. 
-Policy iteration shows that a state can make multiple optimal transitions. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. This creates an optimal, deterministic policy.
 
 % Is it correct that (5,5) can go to North, East, South, West? 
 
@@ -344,6 +349,7 @@ Policy iteration shows that a state can make multiple optimal transitions. The o
 	\end{tabular}
 \end{center}
 
+It takes a few iterations to converge. These are always the same. This can be expected as policy evaluation always takes the same amount of time and policy improvement is applied to the entirety of the grid. This means that each computation is essentially the same and should take the same amount of time
 % Since it's always 2, maybe it would be interesting to also print the number of iterations it takes for the value grid to 
 % converge for both the policy update iteration
 
@@ -358,6 +364,7 @@ Policy iteration shows that a state can make multiple optimal transitions. The o
 	\end{tabular}
 \end{center}
 
+I have no idea what to say here, because I cannot test this, right now.
 
 \subsection*{Value iteration}
 
@@ -382,7 +389,7 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 2 & 0.000027 & 0.000168 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 0.040960 & 0.006554 & 0.001049 & 0.000168 & 0.000027 \\
 3 & 0.000168 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 & 0.001049 & 0.000168 \\
 4 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 10.000000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 & 0.001049 \\
-5 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 10.000000 & 0.000000 & 10.000000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 \\
+5 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 10.000000 & \cellcolor{red!40}0.000000 & 10.000000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 \\
 6 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 10.000000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 & 0.001049 \\
 7 & 0.000168 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 1.600000 & 0.256000 & 0.040960 & 0.006554 & 0.001049 & 0.000168 \\
 8 & 0.000027 & 0.000168 & 0.001049 & 0.006554 & 0.040960 & 0.256000 & 0.040960 & 0.006554 & 0.001049 & 0.000168 & 0.000027 \\
@@ -407,44 +414,25 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 	\end{tabular}
 \end{center}
 
-
 \subsection*{Smarter state-space encoding}
-
-
-
-
-\begin{comment}
-Sample table in case it's needed
-\begin{center}
-	\begin{tabular}{ l | l | l | l | l | l || l | l | l | l || l}
-		\textbf{K} & Sampling & C-space & VocabSize & TrainSize & Kernel & Airplanes & Cars & Faces & Motorbikes & MAP \\ 
-		\hline
-		400 & dense & gray & 100 & 300 & linear & 87 & 74 & 95 & 69 & 81 \\
-		800 & dense & gray & 100 & 300 & linear & 93 & 70 & 86 & 73 & 81 \\
-		1600 & dense & gray & 100 & 300 & linear & 88 & 72 & 86 & 64 & 78 \\
-		2000 & dense & gray & 100 & 300 & linear & 86 & 73 & 81 & 51 & 73 \\	
-		4000 & dense & gray & 100 & 300 & linear & 90 & 75 & 83 & 53 & 75 \\	
-	\end{tabular}
-\end{center}
-
-\end{comment}
+%Sorry, gwerlls. Idunno jack about this. 
 
 
 \section*{Conclusion}
+Performing policy evaluation gives detailed insight in the which actions the agent can take and how this affects reaching the goal state. In order to reach the goal state as quickly as possible, the policy of the agent needs to be adjusted. In order to adjust the policy of the agent most optimally, one of two algortihms can be used: policy improvement or value iteration. The name policy impreovement sounds very straightforward and effective. It is both. However, value iteration is faster, due to performing policy evaluation and policy improvement at the same time rather than sequentially.
+
+The discount factors of these algorithms have also been evaluated. It has shown that a low discount factor (0.1) leads to quick convergence, but is quite radical. Many states in the state space will contain random policies. As this is not the goal of planning algorithms, this is undesired. Too high a discount rate (0.9) will lead to slow convergence, but each state will be evaluated and have optimal actions to take. This does take longer than often is necessary. This leads to the conclusion that, in this case, a learning rate of about 0.7 or 0.8 is optimal.
 
 \section*{Files attached}
 
 \section*{Sources}
 
 % We don't have any sources so far, right? :/
+% -- Ah, young grasshopper! But we do! :D
 
 \begin{comment}
 \begin{itemize}
-	\item MatLab (http://www.mathworks.nl/products/matlab/)
-	\item VL\_Feat (http://www.vlfeat.org/)
-	\item LibSVM (http://www.csie.ntu.edu.tw/cjlin/libsvm/)
-	\item Caltech Vision Group (http://www.vision.caltech.edu/)
-\end{itemize}
+	\item Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html)
 \end{comment}
 
 \end{document}
