@@ -297,25 +297,26 @@ For states with the same Manhattan distance, the diagonal states have a higher v
 State space encoding was implemented to improve performance. By taking into account the distance between the predator and the prey, the valus of less states need to be computed compared to the stated of the entire grid. As the prey can be anywhere on the grid, take into account that the grid is also toroidal. Therefore, in the case of an 11 $\times$ 11 grid, the maximum distance between the predator and the prey is 5. This is a smaller area to analyze than the entire 11 $\times$ 11 grid.
 
 
+
+
+\begin{center}
+	\begin{tabular}{ |l | l | l | l | l | l| }
+		Case & Discount factor & Time to converge & Avg. \# steps to catch pray & Standart deviation & Discount Factor\\ 
+		\hline
+		1 & 0.1 & 11.0183360577 s & (5, 5) & 20 & 15.4767567662 \\
+		2 & 0.5 & 0.19892 & (5, 4) & 21 & 0.8 \\
+		3 & 0.7 & 0.19892 & (10, 0) & 16 & 0.8 \\
+		4 & 0.8 & 1.65066 & (0, 0) & 18 & 0.8 \\	
+		4 & 0.9 & 1.65066 & (0, 0) & 19 & 0.8 \\	
+	\end{tabular}
+\end{center}
+
 \section*{Conclusion}
 Performing policy evaluation gives detailed insight in the which actions the agent can take and how this affects reaching the goal state. In order to reach the goal state as quickly as possible, the policy of the agent needs to be adjusted. In order to update the policy of the agent to an optimal policy, one of two algortihms can be used: policy improvement or value iteration. The name policy improvement sounds very straightforward and effective. It is both. However, value iteration is faster, due to performing policy evaluation and policy improvement at the same time rather than sequentially. In the end, both yield the same results.
 
 The discount factors of these algorithms have also been evaluated. It has shown that a low discount factor (0.1) leads to quick convergence, but is quite radical. Many states in the state space will contain random policies. As this is not the goal of planning algorithms, this is undesired. Too high a discount rate (0.9) will lead to slow convergence, but each state will be evaluated and have optimal actions to take. This does take longer than often is necessary. This leads to the conclusion that, in this case, a learning rate of about 0.7 or 0.8 is optimal.
 
 Smarter state-space encoding does indeed improve performance.
-
-
-
-\begin{center}
-	\begin{tabular}{ l || l }
-		Discount Factor & Iterations to converge \\ 
-		\hline
-		0.1 & 1 \\
-		0.5 & 7 \\
-		0.7 & 7 \\
-		0.9 & 8 \\	
-	\end{tabular}
-\end{center}
 
 
 
