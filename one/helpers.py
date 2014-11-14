@@ -49,7 +49,7 @@ def pretty_print(matrix, label=None, dec=7):
 def policy_print_latex(policy_grid, label, indices=True):
 	""" Function to pretty print policies in terminal to copy to laTeX"""
 	#also only print one optimal function
-	symbols =  {'North': '^', 'East': '>', 'South': 'v','West': '<', 'Wait': 'X'}
+	symbols =  {'North': '\\textasciicircum', 'East': '\\textgreater', 'South': 'v','West': '\\textless', 'Wait': 'X'}
 	
 	if indices:
 		tab_array = ['l'] * (len(policy_grid)+1)
@@ -93,12 +93,11 @@ def policy_print_latex(policy_grid, label, indices=True):
 		# pretty borders
 		row_string = ' & '.join(row_string)
 		if indices:
-			row_string = str(index) + ' & ' + row_string
+			row_string = str(index) + ' & ' + row_string + '\\\\'
 		print row_string
 		index = index + 1
 	print "\\hline"
 	print "\\end{tabular}"
-
 
 def pretty_print_latex(matrix, label, indices=True):
 	""" Function to pretty print matrices in terminal to copy to laTeX"""

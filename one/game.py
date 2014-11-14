@@ -911,5 +911,5 @@ if __name__ == "__main__":
 	#game.iterative_policy_evaluation(discount_factor, [5,5], verbose = verbose, encoding=False)
 	#game.iterative_policy_evaluation_encoded(discount_factor, [0,0], verbose = verbose)
 	
-	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
-	game.policy_iteration_encoded(discount_factor, [5,5], verbose = verbose)
+	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	#game.policy_iteration_encoded(discount_factor, [5,5], verbose = verbose)
