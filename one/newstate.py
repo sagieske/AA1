@@ -49,6 +49,7 @@ class Game:
 		converged = False
 		v_grid = np.zeros((x_length, y_length, x_length, y_length))
 		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
+		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
 		actions =  self.predator.get_policy().keys()
 		print "Actions: ", actions
 		print "grid: ", grid_size
@@ -62,17 +63,19 @@ class Game:
 							highest_q = 0
 							best_action = ""
 							for action in actions:
-								q_value = self.q_value([i,j,k,l], action, v_grid, discount_factor, grid_size)
+								q_value = self.q_value([i,j,k,l], action, temp_grid, discount_factor, grid_size)
 								if q_value > highest_q:
 									highest_q = q_value
 							v_grid[i][j][k][l] = highest_q
+
 							#print "q_value: ", highest_q
-			
-			delta_grid = abs(np.array(temp_grid) - np.array(v_grid))
+
+			delta_grid = abs(np.array(v_grid) - np.array(temp_grid))
 			helpers.pretty_print(delta_grid[:][:][1][2], label=['delta'])
 			helpers.pretty_print(temp_grid[:][:][1][2], label = ['temp'])
 			helpers.pretty_print(v_grid[:][:][1][2], label=['v'])
 			temp_grid = v_grid
+			v_grid = np.zeros((x_length, y_length, x_length, y_length))
 			
 			#v_grid = np.zeros((x_length, y_length, x_length, y_length))
 			delta = np.amax(delta_grid)
@@ -324,6 +327,6 @@ if __name__ == "__main__":
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 
 	goal_state = [5,5]
-	grid_size = [3,3]
-	game.value_iteration(grid_size, 0.01, 0.8)
+	grid_size = [11,11]
+	game.value_iteration(grid_size, 0.0001, 0.9)
 
