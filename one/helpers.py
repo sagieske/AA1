@@ -2,6 +2,12 @@ import numpy as np
 import math
 from operator import add,mul, sub
 import sys
+import time
+
+def timer(start_time, name):
+	""" Stops timer and prints total time of function"""
+	end_time = time.time() - start_time
+	print name, " - time taken: ", end_time
 
 def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
 	""" Calculate xy distance using a toroidal grid"""
