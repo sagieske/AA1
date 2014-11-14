@@ -435,14 +435,14 @@ if __name__ == "__main__":
 	count = 0
 	count_list = []
 	#Initialize re-usable prey and predator objects
-	prey = Prey([3,3])
+	prey = Prey([5,5])
 	predator = Predator([0,0], [5,5])
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 
 	grid_size = [5,5]
 	#game.value_iteration(grid_size, 0.00001, 0.9)
 	#game.policy_evaluation(grid_size, 0.0001, 0.8)
-	#new_policy = game.policy_iteration(grid_size, 0.0001, 0.8)
+	
 
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
@@ -457,4 +457,30 @@ if __name__ == "__main__":
 	var_list = [(x-average)**2 for x in count_list]
 	variance = float(sum(var_list)/len(var_list))
 	standard_deviation = math.sqrt(variance)
-	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+	old_result= "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+
+	new_policy = game.policy_iteration([5,5], 0.0001, 0.8)
+	predator = Predator([0,0], [3,3], policy = new_policy)
+	prey = Prey([3,3])
+	count = 0
+	count_list = []
+	average = 0
+	#Calculate corresponding standard deviation
+	var_list = []
+	variance = 0.0
+	standard_deviation = 0.0
+	for x in range(0, N):
+		# Start game and put prey and predator at initial starting position
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[5,5], prey_location=[3,3])
+		rounds = game.get_rounds()
+		count += rounds
+		count_list.append(rounds)
+		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
+	#Calculate average steps needed to catch prey
+	average = float(count/N)
+	#Calculate corresponding standard deviation
+	var_list = [(x-average)**2 for x in count_list]
+	variance = float(sum(var_list)/len(var_list))
+	standard_deviation = math.sqrt(variance)
+	print old_result
+	print "Average amount of time steps needed before catch with new policy over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
