@@ -11,7 +11,7 @@ import helpers
 
 class Environment:
 
-	def __init__(self, size=[4,4]):
+	def __init__(self, size=[11,11]):
 		"""Initialize environment of given size"""
 		self.size = size
 		self.grid = [[ ' ' for i in range(0, size[0])] for y in range(0, size[1])]
@@ -252,7 +252,6 @@ class Game:
 									best_actions.append(action)
 							new_policy = self.create_optimal_policy(best_actions)
 							new_policy_grid[i][j][k][l] = new_policy
-							print i,j,k,l, " : ", new_policy
 		return new_policy_grid
 
 	def encoded_value_iteration(self, grid_size, epsilon, discount_factor):
@@ -529,7 +528,7 @@ class Game:
 					for l in range(0, y_length):
 						distance = [abs(i-k), abs(j-l)]
 						if(str(distance) in distance_list):
-								new_policy_grid[i][j][k][l] = distance_list[str(distance)]
+							new_policy_grid[i][j][k][l] = distance_list[str(distance)]
 						else:
 							backup_policy = policy_grid[i][j][k][l]
 							actions = backup_policy.keys()
@@ -545,8 +544,8 @@ class Game:
 							new_policy = self.create_optimal_policy(best_actions)
 							if(new_policy != backup_policy):
 								stability = False
-						new_policy_grid[i][j][k][l] = new_policy
-						distance_list[str(distance)] = new_policy
+							new_policy_grid[i][j][k][l] = new_policy
+							distance_list[str(distance)] = new_policy
 		return new_policy_grid, stability
 
 
@@ -555,6 +554,7 @@ class Game:
 		for action in best_actions:
 			policy[action] = 1.0/len(best_actions)
 		return policy
+
 
 if __name__ == "__main__":
 	#Command line arguments
@@ -579,22 +579,29 @@ if __name__ == "__main__":
 	else:
 		verbose = 2
 
+#	run_test(alg_type)
 	count = 0
 	count_list = []
 	#Initialize re-usable prey and predator objects
 	prey = Prey([2,2])
-	predator = Predator([0,0], [5,5])
+	predator = Predator([0,0], [2,2])
 	
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-	grid_size = [4,4]
+	grid_size = [11,11]
+
+	#run_test(prey, predator, game, grid_size, N, discount_factor)
+	start_time = time.time()
 	#optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.8)
-	#optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
-	optimal_policy = game.policy_iteration(grid_size, 0.001, 0.8)
+
+	optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
+	#optimal_policy = game.policy_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.value_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.policy_evaluation(grid_size, 0.01, 0.8)
-	predator = Predator([0,0], [3,3], policy=optimal_policy)
+	end_time = time.time()
+	#predator = Predator([0,0], [2,2], policy=optimal_policy)
 
-	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+
+	game = Game(reset=True, prey=prey, predator=predator, verbose=0)
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=grid_size, prey_location=[2,2])
@@ -610,32 +617,4 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	old_result= "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	print old_result
-	'''
-	new_policy = game.policy_iteration([5,5], 0.0001, 0.8)
-	predator = Predator([0,0], [3,3], policy = new_policy)
-	prey = Prey([3,3])
-	count = 0
-	count_list = []
-	average = 0
-	#Calculate corresponding standard deviation
-	var_list = []
-	variance = 0.0
-	standard_deviation = 0.0
-	for x in range(0, N):
-		# Start game and put prey and predator at initial starting position
-		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[5,5], prey_location=[3,3])
-		rounds = game.get_rounds()
-		count += rounds
-		count_list.append(rounds)
-		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
-	#Calculate average steps needed to catch prey
-	average = float(count/N)
-	#Calculate corresponding standard deviation
-	var_list = [(x-average)**2 for x in count_list]
-	variance = float(sum(var_list)/len(var_list))
-	standard_deviation = math.sqrt(variance)
-	print old_result
-	print "Average amount of time steps needed before catch with new policy over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
-	'''
-	#game.policy_evaluation([11,11], 0.0001, discount_factor)
-	#game.encoded_policy_evaluation([11,11], 0.00001, discount_factor)
+	print end_time - start_time
