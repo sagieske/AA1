@@ -322,7 +322,7 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 \end{tabular}
 \end{center}
 
-As shown in the table above, the states surrounding the goal state have higher values than the ones around it. Also, the policy shows which actions are optimal. Policy iteration can assign multiple optimal transitions to a state. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
+The table shown above depicts the optimal policy, where the prey is located at (5,5). Policy iteration can assign multiple optimal transitions to a state. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
 
 \iffalse
 % WILL BECOME OBSOLETE
@@ -362,8 +362,7 @@ It takes a few iterations to converge. These are always the same. This can be ex
 		0.9 & 7 \\	
 	\end{tabular}
 \end{center}
-
-I have no idea what to say here, because I cannot test this, right now.
+There is a slight difference in number of iterations when performing policy iteration. Though convergence of policy evaluation is relatively quick with a low discount factor, this appears to hardly affect policy improvement.
 
 \subsection*{Value iteration}
 
@@ -399,8 +398,7 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 }
 \end{center}
 
-
-
+This shows that value iteration has the exact same results as policy iteration. Also, we see that the algorithm converges quicker than policy iteration.
 
 \begin{center}
 	\begin{tabular}{ l || l }
@@ -413,14 +411,20 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 	\end{tabular}
 \end{center}
 
+
+
+For states with the same Manhattan distance, the diagonal states have a higher value. This happens, due to the fact that the prey is twice as likely to move toward the predator instead of away from it. When observing the distance between the predator and the prey in a straight line, the prey has a $0.05 \times 3$ probability of moving away from the predator. However, when taking into account the same distance diagonally, the prey only has a probability of $0.05 \times 2$ of moving away.
+
 \subsection*{Smarter state-space encoding}
-State space encoding was implemented to improve performance of the functions. This makes computation of policy evaluation, policy iteration and value iteration faster. By taking into account the distance between the predator and the prey, there are less states to computed than the entire grid. As the prey can be anywhere on the grid, the grid is also toroidal. In the case of an 11 $\times$ 11 grid, the maximum distance between the predator and the prey is 5. This is a smaller area to analyze than the entire 11 $\times$ 11 grid.
+State space encoding was implemented to improve performance. By taking into account the distance between the predator and the prey, the valus of less states need to be computed compared to the stated of the entire grid. As the prey can be anywhere on the grid, take into account that the grid is also toroidal. Therefore, in the case of an 11 $\times$ 11 grid, the maximum distance between the predator and the prey is 5. This is a smaller area to analyze than the entire 11 $\times$ 11 grid.
 
 
 \section*{Conclusion}
 Performing policy evaluation gives detailed insight in the which actions the agent can take and how this affects reaching the goal state. In order to reach the goal state as quickly as possible, the policy of the agent needs to be adjusted. In order to update the policy of the agent to an optimal policy, one of two algortihms can be used: policy improvement or value iteration. The name policy improvement sounds very straightforward and effective. It is both. However, value iteration is faster, due to performing policy evaluation and policy improvement at the same time rather than sequentially. In the end, both yield the same results.
 
 The discount factors of these algorithms have also been evaluated. It has shown that a low discount factor (0.1) leads to quick convergence, but is quite radical. Many states in the state space will contain random policies. As this is not the goal of planning algorithms, this is undesired. Too high a discount rate (0.9) will lead to slow convergence, but each state will be evaluated and have optimal actions to take. This does take longer than often is necessary. This leads to the conclusion that, in this case, a learning rate of about 0.7 or 0.8 is optimal.
+
+Smarter state-space encoding does indeed improve performance
 
 \section*{Files attached}
 \begin{itemize}
