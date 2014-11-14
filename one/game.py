@@ -62,7 +62,7 @@ class Game:
 
 	def policy_iteration_encoded(self, discount_factor, start_location_prey=[2,3], gridsize=[11,11], verbose=0):
 		""" Use smaller state-space encoding in order to only save 1/3 """
-		print "gridsize"
+		start_time = time.time()
 		x_size = gridsize[0]
 		y_size = gridsize[1]
 		dist_end = helpers.euclidian(start_location_prey, gridsize)
@@ -81,12 +81,17 @@ class Game:
 		#Calculate value iteration (mostly) as usual
 		value_grid, this_policy = self.policy_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose)
 		my_policy = helpers.full_policy_grid_from_encoding(start_location_prey, this_policy, gridsize=gridsize)
+		stop_time = time.time();
+		print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+		print "Predator location: ", self.predator.get_location()
+		print "Prey location: ", start_location_prey
+		print "Discount factor: ", discount_factor
 		self.print_policy_grid(my_policy)
+		helpers.policy_print_latex(my_policy, label=[count, 'Policy Iteration Grid'])
 
 	
 	def iterative_policy_evaluation_encoded(self, discount_factor, start_location_prey=[2,3], gridsize=[11,11], verbose=0):
 		""" Use smaller state-space encoding in order to only save 1/3 """
-		print "gridsize"
 		x_size = gridsize[0]
 		y_size = gridsize[1]
 		dist_end = helpers.euclidian(start_location_prey, gridsize)
@@ -211,9 +216,6 @@ class Game:
 				# Update policy grid
 				policy_grid[i][j] = old_policy
 
-
-
-
 		# TODO: FLIP POLICY GRID
 		if encoding:
 			# TODO: EDIT
@@ -317,7 +319,6 @@ class Game:
 			# pretty borders
 			row_string = '|  ' + '  |  '.join(row_string) +  '  |' 
 			print row_string
-
 	
 	def next_to_goal(self, state, goal_state):
 		""" Function checks if state is next to goal state"""
@@ -437,7 +438,7 @@ class Game:
 		y_size = gridsize[1]
 		new_grid = np.zeros((x_size, y_size))
 		delta_grid = np.zeros((x_size,y_size))
-            
+
 		# But first perform policy evaluation until convergence!
 		# There is a small difference, compared to iterative policy evaluation, hence another implementation           
 		while(not convergence):
@@ -447,8 +448,8 @@ class Game:
 					# current state:
 					current_state = [i, j]
 					action = helpers.get_optimal_action(policy[i][j])
-					print 'Action: ', action
-					print 'Policy: ', policy[i][j]
+					#print 'Action: ', action
+					#print 'Policy: ', policy[i][j]
 					
 					q_value = self.q_value(current_state, action, value_grid, discount_factor, start_location_prey, [x_size, y_size], encoding=False)
 					#print "qV: ", q_value
@@ -472,7 +473,7 @@ class Game:
 				convergence = True
 				print helpers.pretty_print(value_grid, label=[count, 'Value grid '])
 				return value_grid, delta
-		      
+	
 	def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
 		""" Performs policy improvement """
 		# Get the optimal policies in a matrix
@@ -513,7 +514,7 @@ class Game:
 		          
 		      # Pretty print value grid, dependent on verbose level
 		      if verbose == 2 or (verbose == 1 and delta < 0.0001):
-			  	helpers.pretty_print(value_grid, label=[count, 'Value grid '])
+			helpers.pretty_print(value_grid, label=[count, 'Value grid'])
 		      
 		      # Perform policy improvement
 		      is_policy_stable, policy = self.policy_improvement(discount_factor, value_grid, policy, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding)
@@ -528,13 +529,15 @@ class Game:
 		stop_time = time.time()	
 		# print extra information, depending on verbose level
 		if verbose == 2 or (verbose == 1 and delta < 0.0001):
-		      # print grid
-			self.print_policy_grid(policy)
+		      # print optimal grid
+		      #printable_policy = self.policy_to_string(policy)
+		      helpers.policy_print_latex(policy, label=[count, 'Policy Iteration Grid'])
 		# Print information about this function
-	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
-		print "Predator location: ", self.predator.get_location()
-		print "Prey location: ", start_location_prey
-		print "Discount factor: ", discount_factor
+		if not encoding: 
+		        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
+			print "Predator location: ", self.predator.get_location()
+			print "Prey location: ", start_location_prey
+			print "Discount factor: ", discount_factor
 		
 		# Yay! We are done! Return optimal value grid and policy!
 		return value_grid, policy
@@ -557,17 +560,17 @@ class Game:
  		prob_sum = 0
                 for new_state in new_states:
    		       bool_preset_transition = False
-   					
+
    		       # Currently ignoring the encoding!!
    		       # in encoding the x or y distance to the prey cant be smaller than 0 or larger than the gridsize
-   					
+
    		       if(encoding):
                             # Mirror states
                             if new_state[0] == -1:
                                 new_state[0] = 1
  			    if new_state[1] == -1:
  			        new_state[1] = 1
-                            
+
                             # If at border right or below, then use state itself as new state
 				"""
 				Need to preset transitions since state is adjusted for correct calculation and does not correspond to action:
@@ -618,43 +621,6 @@ class Game:
    		       prob_sum += transition_value * (reward_value + discount_factor * value_grid[new_state[0]][new_state[1]])
     
  		return prob_sum
-
-
-	# No doubt this can be implemented smarter, but I have no idea how
-	def policy_print(self, policy, value_grid):
-		""" Function to print policy matrices in terminal """
-		# Assume policy and value_grid are of same dimensions
-		policy_strings = self.policy_to_string(policy)
-		print "|---------- OPTIMAL POLICY ----------|"
-		for (row, pol) in zip(value_grid, policy_strings):
-			pretty_row = ['' + '%.4f' %v + ' %s' %z + '' for v, z in zip(row, pol)]
-			#print z
-			#pdb.set_trace()
-			for x in pretty_row:
-				print '| ', x[:7], x[7:],
-			print ' |\n',   
-
-        # No doubt this can be implemented smarter, but I have no idea how
-	def policy_to_string(self, policy):
-		""" Function to extract policy to characters => N = North, S = South, etc. """
-		# Initialize array with empty strings
-		policy_strings = [['' for i in range(0, len(policy))] for j in range(0, len(policy[0]))]
-		
-		# Iterate over policy array and store only the first letters of the optimal policy at said location
-		for i in range(0, len(policy)):
-			for j in range(0, len(policy[0])):
-				for key in policy[i][j]:
-					key_value = policy[i][j][key]
-					if (key_value > 0):
-						if key == "Wait":
-						# Print 'H' of 'Hold' instead of 'Wait'
-							policy_strings[i][j] = policy_strings[i][j] + 'H'
-						else:
-							policy_strings[i][j] = policy_strings[i][j] + key[0]
- 				#	print 'policy: ', policy[i][j]            
-					#print 'policy string: ', policy_strings[i][j]
-				#pdb.set_trace()
-		return policy_strings
 
 	def transition(self, old_state, new_state, goal_state, action):
 		""" Returns transition states """
@@ -826,7 +792,7 @@ class Game:
 					# In order to compute the reward, sum the corresponding rewards for each of the new states
 					action_value = 0
 					new_states = [[i,j], [i+1,j], [i-1,j], [i,j+1], [i,j-1]]
-                        
+
 					# For each new state, compute the reward, multiply it by the corresponding transition function
 					# and sum with the previous result:
 					for new_state in new_states:
@@ -837,18 +803,17 @@ class Game:
 						overall_reward = immediate_reward + discount_factor * value_grid[new_state[0]][new_state[1]]
 						transition_value = self.transition(current_state, new_state, start_location_prey, action) 
 						action_value +=  transition_value * overall_reward
-                        
+
 					# Round the values in order to avoid errors in the presicion:
 					round_action_value = floor(action_value * (10**3)) / float(10**3)
 					round_max = floor(current_max * (10**3)) / float(10**3)
 					# If a new max value is found, save it as maximal so far and reset the optimal actions       
 					if round_action_value > round_max:
 						current_max = action_value
-						# Maybe empty the list first?
-						current_optimal_actions = [action] 
-					# If the new value is better, then check if it's equal to the current maximal   
-					elif round_action_value == round_max:
-						current_optimal_actions.append(action)
+						current_optimal_actions = [action]
+					# If the new value is better, then check if it's equal to the current maximal
+					#elif round_action_value == round_max:
+					#	current_optimal_actions.append(action)
 
                                 # Once the optimal actions for the state are found, update the policy         
                                 updated_policy = self.get_optimal_policy(current_optimal_actions)
@@ -936,14 +901,15 @@ if __name__ == "__main__":
 	#TODO: DEBUG TO SET GOAL STATE AND GRID SIZE AT DIFFERENT SIZES
 	goal_state = [2,2]
 	grid_size = [11,11]
-	value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
-	game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
+	#game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
 
-	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
-
-	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose, encoding=False)
-	game.iterative_policy_evaluation_encoded(discount_factor, [2,3], verbose = verbose)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
+	
+	predator.set_location([0,0])
+	#game.iterative_policy_evaluation(discount_factor, [5,5], verbose = verbose, encoding=False)
+	#game.iterative_policy_evaluation_encoded(discount_factor, [0,0], verbose = verbose)
 	
 	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
-	game.policy_iteration_encoded(discount_factor, [2,3], verbose = verbose)
+	#game.policy_iteration_encoded(discount_factor, [5,5], verbose = verbose)
