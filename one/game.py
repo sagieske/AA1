@@ -314,7 +314,7 @@ class Game:
 			return value
 
 
-	def iterative_policy_evaluation(self, discount_factor, start_location_prey=[2,3], gridsize=[11,11], encoding=False, verbose=0):
+	def iterative_policy_evaluation(self, discount_factor, start_location_prey=[5,5], gridsize=[11,11], encoding=False, verbose=0):
 		""" Performs policy evaluation """
 		# Get start time
 		start_time = time.time()
@@ -401,11 +401,14 @@ class Game:
 					# current state:
 					current_state = [i, j]
 					action = helpers.get_optimal_action(policy[i][j])
+					print 'Action: ', action
+					print 'Policy: ', policy[i][j]
+					
 					q_value = self.q_value(current_state, action, value_grid, discount_factor, start_location_prey, [x_size, y_size], encoding=False)
-					print "qV: ", q_value
+					#print "qV: ", q_value
 					# Compute the value by passing the corresponding policy
-					value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, policy[i][j], False, encoding)
-					print "V: ", value
+					# value = self.get_policy_value(current_state, start_location_prey, discount_factor, [x_size, y_size], value_grid, policy[i][j], False, encoding)
+					#print "V: ", value
 				
 				        # Update grid
 				        new_grid[current_state[0]][current_state[1]] = q_value
@@ -885,15 +888,15 @@ if __name__ == "__main__":
 	#TODO: DEBUG TO SET GOAL STATE AND GRID SIZE AT DIFFERENT SIZES
 	goal_state = [2,2]
 	grid_size = [11,11]
-	value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
-	game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, goal_state, gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
+	#game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
 
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	game.value_encoded(discount_factor, verbose=verbose)
+	#game.value_encoded(discount_factor, verbose=verbose)
 
-	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
+	#game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose)
 
 	#self, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False
 	#game.policy_iteration(discount_factor)
 	
-	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
