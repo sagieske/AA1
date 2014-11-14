@@ -297,7 +297,7 @@ class Game:
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
 
-		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])	
+		helpers.pretty_print_latex(temp_grid[:][:][5][5], label=[loop,'v'])	
 		optimal_policy = self.policy_from_grid(temp_grid, discount_factor, grid_size, False)
 		return optimal_policy
 
@@ -414,7 +414,7 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
-		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])				
+				
 		return temp_grid
 
 	def encoded_policy_evaluation(self, grid_size, epsilon, discount_factor):
@@ -457,7 +457,16 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
-		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])				
+		print 0, 0, 5, 5
+		print temp_grid[0][0][5][5]
+		print 2, 3, 5, 4
+		print temp_grid[2][3][5][4]
+		print 2, 10, 10, 0
+		print temp_grid[2][10][10][0]
+		print 10,10,0,0
+		print temp_grid[10][10][0][0]
+		
+		print "loops: ", loop
 		return temp_grid
 
 	def policy_iteration(self, grid_size, epsilon, discount_factor):
@@ -470,7 +479,7 @@ class Game:
 			new_policy_grid, stable = self.policy_improvement(evaluated_grid, policy_grid, grid_size)
 			predator.set_policy_grid(new_policy_grid)
 			print "In loop ", loop
-			if loop > 10:
+			if loop > 20:
 				break
 		return new_policy_grid
 
@@ -482,10 +491,12 @@ class Game:
 		while(not stable):
 			loop +=1
 			new_policy_grid, stable = self.encoded_policy_improvement(evaluated_grid, policy_grid, grid_size)
+			evaluated_grid = self.encoded_policy_evaluation(grid_size, epsilon, discount_factor)
 			predator.set_policy_grid(new_policy_grid)
 			print "In loop ", loop
-			if loop > 10:
+			if loop > 20:
 				break
+		helpers.pretty_print_latex(evaluated_grid[:][:][5][5], label=[loop,'v'])	
 		return new_policy_grid	
 
 	def policy_improvement(self, v_grid, policy_grid, grid_size):
@@ -591,16 +602,16 @@ if __name__ == "__main__":
 
 	#run_test(prey, predator, game, grid_size, N, discount_factor)
 	start_time = time.time()
-	#optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.8)
+	#optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.1)
 
-	optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
+	#optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.policy_iteration(grid_size, 0.001, 0.8)
 	#optimal_policy = game.value_iteration(grid_size, 0.001, 0.8)
-	#optimal_policy = game.policy_evaluation(grid_size, 0.01, 0.8)
+	game.encoded_policy_evaluation(grid_size, 0.01, 0.8)
 	end_time = time.time()
-	#predator = Predator([0,0], [2,2], policy=optimal_policy)
+	predator = Predator([0,0], [2,2], policy=optimal_policy)
 
-
+'''
 	game = Game(reset=True, prey=prey, predator=predator, verbose=0)
 	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
@@ -617,4 +628,4 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	old_result= "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
 	print old_result
-	print end_time - start_time
+	print end_time - start_time'''
