@@ -11,7 +11,7 @@ import helpers
 
 class Environment:
 
-	def __init__(self, size=[11,11]):
+	def __init__(self, size=[3,3]):
 		"""Initialize environment of given size"""
 		self.size = size
 		self.grid = [[ ' ' for i in range(0, size[0])] for y in range(0, size[1])]
@@ -228,10 +228,10 @@ class Game:
 				converged = True
 
 		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])
-		optimal_policy = self.policy_from_grid(temp_grid, grid_size, False)
+		optimal_policy = self.policy_from_grid(temp_grid, discount_factor, grid_size, False)
 		return optimal_policy
 
-	def policy_from_grid(self, grid, grid_size, encoding):
+	def policy_from_grid(self, grid, discount_factor, grid_size, encoding):
 		example_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
 		x_length = grid_size[0]
 		y_length = grid_size[1]
@@ -245,11 +245,9 @@ class Game:
 							best_action = ""
 							best_actions = []
 							for action in actions:
-								[x,y] = self.get_new_state_location([i,j], action)
-								[x,y] = self.wrap_state([x,y], grid_size, encoding)
-								action_value = grid[x][y][k][l]
-								if(action_value > best_action_value):
-									best_action_value = action_value
+								q_value = self.q_value([i,j,k,l], action, grid, discount_factor, grid_size)
+								if(q_value > best_action_value):
+									best_action_value = q_value
 									best_action = action
 									best_actions.append(action)
 							new_policy = self.create_optimal_policy(best_actions)
@@ -285,9 +283,6 @@ class Game:
 										highest_q = q_value
 								v_grid[i][j][k][l] = highest_q
 								distance_list[str(distance)] = highest_q
-								
-
-
 
 			delta_grid = abs(np.array(v_grid) - np.array(temp_grid))
 			#helpers.pretty_print(delta_grid[:][:][5][5], label=['delta'])
@@ -303,19 +298,9 @@ class Game:
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
 
-		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])	
-
-
-
-	def get_new_state_location(self, old_location, action):
-		""" Returns new state given old state and an action (no object is used) """
-		new_location = []
-		chosen_move = self.predator.get_transformation(action)
-		environment_size = self.environment.get_size()
-		# division by modulo makes board toroidal:
-		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
-		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
-		return new_location
+		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])	
+		optimal_policy = self.policy_from_grid(temp_grid, discount_factor, grid_size, False)
+		return optimal_policy
 
 	def wrap_state(self, state, gridsize, encoding):
 		""" Wrap states for non-encoding for toroidal grid"""
@@ -403,7 +388,7 @@ class Game:
 		v_grid = np.zeros((x_length, y_length, x_length, y_length))
 		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
 		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
-		actions = self.predator.get_policy([0,0,0,0]).keys()
+		actions = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}.keys()
 		loop = 0
 		while(not converged):
 			loop +=1
@@ -430,7 +415,7 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
-		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])				
+		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])				
 		return temp_grid
 
 	def encoded_policy_evaluation(self, grid_size, epsilon, discount_factor):
@@ -440,7 +425,7 @@ class Game:
 		v_grid = np.zeros((x_length, y_length, x_length, y_length))
 		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
 		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
-		actions = self.predator.get_policy([0,0,0,0]).keys()
+		actions = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}.keys()
 		loop = 0
 		while(not converged):
 			loop +=1
@@ -473,7 +458,7 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
-		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])				
+		helpers.pretty_print(temp_grid[:][:][2][2], label=['v'])				
 		return temp_grid
 
 	def policy_iteration(self, grid_size, epsilon, discount_factor):
@@ -489,6 +474,20 @@ class Game:
 			if loop > 10:
 				break
 		return new_policy_grid
+
+	def encoded_policy_iteration(self, grid_size, epsilon, discount_factor):
+		evaluated_grid = self.encoded_policy_evaluation(grid_size, epsilon, discount_factor)
+		policy_grid = predator.get_policy_grid()
+		stable = False
+		loop = 0
+		while(not stable):
+			loop +=1
+			new_policy_grid, stable = self.encoded_policy_improvement(evaluated_grid, policy_grid, grid_size)
+			predator.set_policy_grid(new_policy_grid)
+			print "In loop ", loop
+			if loop > 10:
+				break
+		return new_policy_grid	
 
 	def policy_improvement(self, v_grid, policy_grid, grid_size):
 		x_length = grid_size[0]
@@ -516,6 +515,40 @@ class Game:
 							stability = False
 						new_policy_grid[i][j][k][l] = new_policy
 		return new_policy_grid, stability
+
+	def encoded_policy_improvement(self, v_grid, policy_grid, grid_size):
+		x_length = grid_size[0]
+		y_length = grid_size[1]
+		example_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		new_policy_grid = [[[[example_policy for i in range(0, y_length)] for j in range(0, x_length)] for k in range(0, y_length)] for l in range(0, x_length)]
+		stability = True
+		distance_list = {}
+		for i in range(0, x_length):
+			for j in range(0, y_length):
+				for k in range(0, x_length):
+					for l in range(0, y_length):
+						distance = [abs(i-k), abs(j-l)]
+						if(str(distance) in distance_list):
+								new_policy_grid[i][j][k][l] = distance_list[str(distance)]
+						else:
+							backup_policy = policy_grid[i][j][k][l]
+							actions = backup_policy.keys()
+							best_q_value = 0
+							best_action = ""
+							best_actions = []
+							for action in actions:
+								q_value = self.q_value([i,j,k,l], action, v_grid, discount_factor, grid_size)
+								if q_value > best_q_value:
+									best_q_value = q_value
+									best_action = action
+									best_actions.append(action)
+							new_policy = self.create_optimal_policy(best_actions)
+							if(new_policy != backup_policy):
+								stability = False
+						new_policy_grid[i][j][k][l] = new_policy
+						distance_list[str(distance)] = new_policy
+		return new_policy_grid, stability
+
 
 	def create_optimal_policy(self, best_actions):
 		policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
@@ -553,9 +586,10 @@ if __name__ == "__main__":
 	predator = Predator([0,0], [5,5])
 	
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
-	grid_size = [4,4]
-	optimal_policy = game.value_iteration(grid_size, 0.01, 0.9)
-	#game.policy_evaluation(grid_size, 0.0001, 0.8)
+	grid_size = [3,3]
+	optimal_policy = game.encoded_value_iteration(grid_size, 0.001, 0.9)
+	#optimal_policy = game.encoded_policy_iteration(grid_size, 0.001, 0.8)
+	#optimal_policy = game.policy_evaluation(grid_size, 0.01, 0.8)
 	predator = Predator([0,0], [3,3], policy=optimal_policy)
 
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
