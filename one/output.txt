@@ -1,0 +1,65 @@
+RANDOM: Average amount of time steps needed before catch over 100 rounds is 291.0, standard deviation is 302.931890035
+
+Encoded value iteration 0.8:
+Average amount of time steps needed before catch over 100 rounds is 19.0, standard deviation is 15.3009803607
+8.65246200562 s
+
+Encoded value iteration 0.9:
+Average amount of time steps needed before catch over 100 rounds is 18.0, standard deviation is 12.1264174429
+13.8841497898 s
+
+Encoded value iteration 0.7:
+Average amount of time steps needed before catch over 100 rounds is 16.0, standard deviation is 10.9119200877
+13.2116878033 s
+
+Encoded value iteration 0.5:
+Average amount of time steps needed before catch over 100 rounds is 21.0, standard deviation is 15.5006451479
+12.7715089321 s
+
+Encoded value iteration 0.1:
+Average amount of time steps needed before catch over 100 rounds is 20.0, standard deviation is 15.4767567662
+11.0183360577 s
+
+Value iteration 0.8:
+Average amount of time steps needed before catch over 100 rounds is 13.0, standard deviation is 9.21032029845
+416.799218893 s
+
+Encoded policy iteration:
+Average amount of time steps needed before catch over 100 rounds is 53.0, standard deviation is 85.3629896384
+6.28714489937
+
+Encoded policy iteration values:
+
+0 0 -5 5
+0.204280227085
+2 3 -5 4
+2.10345268235
+2 10 -10 0
+2.83941649058
+10 10 -0 0
+6.24842699284
+Loops needed:  21
+
+Value iteration latex table for 5,5
+
+|---------- v  in iteration  4 ----------|
+\begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
+\hline
+\multicolumn{12}{|c|}{v in loop 4}\\
+\hline
+Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+
+\hline
+0 & 0.000000 & 0.000000 & 0.000000 & 0.000009 & 0.000180 & 0.001225 & 0.000180 & 0.000009 & 0.000000 & 0.000000 & 0.000000 \\
+1 & 0.000000 & 0.000000 & 0.000010 & 0.000240 & 0.002690 & 0.013480 & 0.002690 & 0.000240 & 0.000010 & 0.000000 & 0.000000 \\
+2 & 0.000000 & 0.000010 & 0.000240 & 0.002940 & 0.021480 & 0.117186 & 0.021480 & 0.002940 & 0.000240 & 0.000010 & 0.000000 \\
+3 & 0.000009 & 0.000240 & 0.002940 & 0.021480 & 0.166610 & 0.812180 & 0.166610 & 0.021480 & 0.002940 & 0.000240 & 0.000009 \\
+4 & 0.000180 & 0.002690 & 0.021480 & 0.166610 & 0.812180 & 10.000000 & 0.812180 & 0.166610 & 0.021480 & 0.002690 & 0.000180 \\
+5 & 0.001225 & 0.013480 & 0.117186 & 0.812180 & 10.000000 & 0.000000 & 10.000000 & 0.812180 & 0.117186 & 0.013480 & 0.001225 \\
+6 & 0.000180 & 0.002690 & 0.021480 & 0.166610 & 0.812180 & 10.000000 & 0.812180 & 0.166610 & 0.021480 & 0.002690 & 0.000180 \\
+7 & 0.000009 & 0.000240 & 0.002940 & 0.021480 & 0.166610 & 0.812180 & 0.166610 & 0.021480 & 0.002940 & 0.000240 & 0.000009 \\
+8 & 0.000000 & 0.000010 & 0.000240 & 0.002940 & 0.021480 & 0.117186 & 0.021480 & 0.002940 & 0.000240 & 0.000010 & 0.000000 \\
+9 & 0.000000 & 0.000000 & 0.000010 & 0.000240 & 0.002690 & 0.013480 & 0.002690 & 0.000240 & 0.000010 & 0.000000 & 0.000000 \\
+10 & 0.000000 & 0.000000 & 0.000000 & 0.000009 & 0.000180 & 0.001225 & 0.000180 & 0.000009 & 0.000000 & 0.000000 & 0.000000 \\
+\hline
+\end{tabular}
