@@ -212,16 +212,11 @@ def flip_policy(policy, rotation):
 
 def get_optimal_action(policy):
     """ Use the probabilities in the policy to pick the optimal move """
-    # Split policy dictionary in list of keys and list of values
-    #action_name, policy = zip(*policy.items())
-    # Get choice using probability distribution
-    #print policy
-    #choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
-    
+    # Get highest probability
     optimal = max(policy.values())
     
+	# Return action using highest probability
     for each in policy.keys():
         if policy[each] == optimal:
-            #print each
             return each
 
