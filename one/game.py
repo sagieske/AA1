@@ -435,7 +435,6 @@ class Game:
 		      
 	def policy_improvement(self, discount_factor, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False):
 		""" Performs policy improvement """
-		print "IMPROVEMENT"
 		# Get the optimal policies in a matrix
 		updated_policy_matrix = self.get_optimal_policy_matrix(discount_factor, value_grid, start_location_prey, gridsize=[11,11], encoding=False)
 		# Check if we have reached convergence
@@ -453,7 +452,8 @@ class Game:
 		y_size = gridsize[1]
 
 		# Initialize grids
-		value_grid = np.zeros((x_size, y_size))
+		value_grid = value_grid = self.get_value_grid(discount_factor, start_location_prey=start_location_prey, gridsize=gridsize, encoding=encoding, verbose=verbose, epsilon=0.00002, true_goal_state=start_location_prey)
+		#value_grid = np.zeros((x_size, y_size))
 
                 # Get the predator policy for further use
                 old_policy = self.predator.get_policy()
@@ -484,13 +484,20 @@ class Game:
 		          value_grid = np.zeros((x_size, y_size))
                         
                 policy[start_location_prey[0]][start_location_prey[1]] = self.get_optimal_policy(['Wait'])
-                # print extra information, depending on verbose level
-		if verbose == 2 or (verbose == 1 and delta < 0.0001):
-		      self.policy_print(policy, value_grid)
 
-                # Stop tracking time! 
-                # Print information about this function
+                # Stop tracking time!
 		stop_time = time.time()
+
+                # Finish processing
+		if encoding:
+			policy = helpers.full_policy_grid_from_encoding(start_location_prey, policy, gridsize)
+			value_grid = self.full_grid_from_encoding(start_location_prey, value_grid, gridsize)
+			
+		# print extra information, depending on verbose level
+		if verbose == 2 or (verbose == 1 and delta < 0.0001):
+		      # print grid
+			self.print_policy_grid(policy)
+		# Print information about this function
 	        print "Policy iteration converged! \n- # of iterations: %i\n- Time until convergence in seconds: %.6f" %(count, stop_time-start_time)
 		print "Predator location: ", self.predator.get_location()
 		print "Prey location: ", start_location_prey
@@ -900,9 +907,9 @@ if __name__ == "__main__":
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
 	#game.value_encoded(discount_factor, verbose=verbose)
 
-	game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose, encoding=False)
+	#game.iterative_policy_evaluation(discount_factor, [0,0], verbose = verbose, encoding=False)
 
 	#self, value_grid, policy, start_location_prey, gridsize=[11,11], encoding=False
 	#game.policy_iteration(discount_factor)
 	
-	#new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
+	new_value_grid, new_policy = game.policy_iteration(discount_factor, [5,5], verbose = verbose)
