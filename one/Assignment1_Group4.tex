@@ -36,7 +36,7 @@ This implementation contains an execution of the game, policy evaluation, policy
 
 \section*{Theory}
 \subsection*{Iterative policy evaluation}
-Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey.  It uses the following algorithm as described in Barto and Sutton [1]: \\ \\
+Iterative policy iteration is used compute the state-value function $v_{\pi}$ for an arbitrary policy $\pi$. It is a stationary algorithm where the goal state and the arbitrary policy are static. In this case, it means that the goal state, the prey, remains on the same location. By analyzing different cases for policy evaluation, the policy of the agent can be analyzed for improvement. It is expected that the policy evaluation values increase around the location of the prey. Therefore, if the agent moves in the direction of the increasing numbers on the grid, it will catch the prey.  The implementation the following algorithm as described in Barto and Sutton [1]: \\
 
 \begin{algorithm}[H]
 Input $\pi$, the policy to be evaluated \\
@@ -51,12 +51,15 @@ until $\Delta < \theta $(a small positive number)\\
 Output v $\approx $ v(s)\\
 \end{algorithm}
 
+
 Where: \\
-$\pi(a|s)$ is an action chosen, given the state. \\
-$p(s'|s, a)$ is a transition function. \\
-$r(s, a, s')$ is a reward function. \\
-$v(s')$ is the value of the new state. \\ % is it?
-$\gamma$ is a discount factor.\\ 
+\begin{itemize}
+\item $\pi(a|s)$ is an action chosen, given the state. 
+\item $p(s'|s, a)$ is a transition function. 
+\item $r(s, a, s')$ is a reward function. 
+\item $v(s')$ is the value of the new state.
+\item $\gamma$ is a discount factor. \ldots
+\end{itemize}
 
 This algorithm gives the agent insight in the consequences taking each action has. This can help the agent in deciding which action to take according to its policy. 
 
@@ -84,10 +87,10 @@ Policy improvement is used to find an optimal, deterministic policy. This algori
 \hspace{4 mm} if $temp \neq \pi(s)$, policy stable $\leftarrow$ false
 \end{algorithm}
 
-This algorithm is also used to help the agent decide which action to take according to its policy. The difference with iterative policy evaluation, however, is that the policy is updated after the full grid is evaluated. This leads to a finite, static policy, as this is a stationary function.
+This algorithm is also used to help the agent decide which action to take according to its policy. The difference with iterative policy evaluation, however, is that the policy is updated after the full grid is evaluated. This leads to an optimal policy.
 
 \subsection*{Value iteration}
-This algorithm is a quicker version of policy improvement. Where policy improvement first performs policy evaluation an then computed the optimal policy, value iteration performs these steps together. This makes value iteration quicker and computationally less expensive than policy improvement.
+This algorithm is a quicker version of policy improvement. Where policy improvement first performs policy evaluation and then computes the optimal policy, value iteration performs these steps together. This makes value iteration quicker and computationally less expensive than policy improvement.
 
 \begin{algorithm}[H]
 From Barto and Sutton [1]\\
@@ -102,21 +105,20 @@ until $\Delta \leftarrow \theta$ (a small positive number)\\
 Output a deterministic policy $\pi$, such that \\
 $\pi (s) = arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$
 \end{algorithm}
-After performing this algorithm, the results can also be used for agent planning.
+
+After performing this algorithm, the results can be used for agent planning.
 
 \section*{Implementation}
-
-\noindent The current implementation consists of the following files:
+The current implementation consists of the following files:
 \begin{description}
 	\item[Agents] \hfill \\ 
-	This file contains implementions of the agents, the prey class and the predator class. Both agents have a policy and actions as described in the introduction as well as other functions to get and set data. As the predator is the agent this implementation focuses on, this class contains more functions than the prey.
+	This file contains implementions of the agents, the prey class and the predator class. Both agents have a policy and actions as described in the introduction. Both agents contain functions to retrieve information from the agent as well as functions to change information. As the predator is the agent this implementation focuses on, this class contains more functions than the prey.
 	
 	\item[Helpers] \hfill \\ 
 	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
 	
 	\item[Game] \hfill \\ 
 	This file contains the game and the environment classes. The environment of the game as well as the rules are implemented in this class. The game class contains the implementation of running the game as well as the agent planning algorithms.
-	
 \end{description}
 
 
@@ -128,24 +130,26 @@ After performing this algorithm, the results can also be used for agent planning
 
 \begin{center}
 	\begin{tabular}{  l ||  l }
-		Avarage run time & Standard deviation \\ 
+		Average run time & Standard deviation \\ 
 		\hline
-		296 rounds &  286.580390118 %avarage run time and standart deviation to be filled here 	
+		296 rounds &  286.580390118 %average run time and standart deviation to be filled here 	
 	\end{tabular}
 \end{center}
 
 \subsection*{Iterative policy evaluation}
 As described in the assignment, policy evaluation is implemented. The results will be analyzed in terms of agent (predator) and goal state (prey) locations. The following cases have been analyzed: %  The locations of the predator are marked green and the locations of the prey are marked red to increase readability.
 \begin{center}
-	\begin{tabular}{ | l | l | l | l | l | l |}
-	Case & Discount Factor & Predator & Value & Prey & Value\\
-	\hline
-	1 & (0,0) & 0.8 & 0.003357 & (5,5) & 2.850622 \\ 
-	2 & (2,3) & 0.8 & 0.198928 & (5,4) & 2.850622 \\ 
-	3 & (2,10) & 0.8 & 0.198928 & (10,0) & 2.850622 \\ 
-	4 & (10,10) & 0.8 & 1.650667 & (0,0) & 2.850622 \\ 
+	\begin{tabular}{ |l | l | l | l | l | l | l| }
+		Case & Predator & Value & Prey & Value & Discount Factor & Iterations to converge \\ 
+		\hline
+		1 & (0, 0) & 0.00335 & (5, 5) & 2.850622 & 0.8 & 33 \\
+		2 & (2, 3) & 0.19892 & (5, 4) & 2.850622 & 0.8 & 33 \\
+		3 & (2, 10) & 0.19892 & (10, 0) & 2.850622 & 0.8 & 33 \\
+		4 & (10, 10) & 1.65066 & (0, 0) & 2.850622 & 0.8 & 33 \\	
 	\end{tabular}
 \end{center}
+
+The table above proves that policy evaluation to converge always takes equally long for the same size of the grid. This is to be expected, as the size of the grid, nor the discount factor has not changed.\\
 
 Case 1 is the maximum distance between the predator and the prey. In this case, it can be seen that moving in a diagonal direction gets the agent to the prey fastest. Since this is not possible, the predator can move in a horizontal - vertical fashion to reach the goal state. This takes at least ten timesteps. As this is the maximum distance between the predator and the prey, it will take relatively long for the predator to catch the prey. \\
 
@@ -275,20 +279,6 @@ With the agent starting at (2,10) and the prey at (10,0), it will take the agent
 The agent starts at (10,10) and the prey is located at (0,0). It takes the agent at least two steps to catch the prey. Using the property that the grid is toroidal minimizes the distance between the agent and the prey. 
 % END COMMENTED OUT!!!!
 \fi
-
-
-\begin{center}
-	\begin{tabular}{ l | l | l | l | l }
-		Predator & Prey & Value & Discount Factor & Iterations to converge \\ 
-		\hline
-		(0, 0) & (5, 5) & 0.00335 & 0.8 & 33 \\
-		(2, 3) & (5, 4) & 0.19892 & 0.8 & 33 \\
-		(2, 10) & (10, 0) & 0.19892 & 0.8 & 33 \\
-		(10, 10) & (0, 0) & 1.65066 & 0.8 & 33 \\	
-	\end{tabular}
-\end{center}
-
-The table above proves that policy evaluation to converge always takes equally long for the same size of the grid. This is to be expected, as the size of the grid has not changed.
 
 % Temporarily printing in order to compare 
 
