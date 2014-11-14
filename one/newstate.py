@@ -92,10 +92,12 @@ class Game:
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		# Play one turn prey
 		# Play one turn predator
-		self.turn_predator(state)
-		same = (state[0] == state[2] and state[1] == state[3])
+		prey_location = [state[2], state[3]]
+		predator_location = self.turn_predator(state)
+		print state
+		same = (predator_location == prey_location)
 		if(not same):
-			self.turn_prey()
+			prey_location = self.turn_prey()
 
 		#Check if prey is caugh
 
@@ -131,6 +133,7 @@ class Game:
 		self.environment.place_object(self.prey, new_prey_location)	
 		#Update prey's location in its own knowledge
 		self.prey.set_location(new_prey_location)
+		return new_prey_location
 
 	def turn_predator(self, state):
 		""" Perform turn for predator """
@@ -144,6 +147,7 @@ class Game:
 		self.environment.place_object(self.predator, new_predator_location)	
 		#Update predator's location in its own knowledge
 		self.predator.set_location(new_predator_location)
+		return new_predator_location
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
@@ -440,9 +444,9 @@ if __name__ == "__main__":
 	#game.policy_evaluation(grid_size, 0.0001, 0.8)
 	#new_policy = game.policy_iteration(grid_size, 0.0001, 0.8)
 
-	for x in range(0, 10):
+	for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
-		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[3,3], prey_location=[1,1])
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[11,11], prey_location=[5,5])
 		rounds = game.get_rounds()
 		count += rounds
 		count_list.append(rounds)
