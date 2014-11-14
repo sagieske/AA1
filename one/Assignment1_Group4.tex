@@ -108,6 +108,8 @@ $\pi (s) = arg \max\limits_a \sum_{s'} p(s'|s, a)[r(s, a, s') + \gamma v(s')]$
 
 After performing this algorithm, the results can be used for agent planning.
 
+\pagebreak
+
 \section*{Implementation}
 The current implementation consists of the following files:
 \begin{description}
@@ -177,6 +179,23 @@ The discount factor appears to affect the number of iterations necessary to conv
 \subsection*{Policy iteration}
 Policy iteration is an algorithm for finding the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
 % Somehow print the whole grid for Prey(5,5)
+
+
+\begin{center}
+\begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
+\hline
+\multicolumn{12}{|c|}{Policy Iteration - Value Grid in loop 7}\\
+\hline
+Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ 
+
+\hline
+0 & 3.710664 & 4.638330 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 & 4.638330 & 3.710664 \\ 1 & 4.638330 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 & 4.638330 \\ 2 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 \\ 3 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 22.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 \\ 4 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 22.204616 & 27.755770 & 22.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 \\ 5 & 11.355770 & 14.204616 & 17.755770 & 22.204616 & 27.755770 & 22.204616 & 27.755770 & 22.204616 & 17.755770 & 14.204616 & 11.355770 \\ 6 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 22.204616 & 27.755770 & 22.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 \\ 7 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 22.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 \\ 8 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 17.755770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 \\ 9 & 4.638330 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 14.204616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 & 4.638330 \\ 10 & 3.710664 & 4.638330 & 5.807816 & 7.259770 & 9.084616 & 11.355770 & 9.084616 & 7.259770 & 5.807816 & 4.638330 & 3.710664 \\
+\hline
+\end{tabular}
+\end{center}
+
+
+
 
 \begin{center}
 \begin{tabular}{ |l | l | l | l | l | l | l | l | l | l | l | l|}
