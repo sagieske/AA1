@@ -20,6 +20,22 @@ Encoded value iteration 0.1:
 Average amount of time steps needed before catch over 100 rounds is 20.0, standard deviation is 15.4767567662
 11.0183360577 s
 
+Value iteration 0.8:
+Average amount of time steps needed before catch over 100 rounds is 13.0, standard deviation is 9.21032029845
+416.799218893 s
+
 Encoded policy iteration:
 Average amount of time steps needed before catch over 100 rounds is 53.0, standard deviation is 85.3629896384
 6.28714489937
+
+Encoded policy iteration values:
+
+0 0 -5 5
+0.204280227085
+2 3 -5 4
+2.10345268235
+2 10 -10 0
+2.83941649058
+10 10 -0 0
+6.24842699284
+Loops needed:  21
