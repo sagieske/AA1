@@ -30,15 +30,15 @@ Average amount of time steps needed before catch over 100 rounds is 53.0, standa
 
 Encoded policy iteration values:
 
-0 0 -5 5
-0.204280227085
-2 3 -5 4
-2.10345268235
-2 10 -10 0
-2.83941649058
-10 10 -0 0
-6.24842699284
-Loops needed:  21
+0 0 5 5
+0.00291896898906
+2 3 5 4
+0.171543957716
+2 10 10 0
+0.171543957716
+10 10 0 0
+1.15552749526
+loops:  16
 
 Value iteration latex table for 5,5
 
