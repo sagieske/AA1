@@ -195,10 +195,7 @@ class Game:
 		v_grid = np.zeros((x_length, y_length, x_length, y_length))
 		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
 		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
-		actions =  ["Wait", "North", "South", "East", "West"]
 		actions = self.predator.get_policy([0,0,0,0]).keys()
-		print "Actions: ", actions
-		print "grid: ", grid_size
 		loop = 0
 		while(not converged):
 			loop +=1
@@ -217,9 +214,8 @@ class Game:
 							#print "q_value: ", highest_q
 
 			delta_grid = abs(np.array(v_grid) - np.array(temp_grid))
-			helpers.pretty_print(delta_grid[:][:][5][5], label=['delta'])
-			helpers.pretty_print(temp_grid[:][:][5][5], label = ['temp'])
-			helpers.pretty_print(v_grid[:][:][5][5], label=['v'])
+			#helpers.pretty_print(delta_grid[:][:][5][5], label=['delta'])
+			#helpers.pretty_print(temp_grid[:][:][5][5], label = ['temp'])
 			temp_grid = v_grid
 			v_grid = np.zeros((x_length, y_length, x_length, y_length))
 			
@@ -230,6 +226,87 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
+
+		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])			
+
+	def encoded_value_iteration(self, grid_size, epsilon, discount_factor):
+		x_length = grid_size[0]
+		y_length = grid_size[1]
+		v_grid = np.zeros((x_length, y_length, x_length, y_length))
+		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
+		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
+		actions = self.predator.get_policy([0,0,0,0]).keys()
+		converged = False
+		loop = 0
+		while(not converged):
+			loop +=1
+			distance_list = {}
+			for i in range(0, x_length):
+				for j in range(0, y_length):
+					for k in range(0, x_length):
+						for l in range(0, y_length):
+							distance = [abs(i-k), abs(j-l)]
+							if(str(distance) in distance_list):
+								v_grid[i][j][k][l] = distance_list[str(distance)]
+							else:
+								highest_q = 0
+								best_action = ""
+								for action in actions:
+									q_value = self.encoded_q_value([i,j,k,l], action, temp_grid, discount_factor, grid_size)
+									if q_value > highest_q:
+										highest_q = q_value
+								v_grid[i][j][k][l] = highest_q
+								distance_list[str(distance)] = highest_q
+								
+
+
+
+			delta_grid = abs(np.array(v_grid) - np.array(temp_grid))
+			#helpers.pretty_print(delta_grid[:][:][5][5], label=['delta'])
+			#helpers.pretty_print(temp_grid[:][:][5][5], label = ['temp'])
+			temp_grid = v_grid
+			v_grid = np.zeros((x_length, y_length, x_length, y_length))
+			
+			#v_grid = np.zeros((x_length, y_length, x_length, y_length))
+			delta = np.amax(delta_grid)
+			print delta
+			print "LOOP: ", loop, "\n"
+			
+			if(delta < epsilon* (1-discount_factor)/discount_factor):
+				converged = True
+
+		helpers.pretty_print(temp_grid[:][:][5][5], label=['v'])	
+
+	def encoded_q_value(self, state, action, value_grid, discount_factor, grid_size):
+		i = state[0] 
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		if([i,j] == [k,l]):
+			return 0
+		q_value = 0
+		possible_new_predator = [[i,j], [i+1,j], [i,j+1], [i-1,j], [i,j-1]]
+		possible_new_prey = [[k,l], [k+1,l], [k,l+1], [k-1,l], [k,l-1]]
+		for new_state in possible_new_predator:
+			new_state = self.wrap_state(new_state, grid_size, False)
+			reward = self.reward(state, [new_state[0], new_state[1], k, l], action)
+			transition_pred = self.predator_transition([i,j], new_state, action)
+			#If the reward is 10, the value of the next state is 0 (because: terminal)
+			if (reward == 10 and transition_pred == 1):
+				return 10
+			#If the action cannot lead to the next state, the entire value will be 0
+			else:
+				for new_prey in possible_new_prey:
+					new_prey = self.wrap_state(new_prey, grid_size, False)
+					if(new_prey == new_state):
+						continue
+					if(new_state == [k,l]):
+						transition_prey = 0.8
+					else:
+						transition_prey = 0.05
+					#helpers.pretty_print(value_grid)
+					q_value += transition_prey*transition_pred * discount_factor * value_grid[new_state[0]][new_state[1]][new_prey[0]][new_prey[1]]
+		return q_value
 
 	def get_new_state_location(self, old_location, action):
 		""" Returns new state given old state and an action (no object is used) """
@@ -444,7 +521,7 @@ if __name__ == "__main__":
 	#game.policy_evaluation(grid_size, 0.0001, 0.8)
 	
 
-	for x in range(0, N):
+	'''for x in range(0, N):
 		# Start game and put prey and predator at initial starting position
 		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[11,11], prey_location=[5,5])
 		rounds = game.get_rounds()
@@ -484,3 +561,6 @@ if __name__ == "__main__":
 	standard_deviation = math.sqrt(variance)
 	print old_result
 	print "Average amount of time steps needed before catch with new policy over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)
+	'''
+	game.value_iteration([11,11], 0.001, discount_factor)
+	game.encoded_value_iteration([11,11], 0.00001, discount_factor)
