@@ -36,14 +36,14 @@ class Environment:
 		return self.size
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2):
+	def __init__(self, reset=False, prey=None, predator=None, prey_location=[5,5], predator_location=[0,0], verbose=2, size=[11,11]):
 		""" Initalize environment and agents """
 		# Initialize environment
-		self.environment = Environment()
+		self.environment = Environment(size=size)
 
 		# Initialize prey and predators
 		prey_predator_distance = helpers.xy_distance(predator_location, prey_location, self.environment.get_size())
-		print prey_predator_distance
+		
 		if(prey==None):
 			self.prey = Prey(prey_location)
 		else:
@@ -80,34 +80,37 @@ class Game:
 		caught = 0
 		while(caught == 0):
 			steps +=1
-			caught = self.turn()
+			print "Round: ", steps
+			state = [predator.get_location()[0], predator.get_location()[1], prey.get_location()[0], prey.get_location()[1]]
+			caught = self.turn(state)
 			self.predator.update_reward(0)
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return steps
 
-	def turn(self):
+	def turn(self, state):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		# Play one turn prey
-		self.turn_prey()
 		# Play one turn predator
-		self.turn_predator()
+		self.turn_predator(state)
+		same = (state[0] == state[2] and state[1] == state[3])
+		if(not same):
+			self.turn_prey()
 
-		#Check if prey is caught
-		same = (self.predator.get_location() == self.prey.get_location())
+		#Check if prey is caugh
 
 		# Only print grid or show prey & predator states if verbose level is 1 or 2 
-		if (self.verbose == 1 and same):
-			self.environment.print_grid()
-			print "States: "
-			print self.predator.get_state()
-			print self.prey.get_state()
-			# Always print grid at verbose level 2
-		elif self.verbose == 2:
-			self.environment.print_grid()
-			print "States: "
-			print self.predator.get_state()
-			print self.prey.get_state()
+			if (self.verbose == 1 and same):
+				self.environment.print_grid()
+				print "States: "
+				print self.predator.get_state()
+				print self.prey.get_state()
+				# Always print grid at verbose level 2
+			elif self.verbose == 2:
+				self.environment.print_grid()
+				print "States: "
+				print self.predator.get_state()
+				print self.prey.get_state()
 
 		return same
 
@@ -129,12 +132,12 @@ class Game:
 		#Update prey's location in its own knowledge
 		self.prey.set_location(new_prey_location)
 
-	def turn_predator(self):
+	def turn_predator(self, state):
 		""" Perform turn for predator """
 		#Remove predator from old location
 		self.environment.remove(self.predator.get_location())
 		#Get action for predator
-		predator_move,action_name = self.predator.action()
+		predator_move,action_name = self.predator.action(state)
 		#Get new location for predator
 		new_predator_location = self.get_new_location(self.predator, predator_move)
 		#Move predator to new location
@@ -180,6 +183,7 @@ class Game:
 		      # Return the action which yields the new state
 		      if new_location == new_state:
 		          return action
+
 	def value_iteration(self, grid_size, epsilon, discount_factor):
 		x_length = grid_size[0]
 		y_length = grid_size[1]
@@ -319,10 +323,7 @@ class Game:
 		v_grid = np.zeros((x_length, y_length, x_length, y_length))
 		temp_grid = np.zeros((x_length, y_length, x_length, y_length))
 		delta_grid = np.zeros((x_length, y_length, x_length, y_length))
-		actions =  ["Wait", "North", "South", "East", "West"]
 		actions = self.predator.get_policy([0,0,0,0]).keys()
-		print "Actions: ", actions
-		print "grid: ", grid_size
 		loop = 0
 		while(not converged):
 			loop +=1
@@ -355,6 +356,54 @@ class Game:
 			
 			if(delta < epsilon* (1-discount_factor)/discount_factor):
 				converged = True
+		return temp_grid
+
+	def policy_iteration(self, grid_size, epsilon, discount_factor):
+		evaluated_grid = self.policy_evaluation(grid_size, epsilon, discount_factor)
+		policy_grid = predator.get_policy_grid()
+		stable = False
+		loop = 0
+		while(not stable):
+			loop +=1
+			new_policy_grid, stable = self.policy_improvement(evaluated_grid, policy_grid, grid_size)
+			predator.set_policy_grid(new_policy_grid)
+			print "In loop ", loop
+			if loop > 10:
+				break
+		return new_policy_grid
+
+	def policy_improvement(self, v_grid, policy_grid, grid_size):
+		x_length = grid_size[0]
+		y_length = grid_size[1]
+		example_policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		new_policy_grid = [[[[example_policy for i in range(0, y_length)] for j in range(0, x_length)] for k in range(0, y_length)] for l in range(0, x_length)]
+		stability = True
+		for i in range(0, x_length):
+			for j in range(0, y_length):
+				for k in range(0, x_length):
+					for l in range(0, y_length):
+						backup_policy = policy_grid[i][j][k][l]
+						actions = backup_policy.keys()
+						best_q_value = 0
+						best_action = ""
+						best_actions = []
+						for action in actions:
+							q_value = self.q_value([i,j,k,l], action, v_grid, discount_factor, grid_size)
+							if q_value > best_q_value:
+								best_q_value = q_value
+								best_action = action
+								best_actions.append(action)
+						new_policy = self.create_optimal_policy(best_actions)
+						if(new_policy != backup_policy):
+							stability = False
+						new_policy_grid[i][j][k][l] = new_policy
+		return new_policy_grid, stability
+
+	def create_optimal_policy(self, best_actions):
+		policy = {'North':0, 'East':0, 'South':0, 'West':0, 'Wait':0}
+		for action in best_actions:
+			policy[action] = 1.0/len(best_actions)
+		return policy
 
 if __name__ == "__main__":
 	#Command line arguments
@@ -382,11 +431,26 @@ if __name__ == "__main__":
 	count = 0
 	count_list = []
 	#Initialize re-usable prey and predator objects
-	prey = Prey([0,0])
-	predator = Predator([5,5], [5,5])
+	prey = Prey([3,3])
+	predator = Predator([0,0], [5,5])
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
 
-	goal_state = [5,5]
-	grid_size = [11,11]
+	grid_size = [5,5]
 	#game.value_iteration(grid_size, 0.00001, 0.9)
-	game.policy_evaluation(grid_size, 0.0001, 0.8)
+	#game.policy_evaluation(grid_size, 0.0001, 0.8)
+	#new_policy = game.policy_iteration(grid_size, 0.0001, 0.8)
+
+	for x in range(0, 10):
+		# Start game and put prey and predator at initial starting position
+		game = Game(reset=True, prey=prey, predator=predator, verbose=verbose, size=[3,3], prey_location=[1,1])
+		rounds = game.get_rounds()
+		count += rounds
+		count_list.append(rounds)
+		print 'Cumulative reward for ' + str(x+1) + ' games: ' + str(predator.get_reward())
+	#Calculate average steps needed to catch prey
+	average = float(count/N)
+	#Calculate corresponding standard deviation
+	var_list = [(x-average)**2 for x in count_list]
+	variance = float(sum(var_list)/len(var_list))
+	standard_deviation = math.sqrt(variance)
+	print "Average amount of time steps needed before catch over " + str(N) + " rounds is " + str(average) + ", standard deviation is " + str(standard_deviation)

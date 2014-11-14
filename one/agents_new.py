@@ -1,4 +1,6 @@
 import numpy as np
+import copy 
+import random
 
 class Predator:
 	"""Predator class, with policy"""
@@ -19,16 +21,16 @@ class Predator:
 		""" Represent Predator as X """
 		return ' X '
 
-	def action(self):
+	def action(self, state):
 		""" Choose an action and turn it into a move """
-		chosen_action = self.pick_action()
+		chosen_action = self.pick_action(state)
 		chosen_move = self.actions[chosen_action]
 		return chosen_move, chosen_action
 
-	def pick_action(self):
+	def pick_action(self, state):
 		""" Use the probabilities in the policy to pick a move """
-		# Split policy dictionary in list of keys and list of values
-		action_name, policy = zip(*self.get_policy().items())
+		policy = self.get_policy(state)
+		action_name, policy = zip(*policy.items())
 		# Get choice using probability distribution
 		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
 		return choice_index
@@ -68,12 +70,20 @@ class Predator:
 
 	def get_policy(self, state):
 		""" Return the predator's policy """
-		predator = [state[0], state[1]]
-		prey = [state[2], state[3]]
-		return self.policy[predator[0]][predator[1]][prey[0]][prey[1]]
+		i = state[0]
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		return self.policy[i][j][k][l]
+
+	def get_policy_grid(self):
+		return self.policy
+
+	def set_policy_grid(self, policy_grid):
+		self.policy = policy_grid
 		
 	def get_action_keys(self):
-                return self.get_policy().keys() 		
+		return self.get_policy().keys() 		
 
 
 
@@ -105,19 +115,18 @@ class Prey:
 
 	def pick_action(self):
 		""" Use the probabilities in the policy to pick a move """
-		policy_backup = self.policy
+
 		# Split policy dictionary in list of keys and list of values
-		action_name, policy = zip(*self.policy.items())
+		old_policy = copy.deepcopy(self.policy)
+		action_name, policy = zip(*old_policy.items())
 		# Get choice using probability distribution
-		print self.policy
 		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
-		self.policy = policy_backup
 		return choice_index
 
 	def pick_action_restricted(self, blocked_moves):
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
 		# Temporary policy list
-		temp_policy = self.policy
+		temp_policy = copy.deepcopy(self.policy)
 		# Keep track of probability of deleted moves
 		update_probability = 0
 		# Delete blocked moves from temporary policy list
