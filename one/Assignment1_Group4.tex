@@ -325,18 +325,20 @@ State space encoding was implemented to improve performance. By taking into acco
 
 
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-% NOT Updated table
+% Updated table, missing results
+% Do we even need the av. \# of steps here? + Policy evaluation does not return a policy, so we can't get these results for it
+% So no idea what are comparing here actually
 
 \begin{center}
 	\begin{tabular}{ |l | l | l | l | l | l| }
 		Case & Algorithm & $\gamma$ & Time to converge & Avg. \# steps & Standart deviation \\ 
 		\hline
-		1  & Value Iteration & 0.8 & 11.0183360577 s & 20 & 15.4767567662 \\
-		2  & Encoded Value Iteration & 0.8 &  & &  \\
+		1  & Value Iteration & 0.8 & 189 s & 20 & 14.10 \\
+		2  & Encoded Value Iteration & 0.8 & 12 s & 19 & 13.57 \\
 		3  & Policy Iteration & 0.8 & & &  \\
 		4  & Encoded Policy Iteration & 0.8 & & & \\	
-		5  & Value Iteration & 0.8 & & & \\	
-		6  & Encoded Value Iteration & 0.8 & & & \\	
+		5  & Policy Evaluation & 0.8 & & & \\	
+		6  & Encoded Policy Evaluation & 0.8 & & & \\	
 	\end{tabular}
 \end{center}
 
