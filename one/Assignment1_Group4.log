@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.9.4)  15 NOV 2014 14:34
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2014.9.4)  15 NOV 2014 15:15
 entering extended mode
 **C:/Users/Iva/Documents/GitHub/AA1/one/Assignment1_Group4.tex
 (C:/Users/Iva/Documents/GitHub/AA1/one/Assignment1_Group4.tex
@@ -349,42 +349,42 @@ Underfull \hbox (badness 10000) in paragraph at lines 67--68
 Missing character: There is no Ã in font cmr10!
 Missing character: There is no ­ in font cmr10!
 [3] [4]
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 156--157
+Underfull \hbox (badness 10000) in paragraph at lines 159--160
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 158--159
+Underfull \hbox (badness 10000) in paragraph at lines 161--162
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 160--161
+Underfull \hbox (badness 10000) in paragraph at lines 163--164
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 162--163
+Underfull \hbox (badness 10000) in paragraph at lines 165--166
 
  []
 
 [5]
-Overfull \hbox (0.86171pt too wide) in paragraph at lines 196--197
+Overfull \hbox (0.86171pt too wide) in paragraph at lines 203--204
  [] 
  []
 
-LaTeX Font Info:    Try loading font information for OML+cmr on input line 210.
+LaTeX Font Info:    Try loading font information for OML+cmr on input line 221.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omlcmr.fd"
 File: omlcmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <10> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 210.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 221.
  [6] [7] [8]
 (C:\Users\Iva\Documents\GitHub\AA1\one\Assignment1_Group4.aux) ) 
 Here is how much of TeX's memory you used:
@@ -408,7 +408,7 @@ fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Program Files (x86)/MiKTeX 2.9/font
 s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/
 type1/public/amsfonts/cm/cmsy5.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/typ
 e1/public/amsfonts/cm/cmsy7.pfb>
-Output written on Assignment1_Group4.pdf (8 pages, 155904 bytes).
+Output written on Assignment1_Group4.pdf (8 pages, 155903 bytes).
 PDF statistics:
  77 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

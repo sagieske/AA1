@@ -140,6 +140,9 @@ The current implementation consists of the following files:
 
 \subsection*{Iterative policy evaluation}
 As described in the assignment, policy evaluation is implemented. The results will be analyzed in terms of agent (predator) and goal state (prey) locations. The following cases have been analyzed: 
+
+% Updated table
+
 \begin{center}
 	\begin{tabular}{ |l | l | l | l | l | l| }
 		Case & Predator & Prey & Value  & Discount Factor & Iterations to converge \\ 
@@ -161,7 +164,8 @@ In case 3, the agent starts at (2,10) and the prey at (10,0). Using the properti
 
 Case 4 has the agent starting at (10,10) and the prey located at (0,0). The distance between the agent and the goal state is (1, 1). The predator is very close to the goal state. The difference between the values of the predator and the prey is quite small, especially compared with the previous cases.  \\
 
-% Temporarily printing in order to compare 
+
+% Updated table
 
 \begin{center}
 	\begin{tabular}{ l || l }
@@ -179,8 +183,11 @@ The discount factor appears to affect the number of iterations necessary to conv
 
 \subsection*{Policy iteration}
 Policy iteration is an algorithm for finding the optimal policy. After performing policy evaluation, the policy is updated. This is repeated until the policy is optimized. The table below shows the results for policy iteration with the prey located at (5,5).
-% Somehow print the whole grid for Prey(5,5)
 
+
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOT Updated table
 
 \begin{center}
 \scalebox{0.7}{
@@ -196,6 +203,10 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 \end{tabular}}
 \end{center}
 
+
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOT Updated table
 
 
 
@@ -224,15 +235,15 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 
 The table shown above depicts the optimal policy, where the prey is located at (5,5). Policy iteration can assign multiple optimal transitions to a state. The optimal transitions all have the same probability of being chosen, while all other transition probabilities are set to zero. In the cases where there are multiple optimal actions, one of the actions was selected. This creates an optimal, deterministic policy.
 
-% Is it correct that (5,5) can go to North, East, South, West? 
-
-% Temporarily printing only these examples in order to compare
-% Iterative policy evaluation and policy iteration yield exactly the same solution (at least for discount factor = 0.8). 
-% Is this expected behavior? 
 
 It takes a few iterations to converge. These are always the same. This can be expected as policy evaluation always takes the same amount of time and policy improvement is applied to the entirety of the grid. This means that each computation is essentially the same and should take the same amount of time.
 % Since it's always 2, maybe it would be interesting to also print the number of iterations it takes for the value grid to 
 % converge for both the policy update iteration
+
+
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOT Updated table
+
 
 \begin{center}
 	\begin{tabular}{ l || l }
@@ -242,18 +253,15 @@ It takes a few iterations to converge. These are always the same. This can be ex
 		0.5 & 7 \\
 		0.7 & 7 \\
 		0.8 & 7 \\	
-		0.9 & 7 \\	
+		0.9 & 7 \\
 	\end{tabular}
 \end{center}
 There is a slight difference in number of iterations when performing policy iteration. Though convergence of policy evaluation is relatively quick with a low discount factor, this appears to hardly affect policy improvement.
 
 \subsection*{Value iteration}
 
-% Somehow print the whole grid for Prey(5,5)
+% Updated table
 
-% Temporarily printing only these examples in order to compare
-% Shouldn't the second and third example have the same values like in the previous two methods? 
-% Both are 4 states away from the goal
 Prey is located at (5, 5)
 
 \begin{center}
@@ -293,15 +301,19 @@ Indices y\textbackslash x &0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
 
 This shows that value iteration has the exact same results as policy iteration. Also, we see that the algorithm converges quicker than policy iteration.
 
+
+% Updated table
+
+
 \begin{center}
 	\begin{tabular}{ l || l }
 		Discount Factor & Iterations to converge \\ 
 		\hline
-		0.1 & 6 \\
-		0.5 & 9 \\
-		0.7 & 10 \\
-		0.8 & 10 \\
-		0.9 & 11 \\	
+		0.1 & 4 \\
+		0.5 & 12 \\
+		0.7 & 15 \\
+		0.8 & 16 \\
+		0.9 & 17 \\	
 	\end{tabular}
 \end{center}
 
@@ -312,6 +324,8 @@ State space encoding was implemented to improve performance. By taking into acco
 
 
 
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOT Updated table
 
 \begin{center}
 	\begin{tabular}{ |l | l | l | l | l | l| }
