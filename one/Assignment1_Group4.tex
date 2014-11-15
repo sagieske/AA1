@@ -320,7 +320,7 @@ This shows that value iteration has the exact same results as policy iteration. 
 For states with the same Manhattan distance, the diagonal states have a higher value. This happens, due to the fact that the prey is twice as likely to move toward the predator instead of away from it. When observing the distance between the predator and the prey in a straight line, the prey has a $0.05 \times 3$ probability of moving away from the predator. However, when taking into account the same distance diagonally, the prey only has a probability of $0.05 \times 2$ of moving away.
 
 \subsection*{Smarter state-space encoding}
-State space encoding was implemented to improve performance. By taking into account the distance between the predator and the prey, the valus of less states need to be computed compared to the stated of the entire grid. As the prey can be anywhere on the grid, take into account that the grid is also toroidal. Therefore, in the case of an 11 $\times$ 11 grid, the maximum distance between the predator and the prey is 5. This is a smaller area to analyze than the entire 11 $\times$ 11 grid.
+State space encoding was implemented to improve performance. By taking into account the distance between the predator and the prey, the valus of less states need to be computed compared to the stated of the entire grid. The  state space is reduced from $11^4$ to $11^2$, by calculating distances and only updating states whose distance has not been updated yet. This greatly reduces the state space and thus increases the speed of the algorithms
 
 
 
@@ -331,11 +331,12 @@ State space encoding was implemented to improve performance. By taking into acco
 	\begin{tabular}{ |l | l | l | l | l | l| }
 		Case & Algorithm & $\gamma$ & Time to converge & Avg. \# steps & Standart deviation \\ 
 		\hline
-		1  & Value Iteration & 0.1 & 11.0183360577 s & 20 & 15.4767567662 \\
-		2  & Encoded Value Iteration & 0.5 & 0.19892 & 21 & 21 \\
-		3  & 15.4767567662 & 0.7 & 0.19892 & 16 & 16 \\
-		4  & 15.4767567662 & 0.8 & 1.65066 & 18 & 18 \\	
-		4  & 15.4767567662 & 0.9 & 1.65066 & 19 & 19 \\	
+		1  & Value Iteration & 0.8 & 11.0183360577 s & 20 & 15.4767567662 \\
+		2  & Encoded Value Iteration & 0.8 &  & &  \\
+		3  & Policy Iteration & 0.8 & & &  \\
+		4  & Encoded Policy Iteration & 0.8 & & & \\	
+		5  & Value Iteration & 0.8 & & & \\	
+		6  & Encoded Value Iteration & 0.8 & & & \\	
 	\end{tabular}
 \end{center}
 
