@@ -131,7 +131,9 @@ class Game:
 		#so, distance 0,0 is the prey's location
 		new_prey_location = [0,0]
 		#Calculate value iteration (mostly) as usual
-		self.value_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose, true_goal_state=start_location_prey, true_gridsize=gridsize)
+		value_grid, policy_grid = self.value_iteration(discount_factor, start_location_prey=new_prey_location, gridsize=[largest_x+1, largest_y+1], encoding=True, verbose=verbose, true_goal_state=start_location_prey, true_gridsize=gridsize)
+		
+		return value_grid, policy_grid
 
 	def wrap_state(self, state, gridsize, encoding):
 		""" Wrap states for non-encoding for toroidal grid"""
@@ -878,10 +880,19 @@ if __name__ == "__main__":
 
 	count = 0
 	count_list = []
+	
+	
 	#Initialize re-usable prey and predator objects
 	prey = Prey([0,0])
-	predator = Predator([5,5], [5,5])
+	predator = Predator([5,5], [5,5], [11, 11])
 	game = Game(reset=True, prey=prey, predator=predator, verbose=verbose)
+       
+       	value_grid, policy_grid = game.value_encoded(discount_factor, [0,0], gridsize=[11,11], verbose=verbose)
+        
+        
+        predator = Predator([5,5], [5,5], [11, 11], policy_grid)
+	
+		
 	#Run N games
 	#TODO: ONLY COMMENTED OUT FOR TESTING PURPOSES
 	'''
@@ -908,8 +919,8 @@ if __name__ == "__main__":
 	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], gridsize=grid_size, verbose=verbose,true_goal_state=goal_state, true_gridsize=grid_size)
 	#game.value_encoded(discount_factor, start_location_prey=goal_state, gridsize=grid_size, verbose=verbose)
 
-	value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
-	#game.value_encoded(discount_factor, verbose=verbose)
+	#value_grid, policy_grid = game.value_iteration(discount_factor, [5,5], verbose=verbose)
+	value_grid, policy_grid = game.value_encoded(discount_factor, verbose=verbose)
 	
 	predator.set_location([0,0])
 	#game.iterative_policy_evaluation(discount_factor, [5,5], verbose = verbose, encoding=False)
