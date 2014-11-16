@@ -3,12 +3,12 @@ import copy
 import random
 
 class Agent(object):
-	"""Agent class, with policy"""
-	def __init__(self, policy_grid=None, policy_given=False):
-		if policy_grid is not None:
-			self.policy_grid = policy_grid
+	""" Agent class, with policy """
+	def __init__(self, policy_grid):
+		#Store given policy
+		self.policy_grid = policy_grid
+		#Set reward to 0
 		self.reward = 0
-		self.policy_given = policy_given
 
 	def get_transformation(self, action):
 		""" Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
@@ -26,11 +26,13 @@ class Agent(object):
 		""" Get collected reward for predator """
 		return self.reward
 
-	def get_action(self, state):
-		return self.policy_grid.get_action(state)
+	def get_action(self, state, restricted=None):
+		#Retrieve an action using the policy for this state in the policy object 
+		return self.policy_grid.get_action(state, restricted)
 
 	def get_policy(self, state):
 		""" Return the predator's policy """
+		#Get indices to retrieve policy
 		i = state[0]
 		j = state[1]
 		k = state[2]
@@ -38,17 +40,22 @@ class Agent(object):
 		return self.policy[i][j][k][l]
 
 	def get_policy_grid(self):
+		""" Return policy grid for agent """
 		return self.policy
 
 	def set_policy_grid(self, policy_grid):
+		""" Set policy grid for agent """
 		self.policy = policy_grid
 		
-	def get_action_keys(self):
-		return self.get_policy().keys() 		
+	def get_action_keys(self, state):
+		""" Return the names of the actions for a state """
+		return self.get_policy(state).keys() 		
 
 
 class Predator(Agent):
+	""" Predator agent, inherits from Agent class """
 	def __init__(self, policy):
+		""" Initializes Predator by calling Agent init """
 		Agent.__init__(self, policy)
 
 	def __repr__(self):
@@ -56,41 +63,11 @@ class Predator(Agent):
 		return ' X '		
 
 class Prey(Agent):
+	""" Prey Agent, inherits from Agent class """
 	def __init__(self, policy):
+		""" Initializes Prey by calling Agent init """
 		Agent.__init__(self, policy)
 
 	def __repr__(self):
 		""" Represent Prey as O """
 		return ' O '		
-
-	def action(self, restricted=None):
-		""" Choose an action and turn it into a move """
-		# Check if restricted subset of moves can be chosen
-		if restricted is not None:
-			chosen_action = self.pick_action_restricted(restricted)
-		else:
-			chosen_action = self.pick_action()
-		chosen_move = self.actions[chosen_action]
-		return chosen_move, chosen_action
-
-
-	def pick_action_restricted(self, blocked_moves):
-		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
-		# Temporary policy list
-		temp_policy = copy.deepcopy(self.policy)
-		# Keep track of probability of deleted moves
-		update_probability = 0
-		# Delete blocked moves from temporary policy list
-		for block in blocked_moves:
-			update_probability += temp_policy[block]
-			del temp_policy[block]			
-
-		# Split policy dictionary in list of keys and list of values
-		action_name, policy = zip(*temp_policy.items())
-		# Create new policy wrt deleted moves
-		added_probability = update_probability/float(len(blocked_moves))
-		new_policy = new_list = [x+added_probability for x in list(policy)]
-		# Get choice using probability distribution
-		choice_index = np.random.choice(list(action_name), 1, new_policy)[0]
-		return choice_index
-
