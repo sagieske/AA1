@@ -39,13 +39,13 @@ class Game:
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
-	def get_rounds(self):
+	def get_rounds(self, epsilon):
 		""" Return rounds played """
 		#Play rounds until the prey is caught, and return how many were needed
-		self.rounds = self.until_caught()
+		self.rounds = self.until_caught(epsilon)
 		return self.rounds
 
-	def until_caught(self):
+	def until_caught(self, epsilon):
 		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
 		steps = 0
 		caught = 0
@@ -55,19 +55,19 @@ class Game:
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			caught = self.turn(state)
+			caught = self.turn(state, epsilon)
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return steps
 
-	def turn(self, state):
+	def turn(self, state, epsilon):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
-		prey_location = [state[2], state[3]]
+		prey_location = self.environment.get_location('prey')
 		#Move the predator
-		predator_location = self.turn_predator(state)
+		predator_location = self.turn_predator(state, epsilon)
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
 		if(not same):
@@ -103,10 +103,10 @@ class Game:
 		self.environment.move_object('prey', new_location)
 		return new_location
 
-	def turn_predator(self, state):
+	def turn_predator(self, state, epsilon):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state)
+		predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location
@@ -251,7 +251,7 @@ class Game:
 					q_value += transition_prey*transition_pred * discount_factor * value_grid[new_state[0]][new_state[1]][new_prey[0]][new_prey[1]]
 		return q_value
 
-def run_episodes(policy, predator, grid_size, N):
+def run_episodes(policy, predator, grid_size, N, epsilon):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
@@ -259,7 +259,7 @@ def run_episodes(policy, predator, grid_size, N):
 		#Initialize episode
 		game = Game(grid_size=grid_size)
 		#Run episode until prey is caught
-		current_rounds = game.get_rounds()
+		current_rounds = game.get_rounds(epsilon)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -280,23 +280,27 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Run simulation")
 	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
 	parser.add_argument('-discount', metavar='Specify the size of the discount factor for value iteration.', type=float)
-	parser.add_argument('-loops', metavar='Specify the amount of loops to test value iteration on.', type=int)
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
+	parser.add_argument('-size', metavar='Size of the grid.', type=int)
+	parser.add_argument('-epsilon', metavar='Epsilon for e-greedy', type=float)
 	args = parser.parse_args()
 
 	N = 100
 	discount_factor = 0.8
-	loops = 3
+	size = 11
+	epsilon = 0.1
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
 	if(vars(args)['discount'] is not None):
 		discount_factor = vars(args)['discount']
-	if(vars(args)['loops'] is not None):
-		loops = vars(args)['loops']
+	if(vars(args)['size'] is not None):
+		size = vars(args)['size']
+	if(vars(args)['epsilon'] is not None):
+		epsilon = vars(args)['epsilon']
 	if(vars(args)['verbose'] is not None):
 		verbose = vars(args)['verbose']
 	else:
 		verbose = 2
 
 
-	run_episodes("policy", "predator", [4,4], N)
+	run_episodes("policy", "predator", [size,size], N, epsilon)
