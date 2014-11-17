@@ -40,10 +40,10 @@ class Agent(object):
 	def set_policy_grid(self, policy_grid):
 		""" Set policy grid for agent """
 		self.policy = policy_grid
-		
-	def get_action_keys(self, state):
-		""" Return the names of the actions for a state """
-		return self.get_policy(state).keys() 		
+
+	def get_action(self, state, restricted=None, epsilon=0.0):
+		"""Retrieve an action using the policy for this state in the policy object """
+		return self.policy_grid.get_action(state, restricted=restricted, epsilon=epsilon)		
 
 
 class Predator(Agent):
@@ -56,10 +56,6 @@ class Predator(Agent):
 		""" Represent Predator as X """
 		return ' X '		
 
-	def get_action(self, state, epsilon):
-		#Retrieve an action using the policy for this state in the policy object 
-		return self.policy_grid.get_e_greedy_action(state, epsilon)		
-
 class Prey(Agent):
 	""" Prey Agent, inherits from Agent class """
 	def __init__(self, policy):
@@ -68,8 +64,4 @@ class Prey(Agent):
 
 	def __repr__(self):
 		""" Represent Prey as O """
-		return ' O '	
-
-	def get_action(self, state, restricted=None):
-		#Retrieve an action using the policy for this state in the policy object 
-		return self.policy_grid.get_action(state, restricted)			
+		return ' O '		

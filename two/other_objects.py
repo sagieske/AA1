@@ -109,35 +109,15 @@ class Policy:
 		y_distance = state[1]
 		return self.policy_grid[x_distance][y_distance]
 
-	def get_action(self, state, restricted=None):
+	def get_action(self, state, restricted=None, epsilon=0.0):
 		""" Choose an action and turn it into a move """
-		#If there are restricted actions, do a restricted action pick
-		if restricted is not None:
-			chosen_action = self.pick_action_restricted(state, restricted)
-		#Otherwise, just choose an action
-		else:
-			chosen_action = self.pick_action(state)
+		chosen_action = self.pick_action(state, restricted=restricted, epsilon=epsilon)
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_action		
 
-	def get_e_greedy_action(self, state, epsilon):
-		""" Do action selection using epsilon-greedy """
-		#Get the Q-values for the current state
-		policy = self.get_policy(state)
-		#Turn the Q-values into an e-greedy probabilistic policy
-		probabilistic_policy = self.get_e_greedy_policy(policy, epsilon)
-		#Zip the policy into a tuple of names, and a tuple of values
-		action_name, policy = zip(*probabilistic_policy.items())
-		#Use np.random.choice to select actions according to probabilities
-		chosen_action = np.random.choice(list(action_name), 1, p=list(policy))[0]
-		#Get corresponding transformation
-		chosen_move = self.actions[chosen_action]
-		#Return transformation and chosen action name
-		return chosen_move, chosen_action
-
-	def get_e_greedy_policy(self, policy, epsilon):
+	def get_e_greedy_policy(self, policy, epsilon=0.0):
 		#Get |A(s)|
 		number_actions = len(policy)
 		#Get the extra probability to divide over actions
@@ -166,36 +146,29 @@ class Policy:
 		return probability_dict
 
 
-	def pick_action(self, state):
+	def pick_action(self, state, restricted=None, epsilon=0.0):
 		""" Use the probabilities in the policy to pick a move """
-		#Retrieve the policy for the current state
-		policy = self.get_policy(state)
-		#Zip the policy into a tuple of names, and a tuple of values
-		action_name, policy = zip(*policy.items())
+		#Retrieve the policy using e_greedy for the current state
+		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
+		if(restricted is not None):
+			#make a deepcopy of the policy to prevent accidental pops
+			temp_policy = copy.deepcopy(policy)
+			update_probability = 0
+			#Sum the probabilities of all blocked moves
+			for block in restricted:
+				update_probability += temp_policy[block]
+				#Remove the blocked actions from the policy
+				del temp_policy[block]
+			#Zip the policy into a tuple of names, and a tuple of values
+			action_name, policy = zip(*temp_policy.items())
+			#Divide the summed probabilities of blocked actions
+			added_probability = update_probability/float(len(self.get_policy(state))-len(restricted))
+			#and add to the other actions
+			policy = [x+added_probability for x in list(policy)]			
+		else:	
+			#Zip the policy into a tuple of names, and a tuple of values
+			action_name, policy = zip(*policy.items())			
 		#Use np.random.choice to select actions according to probabilities
 		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
 		#Return name of action
 		return choice_index	
-
-	def pick_action_restricted(self, state, blocked_moves):
-		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
-		#Make a deep copy of the policy to prevent accidental pops
-		temp_policy = copy.deepcopy(self.get_policy(state))
-		update_probability = 0
-		#Sum the probabilities of all blocked moves
-		for block in blocked_moves:
-			update_probability += temp_policy[block]
-			#Remove the blocked actions from the policy
-			del temp_policy[block]
-		#Zip the cleaned policy into a tuple of names, and a tuple of values
-		action_name, policy = zip(*temp_policy.items())
-		#Divide the summed probabilities of blocked actions
-		added_probability = update_probability/float(len(blocked_moves))
-		#and add to the other actions
-		new_policy = new_list = [x+added_probability for x in list(policy)]
-		#Use np.random.choice to select actions according to probabilities
-		choice_index = np.random.choice(list(action_name), 1, new_policy)[0]
-		#Return name of action
-		return choice_index
-
-

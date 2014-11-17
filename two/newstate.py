@@ -112,7 +112,7 @@ class Game:
 	def turn_predator(self, state, epsilon):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state, epsilon)
+		predator_move, action_name = self.predator.get_action(state, epsilon=epsilon)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location
