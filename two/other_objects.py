@@ -124,8 +124,26 @@ class Policy:
 
 	def get_e_greedy_action(self, state, epsilon):
 		""" Do action selection using epsilon-greedy """
+		#Get the Q-values for the current state
 		policy = self.get_policy(state)
+		#Turn the Q-values into an e-greedy probabilistic policy
+		probabilistic_policy = self.get_e_greedy_policy(policy, epsilon)
+		#Zip the policy into a tuple of names, and a tuple of values
+		action_name, policy = zip(*probabilistic_policy.items())
+		#Use np.random.choice to select actions according to probabilities
+		chosen_action = np.random.choice(list(action_name), 1, p=list(policy))[0]
+		#Get corresponding transformation
+		chosen_move = self.actions[chosen_action]
+		#Return transformation and chosen action name
+		return chosen_move, chosen_action
+
+	def get_e_greedy_policy(self, policy, epsilon):
+		#Get |A(s)|
+		number_actions = len(policy)
+		#Get the extra probability to divide over actions
+		extra_probability = epsilon/number_actions
 		best_action_list = []
+		other_action_list = []
 		#Get the maximum value in the policy
 		max_value = policy[max(policy)]
 		#For each action, check if their value is maximum
@@ -133,10 +151,20 @@ class Policy:
 			#If value is max, append to best_action_list
 			if action[1] == max_value:
 				best_action_list.append(action[0])
-		#Pick an action from the best_action_list at random
-		chosen_action = np.random.choice(best_action_list)
-		chosen_move = self.actions[chosen_action]
-		return chosen_move, chosen_action
+			#Otherwise, append to other_action_list
+			else:
+				other_action_list.append(action[0])
+		probability_dict = {}
+		#Compute the probability of the best actions
+		best_actions_probability = (1.0 - epsilon)/len(best_action_list)
+		#The best actions have a probability of best_actions_probability + extra_probability
+		for max_action in best_action_list:
+			probability_dict[max_action] = best_actions_probability + extra_probability
+		#The other actions have a probability of extra_probability
+		for other_action in other_action_list:
+			probability_dict[other_action] = extra_probability
+		return probability_dict
+
 
 	def pick_action(self, state):
 		""" Use the probabilities in the policy to pick a move """

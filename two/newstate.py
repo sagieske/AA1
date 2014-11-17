@@ -59,6 +59,12 @@ class Game:
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
+		predator_location = self.environment.get_location('predator')
+		prey_location = self.environment.get_location('prey')
+		print 'States: '
+		print 'Predator: ', predator_location[0], ',', predator_location[1]
+		print 'Prey: ', prey_location[0], ',', prey_location[1]
+		self.environment.print_grid()
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return steps
 
@@ -98,7 +104,7 @@ class Game:
 			#Get action, restricted by predator location
 			prey_move, action_name = self.prey.get_action(state, restricted=[action_name])
 			#Turn action into new location
-			new_prey_location = self.get_new_location('prey', prey_move)
+			new_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
 		self.environment.move_object('prey', new_location)
 		return new_location
