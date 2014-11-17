@@ -109,13 +109,27 @@ class Policy:
 		y_distance = state[1]
 		return self.policy_grid[x_distance][y_distance]
 
-	def get_action(self, state, restricted=None, epsilon=0.0):
+	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True):
 		""" Choose an action and turn it into a move """
 		chosen_action = self.pick_action(state, restricted=restricted, epsilon=epsilon)
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
-		#Return the name and transformation of the selected action
 		return chosen_move, chosen_action		
+
+	def q_learning(self, old_state, action, new_state, epsilon, discount_factor, alpha, reward):
+		#Store value of current state-action pair
+		q_value = self.get_policy(old_state)[action]
+		print "Old Q-value for state ", old_state, " action, ", action, ":", q_value
+		if(reward == True):
+			score = 10
+		else:
+			score = 0
+		#Get value of max action of the new state
+		chosen_move, chosen_action = self.get_action(new_state)
+		next_q_value = self.get_policy(new_state)[chosen_action]
+		new_q_value = q_value + alpha * (score + discount_factor * next_q_value - q_value)
+		self.get_policy(old_state)[action] = new_q_value
+		print self.policy_grid[old_state[0]][old_state[1]][action]
 
 	def get_e_greedy_policy(self, policy, epsilon=0.0):
 		#Get |A(s)|
