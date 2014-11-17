@@ -76,8 +76,10 @@ class Game:
 		prey_location = self.environment.get_location('prey')
 		#Move the predator
 		predator_location, predator_action = self.turn_predator(state, epsilon, discount_factor, alpha)
+		
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
+
 		self.predator.q_learning(state, predator_action, predator_location, prey_location, epsilon, discount_factor, alpha, same)
 		if(not same):
 			#If prey is not caught, move it

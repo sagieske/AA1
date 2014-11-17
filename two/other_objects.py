@@ -133,34 +133,31 @@ class Policy:
 	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
 		""" Choose an action and turn it into a move """
 		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon)
-		print "chosen dist: ", chosen_distance
 		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location)
+		print "Chosen action: ", chosen_action, " from distance: ", chosen_distance
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
 		return chosen_move, chosen_action		
 
 	def distance_to_action(self, new_distance, predator_location, prey_location):
-		print "predatorloc: ", predator_location
-		print "preyloc: ", prey_location
+		print "Predator location: ", predator_location, ", prey_location: ", prey_location
 		old_distance = self.absolute_xy(predator_location, prey_location)
-		print "old distance: ", old_distance
+		print "Old distance: ", old_distance, " new distance: ", new_distance
 		new_distance = [int(x) for x in new_distance.strip('[').strip(']').split(',')]
-		print "new distance: ", new_distance
 		transformation = self.absolute_xy(old_distance, new_distance)
-		print "transformation: ", transformation
+		
 		for action in self.actions.items():
 			if action[1] == transformation:
 				return action[0]
 
-	def q_learning(self, old_state, action, new_state, prey_location, epsilon, discount_factor, alpha, reward):
+	def q_learning(self, old_state, action, new_predator_location, prey_location, epsilon, discount_factor, alpha, reward):
 		policy = self.get_policy(old_state)
-		predator_location = self.absolute_xy(prey_location, old_state)
-		print "Old distance: ", old_state
-		print "Predator: ", predator_location
-		print "Prey: ", prey_location
-		distance = self.action_to_distance(action, predator_location, prey_location)
-		print "Action: ", action
-		print "Distance: ", distance
+		#Get predator location from prey location and distance
+		old_predator_location = self.absolute_xy(prey_location, old_state)
+		#Get the new distance after applying the chosen action
+		distance = self.action_to_distance(action, old_predator_location, prey_location)
+		
+		
 		#Store value of current state-action pair
 		q_value = self.get_distance_policy(old_state)[str(distance)]
 		if(reward == True):
@@ -168,14 +165,18 @@ class Policy:
 		else:
 			score = 0
 		#Get value of max action of the new state
-		chosen_move, chosen_action = self.get_action(new_state, epsilon=0.0, predator_location=predator_location, prey_location=prey_location)
-		next_q_value = self.get_distance_policy(new_state)[chosen_action]
+		chosen_move, chosen_action = self.get_action(distance, epsilon=0.0, predator_location=new_predator_location, prey_location=prey_location)
+	
+		next_distance = self.action_to_distance(chosen_action, new_predator_location, prey_location)
+		next_q_value = self.get_distance_policy(distance)[str(next_distance)]
 		new_q_value = q_value + alpha * (score + discount_factor * next_q_value - q_value)
 		self.get_policy(old_state)[action] = new_q_value
-		print self.policy_grid[old_state[0]][old_state[1]][action]
+		
 
 	def absolute_xy(self, location, new_location):
-		return [abs(location[0]-new_location[0]), abs(location[1]-new_location[1])]
+		print "X-location: ", abs(location[0]-new_location[0])
+		print "Y-location: ", abs(location[1]-new_location[1])
+		return self.wrap_state([abs(location[0]-new_location[0]), abs(location[1]-new_location[1])])
 
 	def action_to_distance(self, action, predator_location, prey_location):
 		transformation = self.actions[action]
@@ -225,9 +226,9 @@ class Policy:
 	def pick_action(self, state, restricted=None, epsilon=0.0):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy using e_greedy for the current state
-		print "Non greedy: ", self.get_distance_policy(state)
+		
 		policy = self.get_e_greedy_policy(self.get_distance_policy(state), epsilon)
-		print "Policy: ", policy
+		
 		if(restricted is not None):
 			#make a deepcopy of the policy to prevent accidental pops
 			temp_policy = copy.deepcopy(policy)

@@ -67,4 +67,4 @@ class Prey(Agent):
 
 	def __repr__(self):
 		""" Represent Prey as O """
-		return ' O '		
+		return ' O '			
