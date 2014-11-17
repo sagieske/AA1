@@ -78,7 +78,7 @@ class Game:
 		predator_location, predator_action = self.turn_predator(state, epsilon, discount_factor, alpha)
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
-		self.predator.q_learning(state, predator_action, predator_location, epsilon, discount_factor, alpha, same)
+		self.predator.q_learning(state, predator_action, predator_location, prey_location, epsilon, discount_factor, alpha, same)
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(state, predator_location)
@@ -102,13 +102,13 @@ class Game:
 	def turn_prey(self, state, predator_location):
 		""" Perform turn for prey """
 		#Retrieve the action for the prey for this state
-		prey_move, action_name = self.prey.get_action(state, predator=False)
+		prey_move, action_name = self.prey.get_action(state, predator=False, predator_location=predator_location, prey_location=self.environment.get_location('prey'))
 		#Turn action into new location
 		new_location = self.get_new_location('prey', prey_move)
 		#Check if the new location contains the predator, and if so, pick different action
 		if new_location == predator_location:
 			#Get action, restricted by predator location
-			prey_move, action_name = self.prey.get_action(state, restricted=[action_name], predator=False)
+			prey_move, action_name = self.prey.get_action(state, restricted=[action_name], predator=False, predator_location=predator_location, prey_location=self.environment.get_location('prey'))
 			#Turn action into new location
 			new_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
@@ -118,7 +118,7 @@ class Game:
 	def turn_predator(self, state, epsilon, discount_factor, alpha):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state, epsilon=epsilon, discount_factor=discount_factor, alpha=alpha, predator=True)
+		predator_move, action_name = self.predator.get_action(state, epsilon=epsilon, discount_factor=discount_factor, alpha=alpha, predator=True, predator_location=self.environment.get_location('predator'), prey_location=self.environment.get_location('prey'))
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location

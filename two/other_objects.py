@@ -102,6 +102,22 @@ class Policy:
 		else:
 			self.policy_grid = [[self.policy for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])]
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
+		self.distance_grid = [[{} for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])]
+		for i in range(0, self.grid_size[1]):
+			for j in range(0, self.grid_size[0]):
+				distances = [[i,j], [i-1,j], [i,j-1], [i+1,j], [i,j+1]]
+				distance_dict = {}
+				for distance in distances:
+					distance = self.wrap_state(distance)
+					distance_dict[str(distance)] = 15
+				self.distance_grid[i][j] = distance_dict
+
+	def wrap_state(self, state):
+		""" Wrap states for non-encoding for toroidal grid"""
+		temp_state = state
+		state[0] = temp_state[0] % self.grid_size[0]
+		state[1] = temp_state[1] % self.grid_size[1]
+		return state
 
 	def get_policy(self, state):
 		""" Return the policy dictionary for a state """
@@ -109,27 +125,73 @@ class Policy:
 		y_distance = state[1]
 		return self.policy_grid[x_distance][y_distance]
 
-	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True):
+	def get_distance_policy(self, state):
+		x_distance = state[0]
+		y_distance = state[1]
+		return self.distance_grid[x_distance][y_distance]
+
+	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
 		""" Choose an action and turn it into a move """
-		chosen_action = self.pick_action(state, restricted=restricted, epsilon=epsilon)
+		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon)
+		print "chosen dist: ", chosen_distance
+		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location)
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
 		return chosen_move, chosen_action		
 
-	def q_learning(self, old_state, action, new_state, epsilon, discount_factor, alpha, reward):
+	def distance_to_action(self, new_distance, predator_location, prey_location):
+		print "predatorloc: ", predator_location
+		print "preyloc: ", prey_location
+		old_distance = self.absolute_xy(predator_location, prey_location)
+		print "old distance: ", old_distance
+		new_distance = [int(x) for x in new_distance.strip('[').strip(']').split(',')]
+		print "new distance: ", new_distance
+		transformation = self.absolute_xy(old_distance, new_distance)
+		print "transformation: ", transformation
+		for action in self.actions.items():
+			if action[1] == transformation:
+				return action[0]
+
+	def q_learning(self, old_state, action, new_state, prey_location, epsilon, discount_factor, alpha, reward):
+		policy = self.get_policy(old_state)
+		predator_location = self.absolute_xy(prey_location, old_state)
+		print "Old distance: ", old_state
+		print "Predator: ", predator_location
+		print "Prey: ", prey_location
+		distance = self.action_to_distance(action, predator_location, prey_location)
+		print "Action: ", action
+		print "Distance: ", distance
 		#Store value of current state-action pair
-		q_value = self.get_policy(old_state)[action]
-		print "Old Q-value for state ", old_state, " action, ", action, ":", q_value
+		q_value = self.get_distance_policy(old_state)[str(distance)]
 		if(reward == True):
 			score = 10
 		else:
 			score = 0
 		#Get value of max action of the new state
-		chosen_move, chosen_action = self.get_action(new_state)
-		next_q_value = self.get_policy(new_state)[chosen_action]
+		chosen_move, chosen_action = self.get_action(new_state, epsilon=0.0, predator_location=predator_location, prey_location=prey_location)
+		next_q_value = self.get_distance_policy(new_state)[chosen_action]
 		new_q_value = q_value + alpha * (score + discount_factor * next_q_value - q_value)
 		self.get_policy(old_state)[action] = new_q_value
 		print self.policy_grid[old_state[0]][old_state[1]][action]
+
+	def absolute_xy(self, location, new_location):
+		return [abs(location[0]-new_location[0]), abs(location[1]-new_location[1])]
+
+	def action_to_distance(self, action, predator_location, prey_location):
+		transformation = self.actions[action]
+		new_location = self.get_new_state_location(predator_location, transformation)
+		distance = self.absolute_xy(new_location, prey_location)
+		return distance
+
+	def get_new_state_location(self, old_location, transformation):
+		""" Returns new state given old state and an action (no object is used) """
+		new_location = []
+		chosen_move = transformation
+		environment_size = self.grid_size
+		# division by modulo makes board toroidal:
+		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
+		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
+		return new_location
 
 	def get_e_greedy_policy(self, policy, epsilon=0.0):
 		#Get |A(s)|
@@ -163,7 +225,9 @@ class Policy:
 	def pick_action(self, state, restricted=None, epsilon=0.0):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy using e_greedy for the current state
-		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
+		print "Non greedy: ", self.get_distance_policy(state)
+		policy = self.get_e_greedy_policy(self.get_distance_policy(state), epsilon)
+		print "Policy: ", policy
 		if(restricted is not None):
 			#make a deepcopy of the policy to prevent accidental pops
 			temp_policy = copy.deepcopy(policy)
