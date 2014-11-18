@@ -132,10 +132,15 @@ class Policy:
 
 	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
 		""" Choose an action and turn it into a move """
+		print "\n\nSharon says: It goes wrong here:\n"
+		print "> do function: self.pick_action(state:%s, restricted:%s, epsilon:%s))" %(str(state), str(restricted), str(epsilon))
 		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon)
-		print "chosen dist: ", chosen_distance
+		print ">> returned chosen dist: ", chosen_distance
+		print "> do function: self.distance_to_action(chosen_distance:%s, predator_location:%s, prey_location:%s)" %(str(chosen_distance), str(predator_location), str(prey_location))
 		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location)
+		print ">> returned chosen_action: %s" %(str(chosen_action)) 
 		#Get the transformation corresponding to the chosen action
+		print "> do self.actions[chosen_action] with chosen_action= %s. [sharon says: this results in the error]"%(str(chosen_action))
 		chosen_move = self.actions[chosen_action]
 		return chosen_move, chosen_action		
 
@@ -151,6 +156,7 @@ class Policy:
 		for action in self.actions.items():
 			if action[1] == transformation:
 				return action[0]
+		print ">>the transformation is not found in the possible action! So it returns None"
 
 	def q_learning(self, old_state, action, new_state, prey_location, epsilon, discount_factor, alpha, reward):
 		policy = self.get_policy(old_state)
