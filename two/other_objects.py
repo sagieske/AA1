@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import random
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -133,49 +134,32 @@ class Policy:
 	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
 		""" Choose an action and turn it into a move """
 		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon)
-		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location)
-		print "Chosen action: ", chosen_action, " from distance: ", chosen_distance
+		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location) 
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
 		return chosen_move, chosen_action		
 
 	def distance_to_action(self, new_distance, predator_location, prey_location):
-		print "Predator location: ", predator_location, ", prey_location: ", prey_location
 		old_distance = self.absolute_xy(predator_location, prey_location)
-		print "Old distance: ", old_distance, " new distance: ", new_distance
 		new_distance = [int(x) for x in new_distance.strip('[').strip(']').split(',')]
 		transformation = self.absolute_xy(old_distance, new_distance)
 		
 		for action in self.actions.items():
 			if action[1] == transformation:
 				return action[0]
+		return random.choice(['Wait', 'South', 'North', 'West', 'East'])
 
-	def q_learning(self, old_state, action, new_predator_location, prey_location, epsilon, discount_factor, alpha, reward):
-		policy = self.get_policy(old_state)
-		#Get predator location from prey location and distance
-		old_predator_location = self.absolute_xy(prey_location, old_state)
-		#Get the new distance after applying the chosen action
-		distance = self.action_to_distance(action, old_predator_location, prey_location)
-		
-		
-		#Store value of current state-action pair
-		q_value = self.get_distance_policy(old_state)[str(distance)]
-		if(reward == True):
-			score = 10
-		else:
-			score = 0
-		#Get value of max action of the new state
-		chosen_move, chosen_action = self.get_action(distance, epsilon=0.0, predator_location=new_predator_location, prey_location=prey_location)
-	
-		next_distance = self.action_to_distance(chosen_action, new_predator_location, prey_location)
-		next_q_value = self.get_distance_policy(distance)[str(next_distance)]
-		new_q_value = q_value + alpha * (score + discount_factor * next_q_value - q_value)
-		self.get_policy(old_state)[action] = new_q_value
+	def q_learning(self, old_state, old_predator_location, action, new_predator_location, prey_location, epsilon, discount_factor, alpha, reward):
+		print "Q-LEARNING"
+		print "old_state = ", old_state
+		new_state = self.absolute_xy(new_predator_location, prey_location)
+		print "new_state = ", new_state
+		print "old predator: ", old_predator_location, " new predator: ", new_predator_location
+		action_distance = self.action_to_distance(action, old_predator_location, prey_location)
+		print "action distance: ", action_distance
 		
 
 	def absolute_xy(self, location, new_location):
-		print "X-location: ", abs(location[0]-new_location[0])
-		print "Y-location: ", abs(location[1]-new_location[1])
 		return self.wrap_state([abs(location[0]-new_location[0]), abs(location[1]-new_location[1])])
 
 	def action_to_distance(self, action, predator_location, prey_location):

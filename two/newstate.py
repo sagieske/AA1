@@ -73,14 +73,14 @@ class Game:
 	def turn(self, state, epsilon, discount_factor, alpha):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
+		old_predator_location = self.environment.get_location('predator')
 		prey_location = self.environment.get_location('prey')
 		#Move the predator
 		predator_location, predator_action = self.turn_predator(state, epsilon, discount_factor, alpha)
-		
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
 
-		self.predator.q_learning(state, predator_action, predator_location, prey_location, epsilon, discount_factor, alpha, same)
+		self.predator.q_learning(state, old_predator_location, predator_action, predator_location, prey_location, epsilon, discount_factor, alpha, same)
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(state, predator_location)
