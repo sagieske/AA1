@@ -26,12 +26,18 @@ class Agent(object):
 		""" Get collected reward for predator """
 		return self.reward
 
+	def get_action(self, state, restricted=None):
+		#Retrieve an action using the policy for this state in the policy object 
+		return self.policy_grid.get_action(state, restricted)
+
 	def get_policy(self, state):
-		""" Return the agent's policy """
+		""" Return the predator's policy """
 		#Get indices to retrieve policy
-		x_distance = state[0]
-		y_distance = state[1]
-		return self.policy[x_distance][y_distance]
+		i = state[0]
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		return self.policy[i][j][k][l]
 
 	def get_policy_grid(self):
 		""" Return policy grid for agent """
@@ -40,10 +46,10 @@ class Agent(object):
 	def set_policy_grid(self, policy_grid):
 		""" Set policy grid for agent """
 		self.policy = policy_grid
-
-	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
-		"""Retrieve an action using the policy for this state in the policy object """
-		return self.policy_grid.get_action(state, restricted=restricted, epsilon=epsilon, discount_factor=discount_factor, alpha=alpha, predator=predator, predator_location=predator_location, prey_location=prey_location)		
+		
+	def get_action_keys(self, state):
+		""" Return the names of the actions for a state """
+		return self.get_policy(state).keys() 		
 
 
 class Predator(Agent):
@@ -56,9 +62,6 @@ class Predator(Agent):
 		""" Represent Predator as X """
 		return ' X '		
 
-	def q_learning(self, old_state, old_predator_location, chosen_action, new_state, prey_location, epsilon, discount_factor, alpha, reward):
-		self.policy_grid.q_learning(old_state, old_predator_location, chosen_action, new_state, prey_location, epsilon, discount_factor, alpha, reward)
-
 class Prey(Agent):
 	""" Prey Agent, inherits from Agent class """
 	def __init__(self, policy):
@@ -67,4 +70,4 @@ class Prey(Agent):
 
 	def __repr__(self):
 		""" Represent Prey as O """
-		return ' O '			
+		return ' O '		

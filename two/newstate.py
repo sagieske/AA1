@@ -39,13 +39,13 @@ class Game:
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
-	def get_rounds(self, epsilon, discount_factor, alpha):
+	def get_rounds(self):
 		""" Return rounds played """
 		#Play rounds until the prey is caught, and return how many were needed
-		self.rounds = self.until_caught(epsilon, discount_factor, alpha)
+		self.rounds = self.until_caught()
 		return self.rounds
 
-	def until_caught(self, epsilon, discount_factor, alpha):
+	def until_caught(self):
 		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
 		steps = 0
 		caught = 0
@@ -55,46 +55,32 @@ class Game:
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			caught = self.turn(state, epsilon, discount_factor, alpha)
+			caught = self.turn(state)
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
-		predator_location = self.environment.get_location('predator')
-		prey_location = self.environment.get_location('prey')
-		distance = [abs(predator_location[0] - prey_location[0]), abs(predator_location[1] - prey_location[1])]
-		print 'States: '
-		print 'Distance: ', distance
-		print 'Predator: ', predator_location[0], ',', predator_location[1]
-		print 'Prey: ', prey_location[0], ',', prey_location[1]
-		self.environment.print_grid()
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return steps
 
-	def turn(self, state, epsilon, discount_factor, alpha):
+	def turn(self, state):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
-		old_predator_location = self.environment.get_location('predator')
-		prey_location = self.environment.get_location('prey')
+		prey_location = [state[2], state[3]]
 		#Move the predator
-		predator_location, predator_action = self.turn_predator(state, epsilon, discount_factor, alpha)
+		predator_location = self.turn_predator(state)
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
-
-		self.predator.q_learning(state, old_predator_location, predator_action, predator_location, prey_location, epsilon, discount_factor, alpha, same)
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(state, predator_location)
-			distance = [abs(predator_location[0] - prey_location[0]), abs(predator_location[1] - prey_location[1])]
 			#Print effect of this turn
 			if (self.verbose == 1 and same):
 				print 'States: '
-				print 'Distance: ', distance
 				print 'Predator: ', predator_location[0], ',', predator_location[1]
 				print 'Prey: ', prey_location[0], ',', prey_location[1]
 				self.environment.print_grid()
 			elif self.verbose == 2:
 				print 'States: '
-				print 'Distance: ', distance
 				print 'Predator: ', predator_location[0], ',', predator_location[1]
 				print 'Prey: ', prey_location[0], ',', prey_location[1]
 				self.environment.print_grid()
@@ -104,28 +90,28 @@ class Game:
 	def turn_prey(self, state, predator_location):
 		""" Perform turn for prey """
 		#Retrieve the action for the prey for this state
-		prey_move, action_name = self.prey.get_action(state, predator=False, predator_location=predator_location, prey_location=self.environment.get_location('prey'))
+		prey_move, action_name = self.prey.get_action(state)
 		#Turn action into new location
 		new_location = self.get_new_location('prey', prey_move)
 		#Check if the new location contains the predator, and if so, pick different action
 		if new_location == predator_location:
 			#Get action, restricted by predator location
-			prey_move, action_name = self.prey.get_action(state, restricted=[action_name], predator=False, predator_location=predator_location, prey_location=self.environment.get_location('prey'))
+			prey_move, action_name = self.prey.get_action(state, restricted=[action_name])
 			#Turn action into new location
-			new_location = self.get_new_location('prey', prey_move)
+			new_prey_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
 		self.environment.move_object('prey', new_location)
 		return new_location
 
-	def turn_predator(self, state, epsilon, discount_factor, alpha):
+	def turn_predator(self, state):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state, epsilon=epsilon, discount_factor=discount_factor, alpha=alpha, predator=True, predator_location=self.environment.get_location('predator'), prey_location=self.environment.get_location('prey'))
+		predator_move, action_name = self.predator.get_action(state)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location
 		self.environment.move_object('predator', new_location)
-		return new_location, action_name
+		return new_location
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
@@ -175,6 +161,15 @@ class Game:
 			state[0] = temp_state[0] % gridsize[0]
 			state[1] = temp_state[1] % gridsize[1]
 		return state
+
+	def reward(self, old_state, new_state, action):
+		""" Calculate reward for transition from old state to new state"""
+		if old_state[0] == old_state[2] and old_state[1] == old_state[3]:
+			return 0
+		elif new_state[0] == new_state[2] and new_state[1] == new_state[3]:
+			return 10
+		else:
+			return 0
 
 	def transition(self, old_state, new_state, action):
 		""" Calculate transition value from old state to new state """
@@ -256,7 +251,7 @@ class Game:
 					q_value += transition_prey*transition_pred * discount_factor * value_grid[new_state[0]][new_state[1]][new_prey[0]][new_prey[1]]
 		return q_value
 
-def run_episodes(policy, predator, grid_size, N, epsilon, discount_factor, alpha):
+def run_episodes(policy, predator, grid_size, N):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
@@ -264,7 +259,7 @@ def run_episodes(policy, predator, grid_size, N, epsilon, discount_factor, alpha
 		#Initialize episode
 		game = Game(grid_size=grid_size)
 		#Run episode until prey is caught
-		current_rounds = game.get_rounds(epsilon, discount_factor, alpha)
+		current_rounds = game.get_rounds()
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -285,31 +280,23 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Run simulation")
 	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
 	parser.add_argument('-discount', metavar='Specify the size of the discount factor for value iteration.', type=float)
+	parser.add_argument('-loops', metavar='Specify the amount of loops to test value iteration on.', type=int)
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
-	parser.add_argument('-size', metavar='Size of the grid.', type=int)
-	parser.add_argument('-epsilon', metavar='Epsilon for e-greedy', type=float)
-	parser.add_argument('-alpha', metavar='Learning rate for Q-learning', type=float)
 	args = parser.parse_args()
 
 	N = 100
-	discount_factor = 0.1
-	size = 11
-	epsilon = 0.1
-	alpha = 0.1
+	discount_factor = 0.8
+	loops = 3
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
 	if(vars(args)['discount'] is not None):
 		discount_factor = vars(args)['discount']
-	if(vars(args)['size'] is not None):
-		size = vars(args)['size']
-	if(vars(args)['epsilon'] is not None):
-		epsilon = vars(args)['epsilon']
-	if(vars(args)['alpha'] is not None):
-		alpha = vars(args)['alpha']
+	if(vars(args)['loops'] is not None):
+		loops = vars(args)['loops']
 	if(vars(args)['verbose'] is not None):
 		verbose = vars(args)['verbose']
 	else:
 		verbose = 2
 
 
-	run_episodes("policy", "predator", [size,size], N, epsilon, discount_factor, alpha)
+	run_episodes("policy", "predator", [4,4], N)
