@@ -90,6 +90,7 @@ class Policy:
 	""" Policy object that stores action values for each state """
 	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
+		self.prey = prey
 		#Set grid size
 		self.grid_size = grid_size
 		#If the agent is not a prey, set the policy to random
@@ -153,7 +154,11 @@ class Policy:
 		#Get the reward for the new state (10 if caught, 0 otherwise)
 		reward = self.reward(new_state)
 		#Get the max action for the new state
+		softmax_backup = self.softmax
+		print "Softmax: ", softmax_backup
+		self.softmax = False
 		new_move, new_max_action = self.get_action(new_state, 0.0)
+		self.softmax = softmax_backup
 		#Get the q-value for the new state and its max action
 		new_q_value = self.get_policy(new_state)[new_max_action]
 		discounted_next = discount_factor*new_q_value
@@ -215,7 +220,7 @@ class Policy:
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
-		if self.softmax == True:
+		if self.softmax == True and self.prey==False:
 			policy = self.get_softmax_action_selection(self.get_policy(state), action_selection_var)
 		else:
 			policy = self.get_e_greedy_policy(self.get_policy(state), action_selection_var)
@@ -288,12 +293,37 @@ class Policy:
 			softmax_prob[actionname] = value
 		return softmax_prob
 
+	def get_action_prey(self, state, restricted=None):
+		policy = copy.deepcopy(self.get_policy(state))
+		if(restricted is None):
+			action_name, policy = zip(*policy.items())
+			#Use np.random.choice to select actions according to probabilities
+			choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
+		else:
+			update_probability = 0
+			#Sum the probabilities of all blocked moves
+			for block in restricted:
+				update_probability += policy[block]
+				#Remove the blocked actions from the policy
+				del policy[block]
+			#Zip the cleaned policy into a tuple of names, and a tuple of values
+			action_name, policy = zip(*policy.items())
+			#Divide the summed probabilities of blocked actions
+			added_probability = update_probability/float(len(restricted))
+			#and add to the other actions
+			new_policy = new_list = [x+added_probability for x in list(policy)]
+			#Use np.random.choice to select actions according to probabilities
+			choice_index = np.random.choice(list(action_name), 1, new_policy)[0]
+		chosen_move = self.actions[choice_index]
+		return chosen_move, choice_index
+
+
 
 	def pick_action_restricted(self, state, action_selection_var, blocked_moves): # epsilon --> is now action_selection_var
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
 		#Make a deep copy of the policy to prevent accidental pops
 		
-		if self.softmax == True:
+		if self.softmax == True and self.prey==False:
 			temp_policy = copy.deepcopy(self.get_softmax_action_selection(self.get_policy(state), action_selection_var))
 		else:
 			temp_policy = copy.deepcopy(self.get_e_greedy_policy(self.get_policy(state), action_selection_var))

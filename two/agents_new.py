@@ -78,3 +78,6 @@ class Prey(Agent):
 	def __repr__(self):
 		""" Represent Prey as O """
 		return ' O '		
+
+	def get_action(self, state, epsilon=0.0, restricted=None):
+		return self.policy_grid.get_action_prey(state, restricted)

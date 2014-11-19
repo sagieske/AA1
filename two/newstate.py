@@ -12,7 +12,7 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[3,3], softmax=False, verbose=2, grid_size=[11,11], learning_type='Q-learning'):
+	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, verbose=2, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
 		self.learning_type = learning_type
 		#Instantiate environment object with correct size, predator and prey locations
@@ -63,8 +63,6 @@ class Game:
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		if self.verbose > 0:
-			print type(self.predator.get_policy_grid())
 		return steps, self.predator.get_policy_grid()
 
 	def relative_xy(self, location1, location2):
@@ -242,6 +240,7 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 		predator = Predator(policy_grid)
 		#Initialize episode
 		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
+		print "Round ", x
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -273,7 +272,7 @@ if __name__ == "__main__":
 	parser.add_argument('-epsilon', metavar='Specify value of epsilon', type=float)
 	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
 	parser.add_argument('-learning_type', metavar='Specify learning type', type=str)
-	parser.add_argument('-softmax', metavar='Use softmax', type=bool)
+	parser.add_argument('-softmax', metavar='Use softmax', type=str)
 	args = parser.parse_args()
 
 	N = 100
@@ -290,7 +289,8 @@ if __name__ == "__main__":
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
 	if(vars(args)['softmax'] is not None):
-		softmax = vars(args)['softmax']
+		if(vars(args)['softmax'] == "yes"):
+			softmax = True
 	if(vars(args)['grid_size'] is not None):
 		grid_size = vars(args)['grid_size']
 	if(vars(args)['discount'] is not None):
@@ -304,5 +304,5 @@ if __name__ == "__main__":
 	else:
 		verbose = 2
 	print 'verbose: ', verbose
-
+	
 	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
