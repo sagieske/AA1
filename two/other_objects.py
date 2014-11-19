@@ -133,7 +133,7 @@ class Policy:
 
 	def get_action(self, state, restricted=None, epsilon=0.0, discount_factor=0.0, alpha=0.0, predator=True, predator_location=None, prey_location=None):
 		""" Choose an action and turn it into a move """
-		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon)
+		chosen_distance = self.pick_action(state, restricted=restricted, epsilon=epsilon, predator_location=predator_location, prey_location=prey_location)
 		chosen_action = self.distance_to_action(chosen_distance, predator_location, prey_location) 
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
@@ -206,7 +206,7 @@ class Policy:
 		return probability_dict
 
 
-	def pick_action(self, state, restricted=None, epsilon=0.0):
+	def pick_action(self, state, restricted=None, epsilon=0.0, predator_location=None, prey_location=None):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy using e_greedy for the current state
 		
@@ -218,9 +218,10 @@ class Policy:
 			update_probability = 0
 			#Sum the probabilities of all blocked moves
 			for block in restricted:
-				update_probability += temp_policy[block]
+				block = self.action_to_distance(block, predator_location, prey_location)
+				update_probability += temp_policy[str(block)]
 				#Remove the blocked actions from the policy
-				del temp_policy[block]
+				del temp_policy[str(block)]
 			#Zip the policy into a tuple of names, and a tuple of values
 			action_name, policy = zip(*temp_policy.items())
 			#Divide the summed probabilities of blocked actions
