@@ -103,7 +103,7 @@ class Policy:
 			self.policy_grid = policy_grid
 		#Otherwise, create a grid of grid_size and fill it with the policy
 		else:
-			self.policy_grid = [[[[self.policy for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
+			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
 		#Store the actions and their corresponding transformations
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 
@@ -134,6 +134,7 @@ class Policy:
 		if self.verbose > 0:
 			print "epsilon: ", epsilon
 			print "state: ", state
+			print "policy for ", state, " : ", self.get_policy(state)
 		#If there are restricted actions, do a restricted action pick
 		if restricted is not None:
 			chosen_action = self.pick_action_restricted(state, epsilon, restricted)
@@ -146,20 +147,25 @@ class Policy:
 		return chosen_move, chosen_action		
 
 	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+		#Get the q-value of the current state, action pair
 		current_q_value = self.get_policy(old_state)[action]
-		reward = self.reward(old_state)
+		#Get the reward for the new state (10 if caught, 0 otherwise)
+		reward = self.reward(new_state)
+		#Get the max action for the new state
 		new_move, new_max_action = self.get_action(new_state, 0.0)
-		new_predator_location = self.get_new_location([new_state[0], new_state[1]], new_move)
-		new_max_state = [new_predator_location[0], new_predator_location[1], old_state[2], old_state[3]]
+		#Get the q-value for the new state and its max action
 		new_q_value = self.get_policy(new_state)[new_max_action]
+		discounted_next = discount_factor*new_q_value
+		difference_q = discounted_next - current_q_value
+		#Update the q_value for the current state by adding reward + discounted next q-value - current q-value, discounted by learning rate
 		updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
+		#Update the q-value for the old state, action pair
 		self.get_policy(old_state)[action] = updated_q_value
 		if self.verbose > 0:
 			print "In state ", old_state, " action ", action, " was chosen leading to state ", new_state
 			print "Q value for this state is ", current_q_value, " epsilon is ", epsilon, " reward is ", reward
+			print "Discounted q_value is ", discounted_next, " difference between q_values is ", difference_q
 			print "New max action = ", new_max_action, " with new move: ", new_move
-			print "New predator_location: ", new_predator_location
-			print "New max state: ", new_max_state
 			print "Q value for next state is ", new_q_value
 			print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value
 
