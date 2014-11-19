@@ -62,7 +62,7 @@ class Game:
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		print type(self.predator.get_policy_grid())
-		return steps, self.predator
+		return steps, self.predator.get_policy_grid()
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -262,14 +262,18 @@ if __name__ == "__main__":
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
 	parser.add_argument('-learning_rate', metavar='Specify value of learning rate', type=float)
 	parser.add_argument('-epsilon', metavar='Specify value of epsilon', type=float)
+	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
 	args = parser.parse_args()
 
 	N = 100
 	discount_factor = 0.8
 	learning_rate = 0.5
 	epsilon = 0.1
+	grid_size = 11
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['grid_size'] is not None):
+		grid_size = vars(args)['grid_size']
 	if(vars(args)['discount'] is not None):
 		discount_factor = vars(args)['discount']
 	if(vars(args)['learning_rate'] is not None):
@@ -282,4 +286,4 @@ if __name__ == "__main__":
 		verbose = 2
 
 
-	run_episodes("policy", "predator", [4,4], N, learning_rate, discount_factor, epsilon)
+	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon)

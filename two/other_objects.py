@@ -4,6 +4,7 @@ import itertools
 import math
 import operator
 import sys
+import operator
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -130,6 +131,7 @@ class Policy:
 	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """
 		print "epsilon: ", epsilon
+		print "state: ", state
 		#If there are restricted actions, do a restricted action pick
 		if restricted is not None:
 			chosen_action = self.pick_action_restricted(state, epsilon, restricted)
@@ -176,14 +178,17 @@ class Policy:
 		else:
 			return 0
 
-	def pick_action(self, state, epsilon):
+	def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state
-		print "working with:", self.get_policy(state)
-		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
-		print "egreedy: ", policy
-		softmax_policy =self.get_softmax_action_selection(self.get_policy(state))
-		print "softmax:", softmax_policy
+		if e_greedy:
+			policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
+		# UNCOMMENT FOR SOFTMAX
+		elif softmax:
+			policy =self.get_softmax_action_selection(self.get_policy(state))
+		else:
+			print "YOU DID NOT CHOOSE AN ACTION-SELECTION METHOD, STUPID YOU.."
+
 
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
@@ -206,7 +211,7 @@ class Policy:
 		other_action_list = []
 		#Get the maximum value in the policy
 		max_value = max(policy.iteritems(), key=operator.itemgetter(1))[1]
-		
+
 		#For each action, check if their value is maximum
 		for action in policy.iteritems():
 			#If value is max, append to best_action_list
@@ -216,7 +221,6 @@ class Policy:
 			else:
 				other_action_list.append(action[0])
 		probability_dict = {}
-		print "best actions", best_action_list
 		#Compute the probability of the best actions
 		best_actions_probability = (1.0 - epsilon)/len(best_action_list)
 		#The best actions have a probability of best_actions_probability + extra_probability

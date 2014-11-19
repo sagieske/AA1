@@ -41,7 +41,7 @@ class Agent(object):
 
 	def get_policy_grid(self):
 		""" Return policy grid for agent """
-		return self.policy
+		return self.policy_grid
 
 	def set_policy_grid(self, policy_grid):
 		""" Set policy grid for agent """
