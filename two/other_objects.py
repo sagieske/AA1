@@ -88,7 +88,7 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, verbose=0):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		#Set grid size
 		self.grid_size = grid_size
@@ -119,6 +119,7 @@ class Policy:
 			distances = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			self.distance_dict = dict.fromkeys(distances, 15)
 		self.verbose= verbose
+		self.softmax = softmax
 
 				
 	def get_policy(self, state):
@@ -186,16 +187,21 @@ class Policy:
 		else:
 			return 0
 
-	def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
+	def pick_action(self, state, action_selection_var): #def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
-		if e_greedy:
-			policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
-		# softmax
-		elif softmax:
-			policy =self.get_softmax_action_selection(self.get_policy(state))
+		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
+		if self.softmax == True:
+			policy = self.get_softmax_action_selection(self.get_policy(state), action_selection_var)
 		else:
-			print "YOU DID NOT CHOOSE AN ACTION-SELECTION METHOD, STUPID YOU.."
+			policy = self.get_e_greedy_policy(self.get_policy(state), action_selection_var)
+#		if e_greedy:
+#			policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
+		# softmax
+#		elif softmax:
+#			policy =self.get_softmax_action_selection(self.get_policy(state))
+#		else:
+#			print "YOU DID NOT CHOOSE AN ACTION-SELECTION METHOD, STUPID YOU.."
 
 
 		#Zip the policy into a tuple of names, and a tuple of values
@@ -259,11 +265,14 @@ class Policy:
 		return softmax_prob
 
 
-	def pick_action_restricted(self, state, epsilon, blocked_moves):
+	def pick_action_restricted(self, state, action_selection_var, blocked_moves): # epsilon --> is now action_selection_var
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
 		#Make a deep copy of the policy to prevent accidental pops
-		# TODO: add softmax
-		temp_policy = copy.deepcopy(self.get_e_greedy_policy(self.get_policy(state), epsilon))
+		
+		if self.softmax == True:
+			temp_policy = copy.deepcopy(self.get_softmax_action_selection(self.get_policy(state), action_selection_var))
+		else:
+			temp_policy = copy.deepcopy(self.get_e_greedy_policy(self.get_policy(state), action_selection_var))
 		update_probability = 0
 		#Sum the probabilities of all blocked moves
 		for block in blocked_moves:

@@ -12,13 +12,13 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[2,2], verbose=2, grid_size=[11,11]):
+	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[2,2], softmax=False, verbose=2, grid_size=[11,11]):
 		""" Initalize environment and agents """
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True, verbose=verbose)
+			prey_policy = Policy(grid_size, prey=True, softmax=softmax, verbose=verbose)
 			self.prey = Prey(prey_policy)
 		else:
 			self.prey = prey
@@ -26,7 +26,7 @@ class Game:
 				self.environment.place_object('predator', prey_location)
 		#Create predator if none was given
 		if(predator==None):
-			predator_policy = Policy(grid_size, prey=False,verbose=verbose)
+			predator_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose)
 			self.predator = Predator(predator_policy)
 		else:
 			self.predator = predator
@@ -225,17 +225,17 @@ class Game:
 		else:
 			return 0.05
 
-def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, verbose=0):
+def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
-	game = Game(grid_size=grid_size, verbose=verbose)
+	game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose)
 	for x in range(0, N):
 		#Run episode until prey is caught
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 		predator = Predator(policy_grid)
 		#Initialize episode
-		game = Game(grid_size=grid_size, predator=predator, verbose=verbose)
+		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -266,6 +266,7 @@ if __name__ == "__main__":
 	parser.add_argument('-learning_rate', metavar='Specify value of learning rate', type=float)
 	parser.add_argument('-epsilon', metavar='Specify value of epsilon', type=float)
 	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
+	parser.add_argument('-softmax', metavar='Use softmax', type=bool)
 	args = parser.parse_args()
 
 	N = 100
@@ -273,8 +274,11 @@ if __name__ == "__main__":
 	learning_rate = 0.5
 	epsilon = 0.1
 	grid_size = 11
+	softmax = False
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['softmax'] is not None):
+		softmax = vars(args)['softmax']
 	if(vars(args)['grid_size'] is not None):
 		grid_size = vars(args)['grid_size']
 	if(vars(args)['discount'] is not None):
@@ -289,4 +293,4 @@ if __name__ == "__main__":
 		verbose = 2
 	print 'verbose: ', verbose
 
-	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, verbose=verbose)
+	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose)
