@@ -88,7 +88,7 @@ class Game:
 		self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		if(not same):
 			#If prey is not caught, move it
-			prey_location = self.turn_prey(old_state, predator_location)
+			prey_location = self.turn_prey(old_state, predator_location, epsilon)
 			#Print effect of this turn
 			if (self.verbose == 1 and same):
 				print 'States: '
@@ -103,17 +103,17 @@ class Game:
 		#Return caught or not
 		return same
 
-	def turn_prey(self, state, predator_location):
+	def turn_prey(self, state, predator_location, epsilon):
 		""" Perform turn for prey """
 		#Retrieve the action for the prey for this state
-		prey_move, action_name = self.prey.get_action(state)
+		prey_move, action_name = self.prey.get_action(state, epsilon)
 		#Turn action into new location
 		new_location = self.get_new_location('prey', prey_move)
 		#Check if the new location contains the predator, and if so, pick different action
 		if new_location == predator_location:
 			print "PREDATOR IS HERE YO - DONT GO THERE (we say to the prey)"
 			#Get action, restricted by predator location
-			prey_move, action_name = self.prey.get_action(state, restricted=[action_name])
+			prey_move, action_name = self.prey.get_action(state, epsilon, restricted=[action_name])
 			#Turn action into new location
 			new_prey_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
