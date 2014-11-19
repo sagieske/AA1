@@ -26,9 +26,9 @@ class Agent(object):
 		""" Get collected reward for predator """
 		return self.reward
 
-	def get_action(self, state, restricted=None):
+	def get_action(self, state, epsilon=0.0, restricted=None):
 		#Retrieve an action using the policy for this state in the policy object 
-		return self.policy_grid.get_action(state, restricted)
+		return self.policy_grid.get_action(state, epsilon, restricted)
 
 	def get_policy(self, state):
 		""" Return the predator's policy """
@@ -60,7 +60,10 @@ class Predator(Agent):
 
 	def __repr__(self):
 		""" Represent Predator as X """
-		return ' X '		
+		return ' X '	
+
+	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+		self.policy_grid.q_learning(action, old_state, new_state, learning_rate, discount_factor, epsilon)
 
 class Prey(Agent):
 	""" Prey Agent, inherits from Agent class """

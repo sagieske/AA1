@@ -92,7 +92,7 @@ class Policy:
 		self.grid_size = grid_size
 		#If the agent is not a prey, set the policy to random
 		if prey==False:
-			self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
+			self.policy = {'North':15, 'East':15, 'South':15, 'West':15, 'Wait':15}
 		#If the agent is a prey, set the policy to the prey-policy (80% wait, 20% action)
 		else:
 			self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
@@ -136,23 +136,59 @@ class Policy:
 		l = state[3]
 		return self.policy_grid[i][j][k][l]
 
-	def get_action(self, state, restricted=None):
+	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """
+		print "epsilon: ", epsilon
 		#If there are restricted actions, do a restricted action pick
 		if restricted is not None:
-			chosen_action = self.pick_action_restricted(state, restricted)
+			chosen_action = self.pick_action_restricted(state, epsilon, restricted)
 		#Otherwise, just choose an action
 		else:
-			chosen_action = self.pick_action(state)
+			chosen_action = self.pick_action(state, epsilon)
 		#Get the transformation corresponding to the chosen action
 		chosen_move = self.actions[chosen_action]
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_action		
 
-	def pick_action(self, state):
+	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+		print "In state ", old_state, " action ", action, " was chosen leading to state ", new_state
+		
+		current_q_value = self.get_policy(old_state)[action]
+		reward = self.reward(old_state)
+		print "Q value for this state is ", current_q_value, " epsilon is ", epsilon, " reward is ", reward
+		new_move, new_max_action = self.get_action(new_state, 0.0)
+		print "New max action = ", new_max_action, " with new move: ", new_move
+		new_predator_location = self.get_new_location([new_state[0], new_state[1]], new_move)
+		print "New predator_location: ", new_predator_location
+		new_max_state = [new_predator_location[0], new_predator_location[1], old_state[2], old_state[3]]
+		print "New max state: ", new_max_state
+		new_q_value = self.get_policy(new_state)[new_max_action]
+		print "Q value for next state is ", new_q_value
+		updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
+		print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value
+		self.get_policy(old_state)[action] = updated_q_value
+
+	def get_new_location(self, object_location, transformation):
+		""" Returns new location of an object when performs the chosen move """
+		new_location = []
+		#Retrieve the agent's position in the grid
+		#Get the size of the environment
+		environment_size = self.grid_size
+		#Wrap edges to make grid toroidal
+		new_location.append((object_location[0] + transformation[0]) % environment_size[0])
+		new_location.append((object_location[1] + transformation[1]) % environment_size[1])
+		return new_location
+
+	def reward(self, state):
+		if state[0] == state[2] and state[1] == state[3]:
+			return 10
+		else:
+			return 0
+
+	def pick_action(self, state, epsilon):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state
-		policy = self.get_policy(state)
+		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
 		#Use np.random.choice to select actions according to probabilities
@@ -160,10 +196,38 @@ class Policy:
 		#Return name of action
 		return choice_index	
 
-	def pick_action_restricted(self, state, blocked_moves):
+	def get_e_greedy_policy(self, policy, epsilon=0.0):
+		#Get |A(s)|
+		number_actions = len(policy)
+		#Get the extra probability to divide over actions
+		extra_probability = epsilon/number_actions
+		best_action_list = []
+		other_action_list = []
+		#Get the maximum value in the policy
+		max_value = policy[max(policy)]
+		#For each action, check if their value is maximum
+		for action in policy.iteritems():
+			#If value is max, append to best_action_list
+			if action[1] == max_value:
+				best_action_list.append(action[0])
+			#Otherwise, append to other_action_list
+			else:
+				other_action_list.append(action[0])
+		probability_dict = {}
+		#Compute the probability of the best actions
+		best_actions_probability = (1.0 - epsilon)/len(best_action_list)
+		#The best actions have a probability of best_actions_probability + extra_probability
+		for max_action in best_action_list:
+			probability_dict[max_action] = best_actions_probability + extra_probability
+		#The other actions have a probability of extra_probability
+		for other_action in other_action_list:
+			probability_dict[other_action] = extra_probability
+		return probability_dict		
+
+	def pick_action_restricted(self, state, epsilon, blocked_moves):
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
 		#Make a deep copy of the policy to prevent accidental pops
-		temp_policy = copy.deepcopy(self.get_policy(state))
+		temp_policy = copy.deepcopy(self.get_e_greedy_policy(self.get_policy(state), epsilon))
 		update_probability = 0
 		#Sum the probabilities of all blocked moves
 		for block in blocked_moves:
