@@ -178,7 +178,11 @@ class Policy:
 	def pick_action(self, state, epsilon):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state
+		print "working with:", self.get_policy(state)
 		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
+		print "egreedy: ", policy
+		print "softmax:", self.get_softmax_action_selection(self.get_policy(state))
+
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
 		#Use np.random.choice to select actions according to probabilities
@@ -213,6 +217,26 @@ class Policy:
 		for other_action in other_action_list:
 			probability_dict[other_action] = extra_probability
 		return probability_dict		
+	
+	def get_softmax_action_selection(self, policy, temperature=0.1):
+		"""
+		Softmax utilizes action-selection probabilities which are determined by
+		ranking the value-function estimates using a Boltzmann distribution
+		"""
+		#For each action, divide by temperature
+		softmax_prob = dict.fromkeys(policy.keys(), None)
+		action_selection = []
+		total_sum = 0
+		for actionname, q_value in policy.iteritems():
+			new_q  = math.exp(q_value/temperature)
+			action_selection.append((actionname,new_q))
+			total_sum += new_q
+		# Calculate softmax probabilities for each action
+		for actionname, new_q in action_selection:
+			value = new_q/total_sum
+			softmax_prob[actionname] = value
+		return softmax_prob
+
 
 	def pick_action_restricted(self, state, epsilon, blocked_moves):
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
