@@ -116,16 +116,6 @@ class Policy:
 			# Get all possible absolute distances from prey
 			distances = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			self.distance_dict = dict.fromkeys(distances, 15)
-		#self.get_Q_value_encoded([10,10], [4,4])
-
-	def get_Q_value_encoded(self, state_prey, state_predator):
-		""" Get Q-value from global dictionary. First calculate the absolute distance to the prey and use this to retrieve the q-value"""
-		# Get absolute distance to prey using toroidal property
-		distance_x = min(abs(state_prey[0] - state_predator[0]), abs(self.grid_size[0] - abs(state_prey[0] - state_predator[0])))
-		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(self.grid_size[1] - abs(state_prey[1] - state_predator[1])))
-		# Retrieve Q value from dict
-		q_value = self.distance_dict[(distance_x, distance_y)]
-		return q_value
 
 				
 	def get_policy(self, state):
