@@ -12,7 +12,7 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[2,2], verbose=2, grid_size=[11,11]):
+	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], verbose=2, grid_size=[11,11]):
 		""" Initalize environment and agents """
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
