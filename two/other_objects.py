@@ -2,6 +2,7 @@ import numpy as np
 import copy
 import itertools
 import math
+import operator
 import sys
 
 class Environment:
@@ -181,7 +182,8 @@ class Policy:
 		print "working with:", self.get_policy(state)
 		policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
 		print "egreedy: ", policy
-		print "softmax:", self.get_softmax_action_selection(self.get_policy(state))
+		softmax_policy =self.get_softmax_action_selection(self.get_policy(state))
+		print "softmax:", softmax_policy
 
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
@@ -191,6 +193,11 @@ class Policy:
 		return choice_index	
 
 	def get_e_greedy_policy(self, policy, epsilon=0.0):
+		"""
+		With epsilon-greedy, at each time step, the agent selects a random
+		action with a fixed probability, 0 <= epsilon<= 1, instead of selecting greedily one of
+		the learned optimal actions with respect to the Q-function
+		"""
 		#Get |A(s)|
 		number_actions = len(policy)
 		#Get the extra probability to divide over actions
@@ -198,7 +205,8 @@ class Policy:
 		best_action_list = []
 		other_action_list = []
 		#Get the maximum value in the policy
-		max_value = policy[max(policy)]
+		max_value = max(policy.iteritems(), key=operator.itemgetter(1))[1]
+		
 		#For each action, check if their value is maximum
 		for action in policy.iteritems():
 			#If value is max, append to best_action_list
@@ -208,6 +216,7 @@ class Policy:
 			else:
 				other_action_list.append(action[0])
 		probability_dict = {}
+		print "best actions", best_action_list
 		#Compute the probability of the best actions
 		best_actions_probability = (1.0 - epsilon)/len(best_action_list)
 		#The best actions have a probability of best_actions_probability + extra_probability
