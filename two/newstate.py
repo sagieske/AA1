@@ -39,13 +39,13 @@ class Game:
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
-	def get_rounds(self):
+	def get_rounds(self, learning_rate, discount_factor, epsilon):
 		""" Return rounds played """
 		#Play rounds until the prey is caught, and return how many were needed
-		self.rounds = self.until_caught()
+		self.rounds = self.until_caught(learning_rate, discount_factor, epsilon)
 		return self.rounds
 
-	def until_caught(self):
+	def until_caught(self, learning_rate, discount_factor, epsilon):
 		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
 		steps = 0
 		caught = 0
@@ -55,24 +55,31 @@ class Game:
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			caught = self.turn(state)
+			caught = self.turn(state, learning_rate, discount_factor, epsilon)
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		return steps
+		print type(self.predator)
+		return steps, self.predator
 
-	def turn(self, state):
+	def absolute_xy(self, location1, location2):
+		return [abs(location1[0]- location2[0]), abs(location1[1] - location2[1])]
+
+	def turn(self, old_state, learning_rate, discount_factor, epsilon):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
-		prey_location = [state[2], state[3]]
+		prey_location = [old_state[2], old_state[3]]
 		#Move the predator
-		predator_location = self.turn_predator(state)
+		predator_location, predator_action = self.turn_predator(old_state)
+		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
+		print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
+		self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		if(not same):
 			#If prey is not caught, move it
-			prey_location = self.turn_prey(state, predator_location)
+			prey_location = self.turn_prey(old_state, predator_location)
 			#Print effect of this turn
 			if (self.verbose == 1 and same):
 				print 'States: '
@@ -95,6 +102,7 @@ class Game:
 		new_location = self.get_new_location('prey', prey_move)
 		#Check if the new location contains the predator, and if so, pick different action
 		if new_location == predator_location:
+			print "PREDATOR IS HERE YO"
 			#Get action, restricted by predator location
 			prey_move, action_name = self.prey.get_action(state, restricted=[action_name])
 			#Turn action into new location
@@ -106,12 +114,12 @@ class Game:
 	def turn_predator(self, state):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state)
+		predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location
 		self.environment.move_object('predator', new_location)
-		return new_location
+		return new_location, action_name
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
@@ -208,62 +216,21 @@ class Game:
 		else:
 			return 0.05
 
-	def q_value(self, state, action, value_grid, discount_factor, grid_size):
-		""" Calculate q value for given state and action"""
-		# Initialize value
-		i = state[0] 
-		j = state[1]
-		k = state[2]
-		l = state[3]
-		# Predator is at same location as prey
-		if([i,j] == [k,l]):
-			return 0
-		q_value = 0
-		# Initialize possible new states for predator and prey
-		possible_new_predator = [[i,j], [i+1,j], [i,j+1], [i-1,j], [i,j-1]]
-		possible_new_prey = [[k,l], [k+1,l], [k,l+1], [k-1,l], [k,l-1]]
-		# Loop over possible predator states
-		for new_state in possible_new_predator:
-			# Check for toroidal grid
-			new_state = self.wrap_state(new_state, grid_size, False)
-			# Get reward 
-			reward = self.reward(state, [new_state[0], new_state[1], k, l], action)
-			# Get transition value for predator move
-			transition_pred = self.predator_transition([i,j], new_state, action)
-			#If the reward is 10, the value of the next state is 0 (because: terminal)
-			if (reward == 10 and transition_pred == 1):
-				return 10
-			#If the action cannot lead to the next state, the entire value will be 0
-			else:
-				# Loop over all possible new states for prey
-				for new_prey in possible_new_prey:
-					# Check or toroidal
-					new_prey = self.wrap_state(new_prey, grid_size, False)
-					# Prey cannot run into predator
-					if(new_prey == new_state):
-						continue
-					# Prey transitions
-					if(new_prey == [k,l]):
-						transition_prey = 0.8
-					else:
-						transition_prey = 0.05
-					# Add to qvalue
-					q_value += transition_prey*transition_pred * discount_factor * value_grid[new_state[0]][new_state[1]][new_prey[0]][new_prey[1]]
-		return q_value
-
-def run_episodes(policy, predator, grid_size, N):
+def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
+	game = Game(grid_size=grid_size)
 	for x in range(0, N):
-		#Initialize episode
-		game = Game(grid_size=grid_size)
 		#Run episode until prey is caught
-		current_rounds = game.get_rounds()
+		current_rounds, predator = game.get_rounds(learning_rate, discount_factor, epsilon)
+		#Initialize episode
+		game = Game(grid_size=grid_size, predator = predator)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
 		rounds_list.append(current_rounds)
+	print "rounds list: ", rounds_list
 	#Compute average number of rounds needed
 	average_rounds = float(total_rounds)/N
 	#Compute list of variances
@@ -280,23 +247,27 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Run simulation")
 	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
 	parser.add_argument('-discount', metavar='Specify the size of the discount factor for value iteration.', type=float)
-	parser.add_argument('-loops', metavar='Specify the amount of loops to test value iteration on.', type=int)
 	parser.add_argument('-verbose', metavar='Verbose level of game. 0: no grids/states, 1: only start and end, 2: all', type=int)
+	parser.add_argument('-learning_rate', metavar='Specify value of learning rate', type=float)
+	parser.add_argument('-epsilon', metavar='Specify value of epsilon', type=float)
 	args = parser.parse_args()
 
 	N = 100
 	discount_factor = 0.8
-	loops = 3
+	learning_rate = 0.5
+	epsilon = 0.1
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
 	if(vars(args)['discount'] is not None):
 		discount_factor = vars(args)['discount']
-	if(vars(args)['loops'] is not None):
-		loops = vars(args)['loops']
+	if(vars(args)['learning_rate'] is not None):
+		learning_rate = vars(args)['learning_rate']
+	if(vars(args)['epsilon'] is not None):
+		epsilon = vars(args)['epsilon']
 	if(vars(args)['verbose'] is not None):
 		verbose = vars(args)['verbose']
 	else:
 		verbose = 2
 
 
-	run_episodes("policy", "predator", [4,4], N)
+	run_episodes("policy", "predator", [4,4], N, learning_rate, discount_factor, epsilon)
