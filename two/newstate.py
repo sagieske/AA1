@@ -9,6 +9,7 @@ import pdb
 from agents_new import Predator, Prey
 import helpers
 from other_objects import Environment, Policy
+import matplotlib.pyplot as plt
 
 class Game:
 	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[2,2], verbose=2, grid_size=[11,11]):
@@ -60,7 +61,7 @@ class Game:
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		print type(self.predator)
+		print type(self.predator.get_policy_grid())
 		return steps, self.predator
 
 	def absolute_xy(self, location1, location2):
@@ -223,9 +224,10 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	game = Game(grid_size=grid_size)
 	for x in range(0, N):
 		#Run episode until prey is caught
-		current_rounds, predator = game.get_rounds(learning_rate, discount_factor, epsilon)
+		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+		predator = Predator(policy_grid)
 		#Initialize episode
-		game = Game(grid_size=grid_size)
+		game = Game(grid_size=grid_size, predator=predator)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -241,6 +243,10 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	standard_deviation = math.sqrt(variance)
 	print "Average rounds needed over ", N, " episodes: ", average_rounds
 	print "Standard deviation: ", standard_deviation	
+	plt.plot(rounds_list)
+	plt.ylabel('Rounds needed before catch')
+	plt.xlabel('Number of rounds')
+	plt.show()
 
 if __name__ == "__main__":
 	#Command line arguments
