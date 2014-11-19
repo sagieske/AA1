@@ -225,7 +225,7 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 		#Run episode until prey is caught
 		current_rounds, predator = game.get_rounds(learning_rate, discount_factor, epsilon)
 		#Initialize episode
-		game = Game(grid_size=grid_size, predator = predator)
+		game = Game(grid_size=grid_size)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
