@@ -63,8 +63,14 @@ class Game:
 		print type(self.predator)
 		return steps, self.predator
 
-	def absolute_xy(self, location1, location2):
-		return [abs(location1[0]- location2[0]), abs(location1[1] - location2[1])]
+	def relative_xy(self, location1, location2):
+		""" Get relative(shortest) distance between two locations using the toroidal property"""
+		# Get grid size of the game
+		grid_size = self.environment.get_size()
+		# Get relative distance to prey using toroidal property
+		distance_x = min(abs(state_prey[0] - state_predator[0]), abs(grid_size[0] - abs(state_prey[0] - state_predator[0])))
+		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
+		return [distance_x, distance_y]
 
 	def turn(self, old_state, learning_rate, discount_factor, epsilon):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
