@@ -62,7 +62,7 @@ class Game:
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		print type(self.predator.get_policy_grid())
-		return steps, self.predator
+		return steps, self.predator.get_policy_grid()
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -282,4 +282,4 @@ if __name__ == "__main__":
 		verbose = 2
 
 
-	run_episodes("policy", "predator", [4,4], N, learning_rate, discount_factor, epsilon)
+	run_episodes("policy", "predator", [5,5], N, learning_rate, discount_factor, epsilon)
