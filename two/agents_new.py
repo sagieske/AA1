@@ -4,11 +4,12 @@ import random
 
 class Agent(object):
 	""" Agent class, with policy """
-	def __init__(self, policy_grid):
+	def __init__(self, policy_grid, verbose=0):
 		#Store given policy
 		self.policy_grid = policy_grid
 		#Set reward to 0
 		self.reward = 0
+		self.verbose = verbose
 
 	def get_transformation(self, action):
 		""" Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
@@ -54,7 +55,7 @@ class Agent(object):
 
 class Predator(Agent):
 	""" Predator agent, inherits from Agent class """
-	def __init__(self, policy):
+	def __init__(self, policy, verbose=0):
 		""" Initializes Predator by calling Agent init """
 		Agent.__init__(self, policy)
 

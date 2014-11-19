@@ -88,7 +88,7 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False):
+	def __init__(self, grid_size, policy_grid=None, prey=False, verbose=0):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		#Set grid size
 		self.grid_size = grid_size
@@ -118,6 +118,7 @@ class Policy:
 			# Get all possible absolute distances from prey
 			distances = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			self.distance_dict = dict.fromkeys(distances, 15)
+		self.verbose= verbose
 
 				
 	def get_policy(self, state):
@@ -130,8 +131,9 @@ class Policy:
 
 	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """
-		print "epsilon: ", epsilon
-		print "state: ", state
+		if self.verbose > 0:
+			print "epsilon: ", epsilon
+			print "state: ", state
 		#If there are restricted actions, do a restricted action pick
 		if restricted is not None:
 			chosen_action = self.pick_action_restricted(state, epsilon, restricted)
@@ -144,22 +146,22 @@ class Policy:
 		return chosen_move, chosen_action		
 
 	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
-		print "In state ", old_state, " action ", action, " was chosen leading to state ", new_state
-		
 		current_q_value = self.get_policy(old_state)[action]
 		reward = self.reward(old_state)
-		print "Q value for this state is ", current_q_value, " epsilon is ", epsilon, " reward is ", reward
 		new_move, new_max_action = self.get_action(new_state, 0.0)
-		print "New max action = ", new_max_action, " with new move: ", new_move
 		new_predator_location = self.get_new_location([new_state[0], new_state[1]], new_move)
-		print "New predator_location: ", new_predator_location
 		new_max_state = [new_predator_location[0], new_predator_location[1], old_state[2], old_state[3]]
-		print "New max state: ", new_max_state
 		new_q_value = self.get_policy(new_state)[new_max_action]
-		print "Q value for next state is ", new_q_value
 		updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
-		print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value
 		self.get_policy(old_state)[action] = updated_q_value
+		if self.verbose > 0:
+			print "In state ", old_state, " action ", action, " was chosen leading to state ", new_state
+			print "Q value for this state is ", current_q_value, " epsilon is ", epsilon, " reward is ", reward
+			print "New max action = ", new_max_action, " with new move: ", new_move
+			print "New predator_location: ", new_predator_location
+			print "New max state: ", new_max_state
+			print "Q value for next state is ", new_q_value
+			print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
@@ -178,12 +180,12 @@ class Policy:
 		else:
 			return 0
 
-	def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
+	def pick_action(self, state, epsilon, e_greedy=False, softmax=True):
 		""" Use the probabilities in the policy to pick a move """
-		#Retrieve the policy for the current state
+		#Retrieve the policy for the current state using e_greedy or softmax
 		if e_greedy:
 			policy = self.get_e_greedy_policy(self.get_policy(state), epsilon)
-		# UNCOMMENT FOR SOFTMAX
+		# softmax
 		elif softmax:
 			policy =self.get_softmax_action_selection(self.get_policy(state))
 		else:
@@ -231,7 +233,7 @@ class Policy:
 			probability_dict[other_action] = extra_probability
 		return probability_dict		
 	
-	def get_softmax_action_selection(self, policy, temperature=0.1):
+	def get_softmax_action_selection(self, policy, temperature=0.3):
 		"""
 		Softmax utilizes action-selection probabilities which are determined by
 		ranking the value-function estimates using a Boltzmann distribution
