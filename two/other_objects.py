@@ -180,7 +180,7 @@ class Policy:
 		else:
 			return 0
 
-	def pick_action(self, state, epsilon, e_greedy=False, softmax=True):
+	def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		if e_greedy:
@@ -256,6 +256,7 @@ class Policy:
 	def pick_action_restricted(self, state, epsilon, blocked_moves):
 		""" Use the probabilities in the policy to pick a move but can not perform blocked move """
 		#Make a deep copy of the policy to prevent accidental pops
+		# TODO: add softmax
 		temp_policy = copy.deepcopy(self.get_e_greedy_policy(self.get_policy(state), epsilon))
 		update_probability = 0
 		#Sum the probabilities of all blocked moves
