@@ -18,7 +18,7 @@ class Game:
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True)
+			prey_policy = Policy(grid_size, prey=True, verbose=verbose)
 			self.prey = Prey(prey_policy)
 		else:
 			self.prey = prey
@@ -26,7 +26,7 @@ class Game:
 				self.environment.place_object('predator', prey_location)
 		#Create predator if none was given
 		if(predator==None):
-			predator_policy = Policy(grid_size, prey=False)
+			predator_policy = Policy(grid_size, prey=False,verbose=verbose)
 			self.predator = Predator(predator_policy)
 		else:
 			self.predator = predator
@@ -61,7 +61,8 @@ class Game:
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		print type(self.predator.get_policy_grid())
+		if self.verbose > 0:
+			print type(self.predator.get_policy_grid())
 		return steps, self.predator.get_policy_grid()
 
 	def relative_xy(self, location1, location2):
@@ -80,7 +81,8 @@ class Game:
 		#Move the predator
 		predator_location, predator_action = self.turn_predator(old_state)
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
-		print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
+		if self.verbose > 0:
+			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
 		self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
@@ -109,7 +111,7 @@ class Game:
 		new_location = self.get_new_location('prey', prey_move)
 		#Check if the new location contains the predator, and if so, pick different action
 		if new_location == predator_location:
-			print "PREDATOR IS HERE YO"
+			print "PREDATOR IS HERE YO - DONT GO THERE (we say to the prey)"
 			#Get action, restricted by predator location
 			prey_move, action_name = self.prey.get_action(state, restricted=[action_name])
 			#Turn action into new location
@@ -223,17 +225,17 @@ class Game:
 		else:
 			return 0.05
 
-def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon):
+def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, verbose=0):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
-	game = Game(grid_size=grid_size)
+	game = Game(grid_size=grid_size, verbose=verbose)
 	for x in range(0, N):
 		#Run episode until prey is caught
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 		predator = Predator(policy_grid)
 		#Initialize episode
-		game = Game(grid_size=grid_size, predator=predator)
+		game = Game(grid_size=grid_size, predator=predator, verbose=verbose)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -284,6 +286,6 @@ if __name__ == "__main__":
 		verbose = vars(args)['verbose']
 	else:
 		verbose = 2
+	print 'verbose: ', verbose
 
-
-	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon)
+	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, verbose=verbose)
