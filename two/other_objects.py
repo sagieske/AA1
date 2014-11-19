@@ -169,6 +169,30 @@ class Policy:
 			print "Q value for next state is ", new_q_value
 			print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value
 
+	def sarsa(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+		#Get the q-value of the current state, action pair
+		current_q_value = self.get_policy(old_state)[action]
+		#Get the reward for the new state (10 if caught, 0 otherwise)
+		reward = self.reward(new_state)
+		#Get the max action for the new state
+		new_move, new_action = self.get_action(new_state, epsilon)
+		#Get the q-value for the new state and its max action
+		new_q_value = self.get_policy(new_state)[new_action]
+		discounted_next = discount_factor*new_q_value
+		difference_q = discounted_next - current_q_value
+		#Update the q_value for the current state by adding reward + discounted next q-value - current q-value, discounted by learning rate
+		updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
+		#Update the q-value for the old state, action pair
+		self.get_policy(old_state)[action] = updated_q_value
+		if self.verbose > 0:
+			print "In state ", old_state, " action ", action, " was chosen leading to state ", new_state
+			print "Q value for this state is ", current_q_value, " epsilon is ", epsilon, " reward is ", reward
+			print "Discounted q_value is ", discounted_next, " difference between q_values is ", difference_q
+			print "New max action = ", new_action, " with new move: ", new_move
+			print "Q value for next state is ", new_q_value
+			print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value			
+		return new_action
+
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
 		new_location = []

@@ -12,8 +12,9 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], verbose=2, grid_size=[11,11]):
+	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[3,3], verbose=2, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
+		self.learning_type = learning_type
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
@@ -51,12 +52,13 @@ class Game:
 		steps = 0
 		caught = 0
 		#Runs turns until the prey is caught
+		action=None
 		while(caught == 0):
 			steps +=1
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			caught = self.turn(state, learning_rate, discount_factor, epsilon)
+			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, action)
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
@@ -74,7 +76,7 @@ class Game:
 		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
 		return [distance_x, distance_y]
 
-	def turn(self, old_state, learning_rate, discount_factor, epsilon):
+	def turn(self, old_state, learning_rate, discount_factor, epsilon, action=None):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
 		prey_location = [old_state[2], old_state[3]]
@@ -85,7 +87,11 @@ class Game:
 			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
-		self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
+		if(learning_type == 'Q-learning'):
+			print 'q_learning'
+			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
+		elif(learning_type == 'Sarsa'):
+			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -101,7 +107,7 @@ class Game:
 				print 'Prey: ', prey_location[0], ',', prey_location[1]
 				self.environment.print_grid()
 		#Return caught or not
-		return same
+		return same, action
 
 	def turn_prey(self, state, predator_location, epsilon):
 		""" Perform turn for prey """
@@ -225,11 +231,11 @@ class Game:
 		else:
 			return 0.05
 
-def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, verbose=0):
+def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
-	game = Game(grid_size=grid_size, verbose=verbose)
+	game = Game(grid_size=grid_size, verbose=verbose, learning_type=learning_type)
 	for x in range(0, N):
 		#Run episode until prey is caught
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
@@ -266,6 +272,7 @@ if __name__ == "__main__":
 	parser.add_argument('-learning_rate', metavar='Specify value of learning rate', type=float)
 	parser.add_argument('-epsilon', metavar='Specify value of epsilon', type=float)
 	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
+	parser.add_argument('-learning_type', metavar='Specify learning type', type=str)
 	args = parser.parse_args()
 
 	N = 100
@@ -273,8 +280,11 @@ if __name__ == "__main__":
 	learning_rate = 0.5
 	epsilon = 0.1
 	grid_size = 11
+	learning_type = "Q-learning"
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['learning_type'] is not None):
+		learning_type = vars(args)['learning_type']
 	if(vars(args)['grid_size'] is not None):
 		grid_size = vars(args)['grid_size']
 	if(vars(args)['discount'] is not None):
@@ -289,4 +299,4 @@ if __name__ == "__main__":
 		verbose = 2
 	print 'verbose: ', verbose
 
-	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, verbose=verbose)
+	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, verbose=verbose, learning_type=learning_type)

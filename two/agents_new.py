@@ -66,6 +66,9 @@ class Predator(Agent):
 	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
 		self.policy_grid.q_learning(action, old_state, new_state, learning_rate, discount_factor, epsilon)
 
+	def sarsa(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+		self.policy_grid.sarsa(action, old_state, new_state, learning_rate, discount_factor, epsilon)
+
 class Prey(Agent):
 	""" Prey Agent, inherits from Agent class """
 	def __init__(self, policy):
