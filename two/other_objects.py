@@ -3,6 +3,7 @@ import copy
 import itertools
 import math
 import sys
+import operator
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -129,6 +130,7 @@ class Policy:
 	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """
 		print "epsilon: ", epsilon
+		print "state: ", state
 		#If there are restricted actions, do a restricted action pick
 		if restricted is not None:
 			chosen_action = self.pick_action_restricted(state, epsilon, restricted)
@@ -198,7 +200,7 @@ class Policy:
 		best_action_list = []
 		other_action_list = []
 		#Get the maximum value in the policy
-		max_value = policy[max(policy)]
+		max_value = max(policy.iteritems(), key=operator.itemgetter(1))[1]
 		#For each action, check if their value is maximum
 		for action in policy.iteritems():
 			#If value is max, append to best_action_list
