@@ -151,9 +151,8 @@ class Policy:
 
 	def q_learning(self, old_state, old_predator_location, action, new_predator_location, prey_location, epsilon, discount_factor, alpha, reward):
 		print "Q-LEARNING"
-		print "old_state = ", old_state
 		new_state = self.absolute_xy(new_predator_location, prey_location)
-		print "new_state = ", new_state
+		print "old_state = ", old_state, "new_state = ", new_state
 		print "old predator: ", old_predator_location, " new predator: ", new_predator_location
 		action_distance = self.action_to_distance(action, old_predator_location, prey_location)
 		print "action distance: ", action_distance

@@ -57,7 +57,7 @@ class Predator(Agent):
 		return ' X '		
 
 	def q_learning(self, old_state, old_predator_location, chosen_action, new_state, prey_location, epsilon, discount_factor, alpha, reward):
-		self.policy_grid.q_learning(old_state, chosen_action, old_predator_location, new_state, prey_location, epsilon, discount_factor, alpha, reward)
+		self.policy_grid.q_learning(old_state, old_predator_location, chosen_action, new_state, prey_location, epsilon, discount_factor, alpha, reward)
 
 class Prey(Agent):
 	""" Prey Agent, inherits from Agent class """
