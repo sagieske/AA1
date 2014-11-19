@@ -252,6 +252,7 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	plt.plot(rounds_list)
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
+	plt.ylim([0,200])
 	plt.show()
 
 if __name__ == "__main__":
