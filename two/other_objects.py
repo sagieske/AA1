@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 import random
+import sys
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -103,6 +104,8 @@ class Policy:
 		else:
 			self.policy_grid = [[self.policy for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])]
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
+
+		# Initialize distance grid: create a grid of grid_size, each element has a dictionary of 5 possible next states and their distance value
 		self.distance_grid = [[{} for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])]
 		for i in range(0, self.grid_size[1]):
 			for j in range(0, self.grid_size[0]):
@@ -140,10 +143,14 @@ class Policy:
 		return chosen_move, chosen_action		
 
 	def distance_to_action(self, new_distance, predator_location, prey_location):
+		"""
+		Calculates old distance between predator and prey. Then calculates the transformation from new chosen distance
+		and old distance. Then choose action accordingly and return
+		"""
 		old_distance = self.absolute_xy(predator_location, prey_location)
 		new_distance = [int(x) for x in new_distance.strip('[').strip(']').split(',')]
 		transformation = self.absolute_xy(old_distance, new_distance)
-		
+		print "Hello:", old_distance, new_distance, transformation
 		for action in self.actions.items():
 			if action[1] == transformation:
 				return action[0]
