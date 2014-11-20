@@ -283,9 +283,15 @@ class Policy:
 		softmax_prob = dict.fromkeys(policy.keys(), None)
 		action_selection = []
 		total_sum = 0
+		sum_q_values = sum(policy.values())
+		nr_of_q_values = len(policy)
+		mean = sum_q_values/nr_of_q_values
+		print 'sum q values: ', sum_q_values, ' nr q values: ', nr_of_q_values,  ' mean: ', mean 
 		for actionname, q_value in policy.iteritems():
 			print "q_value: ", q_value, " temperature: ", temperature
-			new_q  = math.exp(q_value/temperature)
+			print 'q_value - mean = ', q_value - mean
+			new_q  = math.exp((q_value-mean)/temperature) # used to be q_value
+			print 'new q: ', new_q
 			action_selection.append((actionname,new_q))
 			total_sum += new_q
 		# Calculate softmax probabilities for each action
