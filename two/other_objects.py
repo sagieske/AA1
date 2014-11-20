@@ -284,6 +284,7 @@ class Policy:
 		action_selection = []
 		total_sum = 0
 		for actionname, q_value in policy.iteritems():
+			print "q_value: ", q_value, " temperature: ", temperature
 			new_q  = math.exp(q_value/temperature)
 			action_selection.append((actionname,new_q))
 			total_sum += new_q

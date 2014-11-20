@@ -233,7 +233,8 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	total_rounds = 0
 	rounds_list = []
 	game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
-
+	average_list = []
+	counter=0
 	for x in range(0, N):
 		#Run episode until prey is caught
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
@@ -245,7 +246,14 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
 		rounds_list.append(current_rounds)
+		counter+=1
+		if(counter == 100):
+			average_rounds = float(total_rounds)/100
+			average_list.append(average_rounds)
+			total_rounds = 0
+			counter= 0
 	print "rounds list: ", rounds_list
+	print "average_list: ", average_list
 	#Compute average number of rounds needed
 	average_rounds = float(total_rounds)/N
 	#Compute list of variances
@@ -256,7 +264,7 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	standard_deviation = math.sqrt(variance)
 	print "Average rounds needed over ", N, " episodes: ", average_rounds
 	print "Standard deviation: ", standard_deviation	
-	plt.plot(rounds_list)
+	plt.plot(average_list)
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
 	
