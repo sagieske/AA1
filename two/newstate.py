@@ -244,8 +244,9 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 		predator = Predator(policy_grid)
 		#Initialize episode
-		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
 		print "Round ", x
+		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
+		
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
