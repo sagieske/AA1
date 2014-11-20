@@ -197,7 +197,7 @@ class Policy:
 			print "New max action = ", new_action, " with new move: ", new_move
 			print "Q value for next state is ", new_q_value
 			print "Update q value for state ", old_state, " and action ", action, " is ", updated_q_value			
-		return new_action
+		return new_action, new_move
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """

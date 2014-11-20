@@ -79,7 +79,11 @@ class Game:
 		#Get current prey location
 		prey_location = [old_state[2], old_state[3]]
 		#Move the predator
-		predator_location, predator_action = self.turn_predator(old_state)
+		if(action is not None):
+			predator_location = self.get_new_location('predator', action[1])
+			predator_action = action[0]
+		else:
+			predator_location, predator_action = self.turn_predator(old_state)
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
 		if self.verbose > 0:
 			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
