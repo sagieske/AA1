@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor,colortbl}
 \usepackage[]{algorithm2e}
+\usepackage{cite}
 
 %\usepackage{soul}
 
@@ -29,12 +30,45 @@ Some prominent model-free reinforcement learning methods are on- and off-policy 
 
 \section*{Theory}
 \subsection*{Temporal difference learning methods}
-Before explaining what Q-Learning is and does, it is important to take a look at temporal difference methods. Namely, because Q-Learning is a temporal difference method. Temporal difference learning, in this case, combines Monte Carlo methods and Dynamic Programming methods. This leads to very powerful and valuable techniques which can be used in model-free planning. Dynamic Programming exploits the Bellman-equation, but require the model. Monte Carlo methods do not require the model, but do not exploit the Bellman-equation either. Temporal difference methods do not require the model, but do exploit the Bellman-equation. This has lead to temporal difference methods becoming core algorithms in reinforcement learning.
+Temporal difference learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates. Thus, in general, an update-rule for a TD-method would be similar to that of TD(0) in equation \ref{eq:td0}.\\
+Both Q-learning and Sarsa are TD-methods, and are described in more detail in sections Q-learning and Sarsa.
+\begin{figure}
+\begin{align*}
+V(s) \leftarrow V(s) + \alpha [r+\gamma V(s') - V(s)]
+\end{align*}
+\caption{Update-rule for TD(0)}
+\label{eq:td0}
+\end{figure}
 
-\subsection*{Q-Learning}
-This is an off-policy temporal difference learning method.
-\\
-Watkins' Q-Learning algorithm according to [1]: \\\\
+\begin{figure}
+\begin{align*}
+V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]
+\end{align*}
+\caption{Bellman equation for $V^*(s)$}
+\label{eq:bellmanV}
+\end{figure}
+
+\begin{figure}
+\begin{align*}
+Q^*(s,a) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}Q^*(s', a') \right]
+\end{align*}
+\caption{Bellman equation for $Q^*(s,a)$}
+\label{eq:bellmanQ}
+\end{figure}
+
+\subsection*{Q-Learning} 
+Q-learning is a temporal difference method that uses\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
+
+\begin{figure}
+\begin{align*}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a) - Q(s_t,a_t)\right]
+\end{align*}
+\caption{Update rule for one-step Q-learning}
+\label{eq:qupdate}
+\end{figure}
+
+\begin{figure}[h!] 
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
 Repeat (for each episode):\\
@@ -54,6 +88,9 @@ Repeat (for each episode):\\
 \dtab s $\leftarrow$ s'; a $\leftarrow$ a'\\
 \tab until s is terminal\\
 \end{algorithm}
+\caption{The algorithm for one-step Q-learning\cite{bartosutton}}
+\label{alg:qlearning}
+\end{figure}
 
 \subsection*{Sarsa}
 This is an on-policy temporal difference learning method. % I lost inspiration
@@ -129,6 +166,8 @@ The implementation consists of the following files:
 \end{itemize}
 \section*{Sources}
 
+\bibliography{bibliography}
+\bibliographystyle{plain}
 \begin{itemize}
 	\item [1] Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html) \ldots
 \end{itemize}
