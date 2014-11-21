@@ -23,10 +23,8 @@
 \pagebreak
 
 \section*{Introduction}
-This report contains the analyzation of an implementation of single agent learning using reinforcement learning. The agent does not know the transition probabilities nor the rewards. There are two ways to solve this problem: the agent can learn the model and perform model based planning or the agent can perform model-free learning and learn a high-reward policy. In this case, model-free learning is implemented and analyzed.
-
-There are several ways of model-free learning. Just to name a few, on-policy Monte Carlo, off-policy Monte Carle, Sarsa and Q-Learning come to mind. The focus of this analyzation lies on Q-Learning. For comparison, Sarsa was also implemented.
-When selecting actions, the performance of $\epsilon$-greedy and softmax action selection are also analyzed and compared to one another.
+This report contains the analysis of an implementation of single agent reinforcement learning. In these algorithms, the agent has no prior knowledge of the transition or reward function. Two different solutions to this problem are presented: in model-based learning, the agent learns the model from experience and plans on the learned model. In model-free learning, the agent learns state-values or Q-values directly. In this paper, model-free learning methods are considered.\\
+Some prominent model-free reinforcement learning methods are on- and off-policy Monte Carlo, Q-learning (off-policy) and Sarsa (on-policy), where on-policy methods evaluate the values of a policy $\pi$ \textit{as it's being followed}, while off-policy methods allow the agent to follow a different policy $\pi'$. This paper reports on Q-learning and its on-policy equivalent, Sarsa. Moreover, the difference in action-selection between $\epsilon$-greedy and softmax are compared. 
 \pagebreak
 
 \section*{Theory}
@@ -80,15 +78,21 @@ Repeat (for each episode):\\
 \subsection*{Action selection methods}
 In order to select which action to choose according to a given policy, a tradeoff between exploration and exploitation must take place. This tradeoff is important when performing reinforcement learning as the rewards must be maximized, but exploration may lead to finding higher rewards. There are several action selection methods which can be used to select actions. The two techniques analyzed in this report are $\epsilon$-greedy and softmax action selection.
 
-An $\epsilon$-greedy policy mainly exploits the known states to maximize the immediate reward. At times, this policy will explore new states. The times when this policy explores new states is probabilistically determined. This oftentimes leads to desired behaviour. However, it is possible for the agent to stand beside the goal state when the $\epsilon$-greedy policy turns to explore a new state. This can lead to undesirable behaviour, especially in tasks where the worst actions have catastrophic consequences (e.g. falling off a cliff).
+In the case of $\epsilon$-greedy, the best action $a^*$ is given a probability of $1-\epsilon$. All actions $a$ (including $a^*$) then receive an equal portion of $\epsilon$ as a probability. This leads to the following:
+\begin{align}
+\forall a \in \mathcal{A}:p(a) = 
+\begin{cases}
+	1 - \epsilon + \frac{\epsilon}{|\mathcal{A}|}, & \text{if } a = a^*\\
+	\frac{\epsilon}{|\mathcal{A}|} & \text{otherwise }
+\end{cases}
+\end{align}
+So that in $1-\epsilon$ of the cases, $a^*$ is selected, and in $\epsilon$ of the cases a random action is chosen uniformly. Thus, an $\epsilon$-greedy policy mainly exploits the known states to maximize the immediate reward. At probabilistically determined times however, this policy will explore new states. This may lead to undesired behavior as it is possible for the agent to stand beside the goal state when the $\epsilon$-greedy policy turns to explore a new state, which can lead to high negative rewards in particular cases, such as a robot falling off a cliff. Also, $\epsilon$-greedy does not consider the quality of non-optimal actions: an action with a value just below that of $a^*$ receives the same probability as an action with a much lower value. Another note using $\epsilon$-greedy is the intuition that $\epsilon$ should decay as the agent has explored more states, as exploration is adding less information over time. There is, however, no clear-cut way to do decide how and when to decay $\epsilon$.
 
-Softmax action selection offers a solution to the problem presented by $\epsilon$-greedy policies. The greedy action is still assigned the highest probability, but all other probabilities are ranked and weighted according to their values [1]. There are several ways of implementing the sofftmax action selection method. This implementation uses the most common implementation, which is the Boltzmann-distribution: \\
-
-$
-\dfrac{exp[Q_t(a)/\tau]}{\sum_{b=1}exp[Q_t(b)/\tau]} \\
-$
-
-Where $\tau$ is a positive parameter known as the temperature. Lower temperatures lead to a greater difference in selection probability for actions that differ in their value estimates [1].
+Softmax action-selection offers a solution to one problem presented by $\epsilon$-greedy policies. The greedy action $a^*$ is still assigned the highest probability, but all other probabilities are ranked and weighted according to their values [1]. There are several ways of implementing the softmax action selection method, but for the purposes of this paper softmax uses a Boltzmann distribution.
+\begin{align}
+\frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} 
+\end{align}
+The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$ and consequently those of e$^{Q_t(a)/\tau}$ to grow very larger, thus increasing their differences. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
 
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
 \pagebreak
