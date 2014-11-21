@@ -6,6 +6,7 @@
 \usepackage{xcolor,colortbl}
 \usepackage[]{algorithm2e}
 \usepackage{cite}
+\usepackage{mdframed}
 
 %\usepackage{soul}
 
@@ -31,44 +32,34 @@ Some prominent model-free reinforcement learning methods are on- and off-policy 
 \section*{Theory}
 \subsection*{Temporal difference learning methods}
 Temporal difference learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
-Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates. Thus, in general, an update-rule for a TD-method would be similar to that of TD(0) in equation \ref{eq:td0}.\\
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates. 
+\begin{mdframed}
+\begin{align}
+V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]\label{eq:bellmanV}\\
+Q^*(s,a) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}Q^*(s', a') \right]\label{eq:bellmanQ}
+\end{align}
+\end{mdframed}
+
+Thus, in general, an update-rule for a TD-method would be similar to that of TD(0) in equation \ref{eq:td0}.
+\begin{mdframed}
+\begin{align}
+V(s) \leftarrow V(s) + \alpha [r+\gamma V(s') - V(s)]\label{eq:td0}
+\end{align}
+\end{mdframed}
 Both Q-learning and Sarsa are TD-methods, and are described in more detail in sections Q-learning and Sarsa.
-\begin{figure}
-\begin{align*}
-V(s) \leftarrow V(s) + \alpha [r+\gamma V(s') - V(s)]
-\end{align*}
-\caption{Update-rule for TD(0)}
-\label{eq:td0}
-\end{figure}
-
-\begin{figure}
-\begin{align*}
-V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]
-\end{align*}
-\caption{Bellman equation for $V^*(s)$}
-\label{eq:bellmanV}
-\end{figure}
-
-\begin{figure}
-\begin{align*}
-Q^*(s,a) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}Q^*(s', a') \right]
-\end{align*}
-\caption{Bellman equation for $Q^*(s,a)$}
-\label{eq:bellmanQ}
-\end{figure}
 
 \subsection*{Q-Learning} 
 Q-learning is a temporal difference method that uses\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
 
-\begin{figure}
-\begin{align*}
-Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a) - Q(s_t,a_t)\right]
-\end{align*}
-\caption{Update rule for one-step Q-learning}
-\label{eq:qupdate}
-\end{figure}
+\begin{mdframed}
+\begin{align}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a) - Q(s_t,a_t)\right]\label{eq:qupdate}
+\end{align}
+\end{mdframed}
+
 
 \begin{figure}[h!] 
+\begin{mdframed}
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
 Repeat (for each episode):\\
@@ -88,14 +79,22 @@ Repeat (for each episode):\\
 \dtab s $\leftarrow$ s'; a $\leftarrow$ a'\\
 \tab until s is terminal\\
 \end{algorithm}
+\end{mdframed}
 \caption{The algorithm for one-step Q-learning\cite{bartosutton}}
 \label{alg:qlearning}
 \end{figure}
 
 \subsection*{Sarsa}
-This is an on-policy temporal difference learning method. % I lost inspiration
-\\
-From [1]: \\\\
+Sarsa is a temporal difference method that uses the update rule in equation \ref{eq:sarsaupdate}. Because it retrieves the Q-value of the state-action pair (s', a') where a' is selected using the policy $\pi$ that is being evaluated, it is an \textit{on-policy} method. The algorithm for Sarsa can be found in pseudocode in figure \ref{alg:sarsa}.
+\begin{mdframed}
+\begin{align}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a_{t+1}) - Q(s_t,a_t)\right]\label{eq:sarsaupdate}
+\end{align}
+\end{mdframed}
+
+
+\begin{figure}[h!]
+\begin{mdframed}
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
 Repeat (for each episode):\\
@@ -111,24 +110,32 @@ Repeat (for each episode):\\
 \dtab s $\leftarrow$ s'; a $\leftarrow$ a'\\
 \tab until s is terminal\\
 \end{algorithm}
+\end{mdframed}
+\caption{The algorithm for Sarsa \cite{bartosutton}}
+\label{alg:sarsa}
+\end{figure}
 
 \subsection*{Action selection methods}
 In order to select which action to choose according to a given policy, a tradeoff between exploration and exploitation must take place. This tradeoff is important when performing reinforcement learning as the rewards must be maximized, but exploration may lead to finding higher rewards. There are several action selection methods which can be used to select actions. The two techniques analyzed in this report are $\epsilon$-greedy and softmax action selection.
 
-In the case of $\epsilon$-greedy, the best action $a^*$ is given a probability of $1-\epsilon$. All actions $a$ (including $a^*$) then receive an equal portion of $\epsilon$ as a probability. This leads to the following:
+In the case of $\epsilon$-greedy, the best action $a^*$ is given a probability of $1-\epsilon$. All actions $a$ (including $a^*$) then receive an equal portion of $\epsilon$ as a probability. This is formalized in equation \ref{eq:greedy}.
+\begin{mdframed}
 \begin{align}
 \forall a \in \mathcal{A}:p(a) = 
-\begin{cases}
+\begin{cases}\label{eq:greedy}
 	1 - \epsilon + \frac{\epsilon}{|\mathcal{A}|}, & \text{if } a = a^*\\
 	\frac{\epsilon}{|\mathcal{A}|} & \text{otherwise }
 \end{cases}
 \end{align}
+\end{mdframed}
 So that in $1-\epsilon$ of the cases, $a^*$ is selected, and in $\epsilon$ of the cases a random action is chosen uniformly. Thus, an $\epsilon$-greedy policy mainly exploits the known states to maximize the immediate reward. At probabilistically determined times however, this policy will explore new states. This may lead to undesired behavior as it is possible for the agent to stand beside the goal state when the $\epsilon$-greedy policy turns to explore a new state, which can lead to high negative rewards in particular cases, such as a robot falling off a cliff. Also, $\epsilon$-greedy does not consider the quality of non-optimal actions: an action with a value just below that of $a^*$ receives the same probability as an action with a much lower value. Another note using $\epsilon$-greedy is the intuition that $\epsilon$ should decay as the agent has explored more states, as exploration is adding less information over time. There is, however, no clear-cut way to do decide how and when to decay $\epsilon$.
 
-Softmax action-selection offers a solution to one problem presented by $\epsilon$-greedy policies. The greedy action $a^*$ is still assigned the highest probability, but all other probabilities are ranked and weighted according to their values [1]. There are several ways of implementing the softmax action selection method, but for the purposes of this paper softmax uses a Boltzmann distribution.
+Softmax action-selection offers a solution to one problem presented by $\epsilon$-greedy policies. The greedy action $a^*$ is still assigned the highest probability, but all other probabilities are ranked and weighted according to their values [1]. There are several ways of implementing the softmax action selection method, but for the purposes of this paper softmax uses a Boltzmann distribution, formalized in \ref{eq:softmax}.
+\begin{mdframed}
 \begin{align}
-\frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} 
+\forall a: p_t(a) &= \frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} \label{eq:softmax}
 \end{align}
+\end{mdframed}
 The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$ and consequently those of e$^{Q_t(a)/\tau}$ to grow very larger, thus increasing their differences. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
 
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
