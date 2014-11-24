@@ -61,7 +61,7 @@ Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{
 \begin{figure}[h!] 
 \begin{mdframed}
 \begin{algorithm}[H]
-Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
+Initialize Q(s,a) arbitrarily \\
 Repeat (for each episode):\\
 \tab Initialize s \\
 \tab Repeat (for each step of episode):\\
@@ -82,7 +82,7 @@ Repeat (for each episode):\\
 Sarsa is a temporal difference method that uses the update rule in equation \ref{eq:sarsaupdate}. Because it retrieves the Q-value of the state-action pair (s', a') where a' is selected using the policy $\pi$ that is being evaluated, it is an \textit{on-policy} method. The algorithm for Sarsa can be found in pseudocode in figure \ref{alg:sarsa}.
 \begin{mdframed}
 \begin{align}
-Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a_{t+1}) - Q(s_t,a_t)\right]\label{eq:sarsaupdate}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma Q(s_{t+1},a_{t+1}) - Q(s_t,a_t)\right]\label{eq:sarsaupdate}
 \end{align}
 \end{mdframed}
 
@@ -90,24 +90,24 @@ Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{
 \begin{figure}[h!]
 \begin{mdframed}
 \begin{algorithm}[H]
-Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
+Initialize Q(s,a) arbitrarily\\
 Repeat (for each episode):\\
-\tab Initialize s,a\\
+\tab Initialize s \\
+\tab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
 \tab Repeat (for each step of episode):\\
 \dtab Take action a, observe r, s'\\
 \dtab Choose a' from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
-\dtab $\delta \leftarrow$ r + $\gamma$ Q(s',a') - Q(s,a)\\
-\dtab e(s,a) $\leftarrow$ e(s,a) + 1\\
-\dtab For all s,a:\\
-\ttab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha \delta$ e(s,a) \\
-\ttab e(s,a) $\leftarrow$ $\gamma \lambda$ e(s,a)\\
-\dtab s $\leftarrow$ s'; a $\leftarrow$ a'\\
+\dtab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha [ r + \gamma Q(s', a') - Q(s, a) ]$ \\
+\dtab s $\leftarrow$ s'; \\
 \tab until s is terminal\\
 \end{algorithm}
 \end{mdframed}
 \caption{The algorithm for Sarsa \cite{bartosutton}}
 \label{alg:sarsa}
 \end{figure}
+
+
+
 
 \subsection*{Action selection methods}
 In order to select which action to choose according to a given policy, a tradeoff between exploration and exploitation must take place. This tradeoff is important when performing reinforcement learning as the rewards must be maximized, but exploration may lead to finding higher rewards. There are several action selection methods which can be used to select actions. The two techniques analyzed in this report are $\epsilon$-greedy and softmax action selection.
