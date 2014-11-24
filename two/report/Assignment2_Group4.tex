@@ -63,26 +63,20 @@ Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily and e(s, a) = 0 for all s,a \\
 Repeat (for each episode):\\
-\tab Initialize s,a\\
+\tab Initialize s \\
 \tab Repeat (for each step of episode):\\
+\dtab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
 \dtab Take action a, observe r, s'\\
-\dtab Choose a' from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
-\dtab a$^*$ $\leftarrow$ arg $\max_b$ Q(s',b) (if a' ties for the max, then a$^*$ $\leftarrow$ a') \\
-\dtab $\delta \leftarrow$ r + $\gamma$ Q(s',a$^*$) - Q(s,a)\\
-\dtab e(s,a) $\leftarrow$ e(s,a) + 1\\
-\dtab For all s,a:\\
-\ttab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha \delta$ e(s,a) \\
-\ttab If a' = a$^*$ \\
-\qtab e(s,a) $\leftarrow$ $\gamma \lambda$ e(s,a)\\
-\ttab else \\
-\qtab e(s,a) $\leftarrow$ 0\\
-\dtab s $\leftarrow$ s'; a $\leftarrow$ a'\\
+\dtab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha [ r + \gamma \max_a' Q(s', a') - Q(s, a) ]$  \\
+\dtab s $\leftarrow$ s'; \\
 \tab until s is terminal\\
 \end{algorithm}
 \end{mdframed}
 \caption{The algorithm for one-step Q-learning\cite{bartosutton}}
 \label{alg:qlearning}
 \end{figure}
+
+
 
 \subsection*{Sarsa}
 Sarsa is a temporal difference method that uses the update rule in equation \ref{eq:sarsaupdate}. Because it retrieves the Q-value of the state-action pair (s', a') where a' is selected using the policy $\pi$ that is being evaluated, it is an \textit{on-policy} method. The algorithm for Sarsa can be found in pseudocode in figure \ref{alg:sarsa}.
