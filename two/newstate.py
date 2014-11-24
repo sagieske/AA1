@@ -15,6 +15,11 @@ class Game:
 	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, verbose=2, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
 		self.learning_type = learning_type
+		self.visited_pairs = []
+		if(self.learning_type == "ONMC"):
+			mc_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=True)
+		else: 
+			mc_policy = None
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
@@ -28,7 +33,7 @@ class Game:
 		#Create predator if none was given
 		if(predator==None):
 			predator_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose)
-			self.predator = Predator(predator_policy)
+			self.predator = Predator(predator_policy, mc_policy)
 		else:
 			self.predator = predator
 			if reset:
@@ -62,8 +67,9 @@ class Game:
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
+		reward = 10
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		return steps, self.predator.get_policy_grid()
+		return reward, self.visited_pairs, steps, self.predator.get_policy_grid(), self.predator.get_mc_policy()
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -90,10 +96,12 @@ class Game:
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
 		if(learning_type == 'Q-learning'):
-			print 'q_learning'
 			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		elif(learning_type == 'Sarsa'):
 			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
+		elif(learning_type == 'ONMC'):
+			self.visited_pairs.append((old_state, predator_action))
+			print self.visited_pairs
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -232,7 +240,7 @@ class Game:
 			return 0.8
 		else:
 			return 0.05
-def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
+def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
@@ -241,12 +249,15 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	counter=0
 	for x in range(0, N):
 		#Run episode until prey is caught
-		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
-		predator = Predator(policy_grid)
+		reward, visited_pairs, current_rounds, policy_grid, mc_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
+		predator = Predator(policy_grid, mc_policy)
+		if(learning_type == 'ONMC'):
+			predator.update_returns(visited_pairs, reward, discount_factor)
+			predator.update_q_values(visited_pairs)
 		#Initialize episode
 		print "Round ", x
 		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
-		
+		print "epsilon rate: ", epsilon
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -269,11 +280,8 @@ def run_episodes(policy, predator, grid_size, N, learning_rate, discount_factor,
 	standard_deviation = math.sqrt(variance)
 	print "Average rounds needed over ", N, " episodes: ", average_rounds
 	print "Standard deviation: ", standard_deviation	
-	plt.plot(average_list)
-	plt.ylabel('Rounds needed before catch')
-	plt.xlabel('Number of rounds')
-	
-	plt.show()
+	return average_list
+
 
 if __name__ == "__main__":
 	#Command line arguments
@@ -318,4 +326,20 @@ if __name__ == "__main__":
 		verbose = 2
 	print 'verbose: ', verbose
 	
-	run_episodes("policy", "predator", [grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
+	discount_factor_list = [0.1,0.5,0.7,0.9]
+	learning_rate_list = [0.1,0.2,0.3,0.4,0.5]
+	epsilon_list = [0.0,0.1, 0.3,0.5,0.9,1.0]
+	discount_factor=0.9
+	learning_rate = 0.5
+	all_averages = []
+	for i in range(0, len(epsilon_list)):
+		epsilon=epsilon_list[i]
+		average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
+		all_averages.append(average_list)
+		plt.plot(average_list, label=str(epsilon_list[i]))
+	plt.legend()
+	plt.title("Effect of epsilon on Q-learning")
+	plt.ylabel('Rounds needed before catch')
+	plt.xlabel('Number of rounds where learning_rate=' +str(learning_rate)+ ", learning rate="+str(learning_rate) + ", using " + learning_type)
+	plt.show()
+

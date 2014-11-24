@@ -88,9 +88,10 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0, mc=False):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		self.prey = prey
+		self.mc = mc
 		#Set grid size
 		self.grid_size = grid_size
 		#If the agent is not a prey, set the policy to random
@@ -103,8 +104,13 @@ class Policy:
 		if(policy_grid is not None):
 			self.policy_grid = policy_grid
 		#Otherwise, create a grid of grid_size and fill it with the policy
-		else:
+		elif(self.mc==False):
 			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
+		else:
+			action_dict = {}
+			for action in self.policy.keys():
+				action_dict[str(action)] =[]
+			self.returns_list = [[[[ copy.deepcopy(action_dict) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
 		#Store the actions and their corresponding transformations
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 
@@ -131,6 +137,23 @@ class Policy:
 		l = state[3]
 		return self.policy_grid[i][j][k][l]
 
+	def update_returns_list(self, pair, returns):
+		i = pair[0][0]
+		j = pair[0][1]
+		k = pair[0][2]
+		l = pair[0][3]
+		action = pair[1]
+		self.returns_list[i][j][k][l][action].append(returns)
+
+	def get_returns_pair(self, pair):
+		i = pair[0][0]
+		j = pair[0][1]
+		k = pair[0][2]
+		l = pair[0][3]
+		action = pair[1]
+		return self.returns_list[i][j][k][l][action]
+		
+
 	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """
 		if self.verbose > 0:
@@ -155,7 +178,6 @@ class Policy:
 		reward = self.reward(new_state)
 		#Get the max action for the new state
 		softmax_backup = self.softmax
-		print "Softmax: ", softmax_backup
 		self.softmax = False
 		new_move, new_max_action = self.get_action(new_state, 0.0)
 		self.softmax = softmax_backup
