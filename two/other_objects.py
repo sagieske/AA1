@@ -153,6 +153,13 @@ class Policy:
 		action = pair[1]
 		return self.returns_list[i][j][k][l][action]
 		
+	def update_q(self, pair, q_value):
+		i = pair[0][0]
+		j = pair[0][1]
+		k = pair[0][2]
+		l = pair[0][3]
+		action = pair[1]
+		self.get_policy([i,j,k,l])[action] = q_value
 
 	def get_action(self, state, epsilon=0.0, restricted=None):
 		""" Choose an action and turn it into a move """

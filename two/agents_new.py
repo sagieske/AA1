@@ -28,9 +28,7 @@ class Agent(object):
 		for i in pairs_list:
 			return_list = self.returns_list.get_returns_pair(i)
 			q_sa = sum(return_list)/len(return_list)
-			
-
-
+			self.policy_grid.update_q(i, q_sa)
 
 	def get_transformation(self, action):
 		""" Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """

@@ -101,7 +101,6 @@ class Game:
 			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		elif(learning_type == 'ONMC'):
 			self.visited_pairs.append((old_state, predator_action))
-			print self.visited_pairs
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -257,7 +256,6 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		#Initialize episode
 		print "Round ", x
 		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
-		print "epsilon rate: ", epsilon
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -331,15 +329,12 @@ if __name__ == "__main__":
 	epsilon_list = [0.0,0.1, 0.3,0.5,0.9,1.0]
 	discount_factor=0.9
 	learning_rate = 0.5
+	epsilon = 0.1
 	all_averages = []
-	for i in range(0, len(epsilon_list)):
-		epsilon=epsilon_list[i]
-		average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
-		all_averages.append(average_list)
-		plt.plot(average_list, label=str(epsilon_list[i]))
-	plt.legend()
-	plt.title("Effect of epsilon on Q-learning")
+	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
+	plt.plot(average_list)
+	plt.title("Plot of ONMC, eps=0.1, disc=0.9, alpha=0.5")
 	plt.ylabel('Rounds needed before catch')
-	plt.xlabel('Number of rounds where learning_rate=' +str(learning_rate)+ ", learning rate="+str(learning_rate) + ", using " + learning_type)
+	plt.xlabel('Number of rounds')
 	plt.show()
 
