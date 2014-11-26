@@ -6,6 +6,8 @@
 	- softmax temperature		Sharon&Iva
 - Q-learning vs Sarsa vs on-policy
 
-
-runs: 4.000
-
+BASE
+runs: 		4000
+discountfactor: 0.9
+learning rate:	0.5
+epsilon:	0.1
