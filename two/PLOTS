@@ -1,0 +1,11 @@
+- different epsilon			Elise: DONE
+- optimistic initialization		Cassandra:
+- Q-learning:					
+	- discounts			Elise: DONE
+	- learning rates		Elise: DONE
+	- softmax temperature		Sharon&Iva
+- Q-learning vs Sarsa vs on-policy
+
+
+runs: 4.000
+
