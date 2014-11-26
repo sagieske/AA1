@@ -4,15 +4,29 @@ import random
 
 class Agent(object):
 	""" Agent class, with policy """
-	def __init__(self, policy_grid, mc_policy=None, verbose=0):
+	def __init__(self, policy_grid, mc_policy=None, N_policy=None, verbose=0):
 		#Store given policy
 		self.policy_grid = policy_grid
 		self.returns_list = None
+		self.N_policy = None
 		if(mc_policy is not None):
 			self.returns_list = mc_policy
+		if(N_policy is not None):
+			self.N_policy = N_policy
+	
 		#Set reward to 0
 		self.reward = 0
 		self.verbose = verbose
+
+	def update_t_value(self, old_state, t):
+		self.N_policy.update_t_value(old_state, t)
+
+	def get_greedy_action(self, old_state):
+		new_pol = self.policy_grid.get_e_greedy_policy(self.policy_grid.get_policy(old_state), epsilon=0.0)
+		action_name, policy = zip(*new_pol.items())
+		#Use np.random.choice to select actions according to probabilities
+		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
+		return choice_index
 
 	def get_mc_policy(self):
 		return self.returns_list
@@ -74,9 +88,9 @@ class Agent(object):
 
 class Predator(Agent):
 	""" Predator agent, inherits from Agent class """
-	def __init__(self, policy, mc_policy=None, verbose=0):
+	def __init__(self, policy, mc_policy=None, N_policy=None, verbose=0):
 		""" Initializes Predator by calling Agent init """
-		Agent.__init__(self, policy, mc_policy)
+		Agent.__init__(self, policy, mc_policy, N_policy)
 
 	def __repr__(self):
 		""" Represent Predator as X """

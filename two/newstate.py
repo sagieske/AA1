@@ -18,8 +18,14 @@ class Game:
 		self.visited_pairs = []
 		if(self.learning_type == "ONMC"):
 			mc_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=True)
+			N_policy = None
+		elif(self.learning_type == "OFFMC"):
+			N_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=False, off_policy=True)
+			mc_policy = None
+			print "npol: ",N_policy
 		else: 
 			mc_policy = None
+			N_policy = None
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
@@ -33,7 +39,13 @@ class Game:
 		#Create predator if none was given
 		if(predator==None):
 			predator_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose)
-			self.predator = Predator(predator_policy, mc_policy)
+			if(learning_type !="OFFMC"):
+				self.predator = Predator(predator_policy, mc_policy)
+			else:
+				print "OFFMC\n\n"
+				print "npolllllll: ", N_policy
+				self.predator = Predator(predator_policy, mc_policy=None, N_policy=N_policy)
+				print "cassandra is echt kut: ", N_policy
 		else:
 			self.predator = predator
 			if reset:
@@ -63,7 +75,7 @@ class Game:
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, action)
+			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, steps, action)
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
@@ -80,7 +92,7 @@ class Game:
 		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
 		return [distance_x, distance_y]
 
-	def turn(self, old_state, learning_rate, discount_factor, epsilon, action=None):
+	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps, action=None):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
 		prey_location = [old_state[2], old_state[3]]
@@ -101,6 +113,14 @@ class Game:
 			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		elif(learning_type == 'ONMC'):
 			self.visited_pairs.append((old_state, predator_action))
+		elif(learning_type == 'OFFMC'):
+			self.visited_pairs.append((old_state, predator_action))
+			greedy_action = self.predator.get_greedy_action(old_state)
+			if(greedy_action != predator_action):
+				print "YEAH T IS DONE FUCK YES"
+				self.predator.update_t_value(old_state, steps)
+			else:
+				print "cry"
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -329,12 +349,15 @@ if __name__ == "__main__":
 	epsilon_list = [0.0,0.1, 0.3,0.5,0.9,1.0]
 	discount_factor=0.9
 	learning_rate = 0.5
-	epsilon = 0.1
+	if(learning_type == "OFFMC"):
+		epsilon = 0.0
+	else:
+		epsilon = 0.1
 	all_averages = []
 	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	plt.plot(average_list)
 	plt.title("Plot of ONMC, eps=0.1, disc=0.9, alpha=0.5")
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
-	plt.show()
+	#plt.show()
 
