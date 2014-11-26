@@ -190,6 +190,15 @@ The implementation consists of the following files:
 \subsection*{Sarsa}
 \subsection*{$\epsilon$-greedy vs. softmax}
 % Explain that smaller grid takes longer to converge, since the predator is more likely to catch the prey, so it takes more rounds to actually explore enough. On the other hand, in a bigger grid the predator is highly unlikely to catch the prey, so it would explore a lot even in one round by the time it catches the prey.
+\begin{figure}[h]
+\begin{center}
+
+\includegraphics[scale=0.4]{softmax_with_legend}
+\caption{Q-learning using different temperatures in Soft-max}
+\end{center}
+
+\end{figure}
+
 \subsection*{Effect of discount rates on learning}
 \subsubsection*{Q-learning}
 \includegraphics[scale=0.25]{discount_rates_qlearning}
