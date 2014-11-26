@@ -16,16 +16,21 @@ class Game:
 		""" Initalize environment and agents """
 		self.learning_type = learning_type
 		self.visited_pairs = []
+		#print 'learning type: ', self.learning_type
 		if(self.learning_type == "ONMC"):
 			mc_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=True)
 			N_policy = None
 		elif(self.learning_type == "OFFMC"):
+			#print 'getting N_policy!'
 			N_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=False, off_policy=True)
 			mc_policy = None
-			print "npol: ",N_policy
-		else: 
+			#print "npol: ",N_policy
+		else:
+			if(self.learning_type != "OFFMC"):
+				#print 'learning type not offmc'
+				#print 'Setting N policy to none!'
+				N_policy = None
 			mc_policy = None
-			N_policy = None
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
@@ -39,13 +44,16 @@ class Game:
 		#Create predator if none was given
 		if(predator==None):
 			predator_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose)
-			if(learning_type !="OFFMC"):
+			if(self.learning_type != "OFFMC"):
 				self.predator = Predator(predator_policy, mc_policy)
 			else:
 				self.predator = Predator(predator_policy, mc_policy=None, N_policy=N_policy)
-				print "cassandra is echt kut: ", N_policy
+				#print "cassandra is echt kut: ", N_policy
 		else:
 			self.predator = predator
+			if (self.learning_type == "OFFMC"):
+				#print 'setting N_policy!'
+				self.predator.set_N_policy(N_policy)
 			if reset:
 				self.environment.place_object('prey', predator_location)
 		#Set level of output
@@ -264,12 +272,14 @@ class Game:
 			return 0.05
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
+	#print 'in run episodes!'
 	total_rounds = 0
 	rounds_list = []
 	game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	average_list = []
 	counter=0
 	for x in range(0, N):
+		#print 'learning type 1: ', this_learning_type
 		#Run episode until prey is caught
 		reward, visited_pairs, current_rounds, policy_grid, mc_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
 		predator = Predator(policy_grid, mc_policy)
@@ -278,7 +288,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 			predator.update_q_values(visited_pairs)
 		#Initialize episode
 		print "Round ", x
-		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose)
+		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
 		#Add rounds needed in this episode to total_rounds
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
@@ -362,5 +372,5 @@ if __name__ == "__main__":
 	plt.title("Plot of ONMC, eps=0.1, disc=0.9, alpha=0.5")
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
-	#plt.show()
+	plt.show()
 
