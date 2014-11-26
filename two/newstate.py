@@ -42,8 +42,6 @@ class Game:
 			if(learning_type !="OFFMC"):
 				self.predator = Predator(predator_policy, mc_policy)
 			else:
-				print "OFFMC\n\n"
-				print "npolllllll: ", N_policy
 				self.predator = Predator(predator_policy, mc_policy=None, N_policy=N_policy)
 				print "cassandra is echt kut: ", N_policy
 		else:
@@ -79,6 +77,9 @@ class Game:
 			self.predator.update_reward(0)
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
+		if(learning_type == "OFFMC"):
+			returns = 10
+			self.predator.off_mc(self.visited_pairs, returns, discount_factor)
 		reward = 10
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return reward, self.visited_pairs, steps, self.predator.get_policy_grid(), self.predator.get_mc_policy()
@@ -107,6 +108,7 @@ class Game:
 			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
+
 		if(learning_type == 'Q-learning'):
 			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 		elif(learning_type == 'Sarsa'):
@@ -117,10 +119,8 @@ class Game:
 			self.visited_pairs.append((old_state, predator_action))
 			greedy_action = self.predator.get_greedy_action(old_state)
 			if(greedy_action != predator_action):
-				print "YEAH T IS DONE FUCK YES"
 				self.predator.update_t_value(old_state, steps)
-			else:
-				print "cry"
+				print self.predator.get_N_policy(old_state)
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -158,7 +158,10 @@ class Game:
 	def turn_predator(self, state):
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
-		predator_move, action_name = self.predator.get_action(state, epsilon)
+		if(self.learning_type == "OFFMC"):
+			predator_move, action_name = self.predator.get_greedy_action(state)
+		else:
+			predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location

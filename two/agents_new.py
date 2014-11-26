@@ -18,15 +18,35 @@ class Agent(object):
 		self.reward = 0
 		self.verbose = verbose
 
+	def off_mc(self, visited_pairs, returns, discount_factor):
+		amount_rounds = len(visited_pairs)
+		for pair in visited_pairs:
+			pair_w = 0
+			pair_t = self.N_policy.get_N_policy(pair[0])[pair[1]][0]
+			for i in range(pair_t, amount_rounds-1):
+				k_pair = visited_pairs[i]
+				policy = self.N_policy.get_policy(k_pair[0])
+				current_prob = self.N_policy.get_e_greedy_policy(policy, epsilon=0.0)[k_pair[1]]
+				pair_w+=(1.0/current_prob)
+			power = amount_rounds - pair_t - 1
+			discounted_cumulative_reward = 10 * (discount_factor**power)
+			current_values = self.N_policy.get_N_policy(pair[0])[pair[1]]
+			N = current_values[2] + pair_w * discounted_cumulative_reward
+			D = current_values[3] + pair_w
+			if(D==0):
+				D=1
+			Q = (N/D)
+			self.N_policy.update_values(N,D,Q,pair)
+			self.policy_grid.update_Q_values(Q, pair)
+			
+	def get_N_policy(self, old_state):
+		return self.N_policy.get_N_policy(old_state)
+
 	def update_t_value(self, old_state, t):
 		self.N_policy.update_t_value(old_state, t)
 
 	def get_greedy_action(self, old_state):
-		new_pol = self.policy_grid.get_e_greedy_policy(self.policy_grid.get_policy(old_state), epsilon=0.0)
-		action_name, policy = zip(*new_pol.items())
-		#Use np.random.choice to select actions according to probabilities
-		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
-		return choice_index
+		return self.policy_grid.get_greedy_action(old_state)
 
 	def get_mc_policy(self):
 		return self.returns_list
