@@ -3,8 +3,8 @@
 - Q-learning:					
 	- discounts			Elise: DONE
 	- learning rates		Elise: DONE
-	- softmax temperature		Sharon&Iva
-- Q-learning vs Sarsa vs on-policy
+	- softmax temperature		Sharon:
+- Q-learning vs Sarsa vs on-policy	Iva:
 
 BASE
 runs: 		4000
