@@ -3,7 +3,7 @@
 - Q-learning:					
 	- discounts			Elise: DONE
 	- learning rates		Elise: DONE
-	- softmax temperature		Sharon:
+	- softmax temperature		Sharon: PARTIALLY DONE. MISSING LEGEND
 - Q-learning vs Sarsa vs on-policy	Iva:
 
 BASE
