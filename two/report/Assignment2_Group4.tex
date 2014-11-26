@@ -108,6 +108,41 @@ Repeat (for each episode):\\
 
 
 
+\subsection*{Monte Carlo Methods}
+As stated before, there are several ways of learning a estimating value functions and discovering optimal policies. Again, Monte Carlo methods do not know (nor need) complete knowledge of the environment. Monte Carlo methods require only experience, such as sample sequences of states, actions, and rewards, from on-line interaction with an environment. Unlike TD-methods, Monte Carlo methods require a model. The model only needs to generate sample transitions, unlike Dynamic Programming methods which need complete probability distributions of all possible transitions. Therefore, Monte Carlo methods are an important tool for an agent to use when only the model is known.
+
+\subsection*{On-policy Monte Carlo Control}
+On-policy Monte Carlo control (OPMCC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OPMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+
+ 
+\begin{figure}[h!]
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize, for all $s \in \mathcal(S), a \in \mathcal(A)(s)$\\
+Repeat forever:\\
+\tab Generate an episode using exploring starts and $\pi$\\
+\tab For each pair s,a appearing in the episode:\\
+\dtab $\mathcal{R} \leftarrow $ return following the first occurence of s,a\\
+\ttab Append $\mathcal{R}$ to $Returns(s,a)$\\
+\ttab $Q(s,a) \leftarrow$ average($Returns(s,a)$)\\
+\dtab For each $s$ in the episode:\\
+\ttab $a^* \leftarrow$ arg $\max\limits_a Q(s,a)$\\
+\ttab For all $a \in \mathcal{A}(s)$:\\
+
+\qtab \[\pi(s,a) \leftarrow \left \{
+\begin{array}{l l}
+1-\epsilon + \dfrac{\epsilon}{|\mathcal{A}(s)|} & \quad \textit{if } a = a^* \\
+\dfrac{\epsilon}{|\mathcal{A}(s)|} & \quad \textit{if } a \neq a^*
+\end{array}\right.\]
+\end{algorithm}
+\end{mdframed}
+\caption{The algorithm for on-policy Monte Carlo \cite{bartosutton}}
+\label{alg:OPMCC}
+\end{figure}
+
+
+
+
 
 \subsection*{Action selection methods}
 In order to select which action to choose according to a given policy, a tradeoff between exploration and exploitation must take place. This tradeoff is important when performing reinforcement learning as the rewards must be maximized, but exploration may lead to finding higher rewards. There are several action selection methods which can be used to select actions. The two techniques analyzed in this report are $\epsilon$-greedy and softmax action selection.
