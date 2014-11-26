@@ -4,15 +4,49 @@ import random
 
 class Agent(object):
 	""" Agent class, with policy """
-	def __init__(self, policy_grid, mc_policy=None, verbose=0):
+	def __init__(self, policy_grid, mc_policy=None, N_policy=None, verbose=0):
 		#Store given policy
 		self.policy_grid = policy_grid
 		self.returns_list = None
+		self.N_policy = None
 		if(mc_policy is not None):
 			self.returns_list = mc_policy
+		if(N_policy is not None):
+			self.N_policy = N_policy
+	
 		#Set reward to 0
 		self.reward = 0
 		self.verbose = verbose
+
+	def off_mc(self, visited_pairs, returns, discount_factor):
+		amount_rounds = len(visited_pairs)
+		for pair in visited_pairs:
+			pair_w = 0
+			pair_t = self.N_policy.get_N_policy(pair[0])[pair[1]][0]
+			for i in range(pair_t, amount_rounds-1):
+				k_pair = visited_pairs[i]
+				policy = self.N_policy.get_policy(k_pair[0])
+				current_prob = self.N_policy.get_e_greedy_policy(policy, epsilon=0.0)[k_pair[1]]
+				pair_w+=(1.0/current_prob)
+			power = amount_rounds - pair_t - 1
+			discounted_cumulative_reward = 10 * (discount_factor**power)
+			current_values = self.N_policy.get_N_policy(pair[0])[pair[1]]
+			N = current_values[2] + pair_w * discounted_cumulative_reward
+			D = current_values[3] + pair_w
+			if(D==0):
+				D=1
+			Q = (N/D)
+			self.N_policy.update_values(N,D,Q,pair)
+			self.policy_grid.update_Q_values(Q, pair)
+			
+	def get_N_policy(self, old_state):
+		return self.N_policy.get_N_policy(old_state)
+
+	def update_t_value(self, old_state, t):
+		self.N_policy.update_t_value(old_state, t)
+
+	def get_greedy_action(self, old_state):
+		return self.policy_grid.get_greedy_action(old_state)
 
 	def get_mc_policy(self):
 		return self.returns_list
@@ -74,9 +108,9 @@ class Agent(object):
 
 class Predator(Agent):
 	""" Predator agent, inherits from Agent class """
-	def __init__(self, policy, mc_policy=None, verbose=0):
+	def __init__(self, policy, mc_policy=None, N_policy=None, verbose=0):
 		""" Initializes Predator by calling Agent init """
-		Agent.__init__(self, policy, mc_policy)
+		Agent.__init__(self, policy, mc_policy, N_policy)
 
 	def __repr__(self):
 		""" Represent Predator as X """

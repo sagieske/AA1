@@ -88,7 +88,7 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0, mc=False):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0, mc=False, start_val=15, off_policy=False):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		self.prey = prey
 		self.mc = mc
@@ -96,7 +96,7 @@ class Policy:
 		self.grid_size = grid_size
 		#If the agent is not a prey, set the policy to random
 		if prey==False:
-			self.policy = {'North':15, 'East':15, 'South':15, 'West':15, 'Wait':15}
+			self.policy = {'North':start_val, 'East':start_val, 'South':start_val, 'West':start_val, 'Wait':start_val}
 		#If the agent is a prey, set the policy to the prey-policy (80% wait, 20% action)
 		else:
 			self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
@@ -106,11 +106,17 @@ class Policy:
 		#Otherwise, create a grid of grid_size and fill it with the policy
 		elif(self.mc==False):
 			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
-		else:
+		elif(self.mc==True):
 			action_dict = {}
 			for action in self.policy.keys():
 				action_dict[str(action)] =[]
 			self.returns_list = [[[[ copy.deepcopy(action_dict) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
+		if(off_policy == True):
+			action_dict = {}
+			for action in self.policy.keys():
+				#init with t=0, Q=15, N=0, D=0
+				action_dict[str(action)] = [0,15,0,0]
+			self.off_policy_list = [[[[ copy.deepcopy(action_dict) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
 		#Store the actions and their corresponding transformations
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 
@@ -128,7 +134,46 @@ class Policy:
 		self.verbose= verbose
 		self.softmax = softmax
 
-				
+	def update_values(self,N,D,Q, pair):
+		state = pair[0]
+		i = state[0]
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		action = pair[1]
+		self.off_policy_list[i][j][k][l][action][1] = Q
+		self.off_policy_list[i][j][k][l][action][2] = N
+		self.off_policy_list[i][j][k][l][action][3] = D
+
+	def update_Q_values(self,Q, pair):
+		state = pair[0]
+		i = state[0]
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		action = pair[1]
+		self.policy_grid[i][j][k][l][action] = Q
+
+	def get_greedy_action(self, old_state):
+		new_pol = self.get_policy(old_state)
+		max_action = ""
+		max_value = 0
+		for action in new_pol.keys():
+			if new_pol[action] > max_value:
+				max_value = new_pol[action]
+				max_action = action
+		move = self.actions[max_action]
+		return move, max_action
+
+	def update_t_value(self, old_state, t_value):
+		i=old_state[0]
+		j=old_state[1]
+		k=old_state[2]
+		l=old_state[3]
+		policy = self.off_policy_list[i][j][k][l]
+		for action in policy.keys():
+			policy[action][0] = t_value
+
 	def get_policy(self, state):
 		""" Return the policy dictionary for a state """
 		i = state[0]
@@ -136,6 +181,14 @@ class Policy:
 		k = state[2]
 		l = state[3]
 		return self.policy_grid[i][j][k][l]
+
+	def get_N_policy(self, state):
+		""" Return the policy dictionary for a state """
+		i = state[0]
+		j = state[1]
+		k = state[2]
+		l = state[3]
+		return self.off_policy_list[i][j][k][l]	
 
 	def update_returns_list(self, pair, returns):
 		i = pair[0][0]
