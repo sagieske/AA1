@@ -18,6 +18,9 @@ class Agent(object):
 		self.reward = 0
 		self.verbose = verbose
 
+	def set_N_policy(self, N_policy):
+		self.N_policy = N_policy
+		
 	def off_mc(self, visited_pairs, returns, discount_factor):
 		amount_rounds = len(visited_pairs)
 		for pair in visited_pairs:
@@ -67,7 +70,7 @@ class Agent(object):
 	def get_transformation(self, action):
 		""" Get transformation vector ([0 1], [-1 0], etc) given an action ('North', 'West', etc.) """
 		return self.actions[action]
-                
+
 	def update_reward(self, reward):
 		""" Add reward gained on time step to total reward """
 		self.reward += reward
