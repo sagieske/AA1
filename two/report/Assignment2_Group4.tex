@@ -6,6 +6,7 @@
 \usepackage{xcolor,colortbl}
 \usepackage[]{algorithm2e}
 \usepackage{cite}
+\usepackage{caption}
 \usepackage{mdframed}
 
 %\usepackage{soul}
@@ -189,6 +190,7 @@ The implementation consists of the following files:
 This section discusses the results of the implementations.
 \subsection*{Q-Learning}
 First, let's have a look at the effect of different discount factors on Q-learning. This is displayed in the figure below.
+
 \begin{figure}[h!]
 \begin{center}
 
@@ -199,86 +201,118 @@ First, let's have a look at the effect of different discount factors on Q-learni
 \end{figure}
 
 As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour can be expected. 
-
-
+\\
+\\
 
 Now let's analyse the effect of epsilon in the $\epsilon$-greedy algorithm. 
-\begin{figure}[h]
-\begin{center}
 
-\includegraphics[scale=0.4]{epsilons}
-\caption{Q-learning using different epsilon values}
+\begin{center}
+	\includegraphics[scale=0.4]{epsilons}
+	\captionof{figure}{Q-learning using different epsilon values}
 \end{center}
-\end{figure}
+
+
+
 As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to completely random results. This shows how strong an $\epsilon$-greedy policy is. Even with the slightest bit of greedy behaviour, good results will be achieved.
 
 
 
 Now let's analyse the effect of learning rates. 
-\begin{figure}[h]
-\begin{center}
 
-\includegraphics[scale=0.4]{learning_rates}
-\caption{Q-learning using different learning rates}
+\begin{center}
+	\includegraphics[scale=0.4]{learning_rates}
+	\captionof{figure}{Q-learning using different learning rates}
 \end{center}
-\end{figure}
+
+%\begin{figure}[h]
+%\begin{center}
+
+%\includegraphics[scale=0.4]{learning_rates}
+%\caption{Q-learning using different learning rates}
+%\end{center}
+%\end{figure}
+
 The figure above shows that for each learning rate between, and including, 0.1 and 0.5 leads to conversion. However, a low conversion rate leads to slower conversion than a high conversion rate. It is interesting to note that the learning rates of both 0.4 and 0.5 appear to converge at about the same speed. The learning rate determines to which extent the new information will overwrite the old information. It appears that, even when storing little new data, this leads to convergence. The more new data overwrites the old data the quicker the algorithm converges. This seems to be correct. However, overwriting all old data might lead to less than optimal behaviour. As stated before, learning rates of 0.4 and 0.5 seem to yield the same result. It is well possible that this is the limit until which the learning rate factor is beneficial to the algorithm. As this lies beyond the scope of this analysis, this can be researched in the future.
 
 \subsection*{Learning types}
 Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. The results are shown in the figure below.
-\begin{figure}[h]
-\begin{center}
 
-\includegraphics[scale=0.4]{learning_types}
-\caption{Different learning types set out against one another}
+\begin{center}
+	\includegraphics[scale=0.4]{learning_types}
+	\captionof{figure}{Different learning types set out against one another}
 \end{center}
-\end{figure}
+
+%\begin{figure}[h]
+%\begin{center}
+
+%\includegraphics[scale=0.4]{learning_types}
+%\caption{Different learning types set out against one another}
+%\end{center}
+%\end{figure}
 The figure shows that all algorithms converge. Q-learning and Sarsa both converge with almost the same speed. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo performs worst. %explain why
 %\subsection*{Sarsa}
 \subsection*{$\epsilon$-greedy vs. softmax}
 As the effect of $\epsilon$-greedy action selection on Q-learning has already been discussed, let's analyse the effect of softmax action value selection. 
 % Explain that smaller grid takes longer to converge, since the predator is more likely to catch the prey, so it takes more rounds to actually explore enough. On the other hand, in a bigger grid the predator is highly unlikely to catch the prey, so it would explore a lot even in one round by the time it catches the prey.
-\begin{figure}[h]
-\begin{center}
 
-\includegraphics[scale=0.4]{softmax_with_legend}
-\caption{Q-learning using different temperatures in Soft-max}
+\begin{center}
+	\includegraphics[scale=0.4]{softmax_with_legend}
+	\captionof{figure}{Q-learning using different temperatures in Soft-max}
 \end{center}
 
-\end{figure}
+%\begin{figure}[h]
+%\begin{center}
+
+%\includegraphics[scale=0.4]{softmax_with_legend}
+%\caption{Q-learning using different temperatures in Soft-max}
+%\end{center}
+
+%\end{figure}
 Now let's look at the results between softmax and $\epsilon$-greedy. As stated in the theory, the difference in effect between softmax action selection and $\epsilon$-greedy action selection is unknown. The performance of either relies on the goal of the implementation, as well as human factors. Therefore, it is imperative to research the effects on this implementation.
-\begin{figure}[h]
+
 \begin{center}
-
-\includegraphics[scale=0.4]{softmax_vs_egreedy}
-\caption{Q-learning $\epsilon$-greedy and softmax action selection}
+	\includegraphics[scale=0.4]{softmax_vs_egreedy}
+	\captionof{figure}{Q-learning $\epsilon$-greedy and softmax action selection}
 \end{center}
+%\begin{figure}[h]
+%\begin{center}
 
-\end{figure}
+%\includegraphics[scale=0.4]{softmax_vs_egreedy}
+%\caption{Q-learning $\epsilon$-greedy and softmax action selection}
+%\end{center}
+
+%\end{figure}
 The figure shows that both softmax and $\epsilon$-greedy action selection yield similar results. Therefore, either can be used. 
 \subsection*{Effect of discount rates on learning}
 \subsubsection*{Q-learning}
 \includegraphics[scale=0.25]{discount_rates_qlearning}
 \subsection*{Different initialization for Q-learning}
 It was advised to initialize the grid optimistically, when performing Q-learning. When initializing a grid optimistically, it is interesting to see what happens when a grid is not optimistically initialized. The values chosen are 15, 10, 5, 0 and -5. To see the effect of learning, the $\epsilon$-value was either 0 or 0.1. The figure below shows the results of $\epsilon$ value 0.1.
-\begin{figure}[h]
-\begin{center}
 
-\includegraphics[scale=0.4]{q_learnin_diff_init_epsilon_0_1}
-\caption{Q-learning with different initialization values and $\epsilon$ is 0.1}
+\begin{center}
+	\includegraphics[scale=0.4]{q_learnin_diff_init_epsilon_0_1}
+	\captionof{figure}{Q-learning with different initialization values and $\epsilon$ is 0.1}
 \end{center}
 
-\end{figure}
+%\begin{figure}[h]
+%\begin{center}
+%\includegraphics[scale=0.4]{q_learnin_diff_init_epsilon_0_1}
+%\caption{Q-learning with different initialization values and $\epsilon$ is 0.1}
+%\end{center}
+%\end{figure}
 
 Now let's analyse the same initialization values with an $\epsilon$-value of 0.
-\begin{figure}[h]
 \begin{center}
-
-\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
-\caption{Q-learning with different initialization values and $\epsilon$ is 0}
+	\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
+	\captionof{figure}{Q-learning with different initialization values and $\epsilon$ is 0}
 \end{center}
 
-\end{figure}
+%\begin{figure}[h]
+%\begin{center}
+%\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
+%\caption{Q-learning with different initialization values and $\epsilon$ is 0}
+%\end{center}
+%\end{figure}
 
 \section*{Conclusion}
 
