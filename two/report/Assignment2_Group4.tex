@@ -330,9 +330,10 @@ Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is i
 	\captionof{figure}{Different learning types set out against one another}
 \end{center}
 
-The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence. %explain why
+The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence. %yeah, not sure... at all!!
+% CHECK THIS AS I AM REALLY NOT CERTAIN!
 
-The following table shows how many rounds were needed, on average, for the prey to catch the predator. This was calculated for the first 1000 and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
+The following table shows how many rounds were needed, per learning type on average, for the prey to catch the predator. This was calculated for the first 1000 runs  and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
 
 \begin{tabular}{| l | l | l | l | l |}
 \hline
@@ -345,13 +346,23 @@ The following table shows how many rounds were needed, on average, for the prey 
 \textbf{ONMC} & 79.68 & 15.78 & 112.11 & 21.64 \\
 \hline
 \end{tabular}
-%\subsection*{Sarsa}
 
 \section*{Conclusion}
-Q-learning is an effective method to learn the Q-values of the states of environments. 
+Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. 
 
+The effects of the discount factor on Q-learning shows that a high discount factor leads to best results. This makes the future rewards more important. As stated in the analysis, this is expected as the reward for all stated, but the goal state, is 0. The reward of the goal state is 10, at which the episode ends. This leads to a very important future reward that must be maximized.
 
-After seeing the results, it can be concluded that the use of both Monte Carlo methods as well a temporal difference methods converge quickly. However, temporal difference methods outperform on-policy Monte Carlo. Of the temporal difference methods, Q-learning outperforms Sarsa as well. The differences are minimal, but they are there. Nevertheless, both converge to almost the same result. This leads to the conclusion that either Sarsa or Q-learning can be implemented, whatever the requirements, and the same results may be expected.
+Different learning rates determine how important old information is. The higher the learning rate, the more new information overwrites the old information. As the effects of learning rates of 0.1 to 0.5 are tested, it is clear that the height of the learning rate affects the convergence speed. However, it appears that a learning rate of 0.4 and 0.5 perform almost equally well. This could be the tipping point of the effect of the learning rate. It is very well possible that a learning rate higher than 0.5 leads to worse results. This occurs due to the tradeoff between the learning speed and learning wrong behaviour. It is possible the goal state was reached due to luck. This means that the optimal behaviour, determined with a learning rate higher than 0.5, can be based on coincidence. 
+
+When choosing an action selection method, two of the most common methods are $\epsilon$-greedy action selection and softmax action selection. As the optimal tradeoff between exploration and exploitation is difficult to balance, these algorithms can be tested and the best performing algorithm with the best settings can be chosen. In order to determine how important these algorithms are, both were tested with Q-learning. Also, a relatively greedy policy was tested in both cases and compared to one another. When using the $\epsilon$-greedy action selection, an $\epsilon$ value of 1 leads to a completely exploratory behaviour. This does not lead to convergence. Any $\epsilon$ value lower than 1 leads to convergence. The lower the $\epsilon$ value, the quicker convergence is achieved. Also, the lower the $\epsilon$ value, the less timesteps the predator needs to capture the prey. This is caused by the fact that an $\epsilon$ value of 0 leads to a greedy policy.	As the environment is fairly static, the predator does not need to learn much to at least get near the prey. In addition, the optimal grid initialization leads to quite radical changes in Q-values. Meaning, if a visited state is not optimal, the Q-value of that state will drop significantly. On the other hand, optimal states will maintain a high value.
+
+%This conclusion is probably incorrect as the analysis is incomplete!
+After analysing the results, it can be concluded that the use of both Monte Carlo methods as well as temporal difference methods converge quickly. However, temporal difference methods outperform on-policy Monte Carlo. Of the temporal difference methods, Q-learning outperforms Sarsa as well. The differences are minimal, but they are there. Nevertheless, both converge to almost the same result. This leads to the conclusion that either Sarsa or Q-learning can be implemented, whatever the requirements, and the same results can be expected.
+
+\section*{Future work}
+In the report some results lead to more questions or needed more research than was conducted. Some of these questions were already mentioned in the report and are repeated here. 
+Encoded version
+learning rate > 0.5
 
 \section*{Files attached}
 \begin{itemize}
