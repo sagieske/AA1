@@ -409,7 +409,7 @@ if __name__ == "__main__":
 	all_averages = []
 	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	plt.plot(average_list)
-	plt.title("Plot of ", str(learning_type), " e=", str(epsilon), " gamma=", str(discount_factor), "alpha=", str(learning_rate))
+	plt.title("Steps needed versus episode number")
 	plt.ylabel('Steps needed before catch')
 	plt.xlabel('Number of steps')
 	plt.show()

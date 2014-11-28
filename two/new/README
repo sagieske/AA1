@@ -14,6 +14,6 @@ Flag               |     Default value     | Function
 -grid_size         | 11                    | Creates nxn grid with n=grid_size. Note: prey is initialized at 5x5 so grids smaller than 6x6 don't work
 -verbose           | 2                     | Different levels of output, 0,1 or 2. 0 outputs least, 2 outputs most.
 =========DEMO RUN==========
-To run the function with Sarsa, for 1000 episodes, using softmax with a temperature of 0.2, discount factor 0f 0.7 and learning rate of 0.5, you may enter the following into the command line:
+To run the function with Sarsa, for 1000 episodes (we advise using at least 4000 runs though), using softmax with a temperature of 0.2, discount factor 0f 0.7 and learning rate of 0.5, you may enter the following into the command line:
 
 python newstate.py -runs 1000 -epsilon 0.2 -softmax yes -discount 0.7 -learning_rate 0.5 -learning_type Sarsa
