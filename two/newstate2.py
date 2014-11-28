@@ -15,10 +15,10 @@ class Game:
 	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, verbose=2, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
 		print "LEARNING: ", learning_type, "\n\n"
+		#Store the learning type
 		self.learning_type = learning_type
+		#Created empty list to store all visited pairs
 		self.visited_pairs = []
-		#print 'learning type: ', self.learning_type
-		
 		if(self.learning_type == "ONMC"):
 			mc_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=True)
 			N_policy = None
@@ -26,11 +26,8 @@ class Game:
 			#print 'getting N_policy!'
 			N_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=False, off_policy=True)
 			mc_policy = None
-			#print "npol: ",N_policy
 		else:
 			if(self.learning_type != "OFFMC"):
-				#print 'learning type not offmc'
-				#print 'Setting N policy to none!'
 				N_policy = None
 			mc_policy = None
 		#Instantiate environment object with correct size, predator and prey locations
@@ -292,9 +289,12 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	#print 'in run episodes!'
 	total_rounds = 0
 	rounds_list = []
-	policy_grid = Policy(grid_size)
-	N_policy = Policy(grid_size,off_policy=True)
-	predator = Predator(policy_grid, N_policy=N_policy)
+	if(learning_type=="OFFMC"):
+		policy_grid = Policy(grid_size)
+		N_policy = Policy(grid_size,off_policy=True)
+		predator = Predator(policy_grid, N_policy=N_policy)
+	else:
+			game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	#game = Game(predator=predator,grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	average_list = []
 	counter=0
@@ -303,19 +303,27 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		#print 'learning type 1: ', this_learning_type
 		#Run episode until prey is caught
 		print "current_rounds: ", current_rounds
-		game_learning = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
-		reward, visited_pairs, irrel_rounds, policy_grid, mc_policy, N_policy = game_learning.get_rounds(learning_rate, discount_factor, epsilon)
-		predator = Predator(policy_grid)
-
+		if(learning_type=="OFFMC"):
+			game_learning = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
+			reward, visited_pairs, irrel_rounds, policy_grid, mc_policy, N_policy = game_learning.get_rounds(learning_rate, discount_factor, epsilon)
+			predator = Predator(policy_grid)
+			game_testing = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type="None")
+			reward, visited_pairs, current_rounds, policy_grid, mc_policy, irrel_N_policy = game_testing.get_rounds(learning_rate, discount_factor, epsilon=0.0)
+			predator = Predator(policy_grid, N_policy=N_policy)
+		else:
+			reward, visited_pairs, current_rounds, policy_grid, mc_policy, N_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
+			predator = Predator(policy_grid, mc_policy)
 		if(learning_type == 'ONMC'):
 			predator.update_returns(visited_pairs, reward, discount_factor)
 			predator.update_q_values(visited_pairs)
 		#Initialize episode
 		print "Round ", x
-		game_testing = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type="None")
-		reward, visited_pairs, current_rounds, policy_grid, mc_policy, irrel_N_policy = game_testing.get_rounds(learning_rate, discount_factor, epsilon=0.0)
-		predator = Predator(policy_grid, N_policy=N_policy)
+		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
 		#Add rounds needed in this episode to total_rounds
+		if(learning_type == 'ONMC'):
+			predator.update_returns(visited_pairs, reward, discount_factor)
+			predator.update_q_values(visited_pairs)
+		print "Round ", x			
 		total_rounds += current_rounds
 		#Add rounds needed in this episode to the list of rounds
 		rounds_list.append(current_rounds)
@@ -395,7 +403,7 @@ if __name__ == "__main__":
 	all_averages = []
 	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	plt.plot(average_list)
-	plt.title("Plot of ONMC, eps=0.1, disc=0.9, alpha=0.5")
+	plt.title("Plot of OFFMC, eps=0.1, disc=0.9")
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
 	plt.show()

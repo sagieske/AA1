@@ -91,21 +91,23 @@ class Policy:
 	""" Policy object that stores action values for each state """
 	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, verbose=0, mc=False, start_val=15, off_policy=False):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
-		print "CREATING GRID\n\n\n, off_policy=", off_policy
+		#Store prey boolean
 		self.prey = prey
+		#Store on-policy MC boolean
 		self.mc = mc
-		#Set grid size
+		#Store grid size
 		self.grid_size = grid_size
-		#If the agent is not a prey, set the policy to random
+		#If the agent is not a prey, set the policy to random with initialization value
 		if prey==False:
 			self.policy = {'North':start_val, 'East':start_val, 'South':start_val, 'West':start_val, 'Wait':start_val}
 		#If the agent is a prey, set the policy to the prey-policy (80% wait, 20% action)
 		else:
 			self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
-		#If there is an initial policy, store it
+		#If a policy_grid is given, store it
 		if(policy_grid is not None):
 			self.policy_grid = policy_grid
 		#Otherwise, create a grid of grid_size and fill it with the policy
+		#If we're not using On-policy Monte Carlo, create a policy grid 
 		elif(self.mc==False):
 			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]
 		elif(self.mc==True):
