@@ -36,7 +36,7 @@ Some prominent model-free reinforcement learning methods are on- and off-policy 
 \section{Theory}
 \subsection{Temporal difference learning methods}
 Temporal difference (TD) learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
-Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. 
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model and they are similar to dynamic programming methods in that they both exploit the Bellman-equations and \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. However, since TD-methods do not require a model, the state- and action-value updates are slightly different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. However, as TD-methods do not require a model, the state- and action value updates are different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. The value update rule is displayed in \ref{eq:td0}. Updating the Q-values differs per learning method and are shown per section.
 \begin{mdframed}
 \begin{align}
 V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]\label{eq:bellmanV}\\
@@ -313,13 +313,11 @@ In order to determine whether the zero initialization is indeed a border case, m
 \subsection{Learning types}
 Aside from Q-learning, Sarsa and on- and off-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results of the first three are shown in the figure below.
 
-\begin{figure}[h]
 \begin{center}
 	\includegraphics[scale=0.4]{learning_types}
-	\caption{Different learning types set out against one another}
+	\captionof{figure}{Different learning types set out against one another}
 	\label{fig:learningalgs}
 \end{center}
-\end{figure}
 
 The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence.
 
@@ -345,6 +343,8 @@ The following table shows how many rounds were needed, per learning type on aver
 \caption{Average \# rounds and standard deviation of learning algorithms}
 \end{center}
 \end{table}
+
+Here it is concluded that Q-learning eventually leads to needing the least amount of time steps for the predator to catch the prey, although it starts worse. Sarsa performs similarly, though it starts exploiting earlier, so the avarage number of rounds is already lower in the beginning. In the end, the number of time steps any algorithm needs lie close to one another. This shows that all these algorithms are quick to converge and yield similar results. Therefore, either algorithm can be used if there is no reward given for reaching the goal state in a minimal amount of time steps. Also, Q-learning yields less deviation after convergence. This shows that Q-learning performs best out of these algorithms.
 
 A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence seems to take place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the latest states of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
 
