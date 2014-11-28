@@ -114,7 +114,6 @@ class Game:
 			predator_action = action[0]
 		else:
 			predator_location, predator_action = self.turn_predator(old_state)
-			print predator_action
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
 		if self.verbose > 0:
 			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
@@ -132,7 +131,7 @@ class Game:
 			greedy_action = self.predator.get_greedy_action(old_state)
 			if(greedy_action != predator_action):
 				self.predator.update_t_value(old_state, steps)
-			print self.visited_pairs
+			#print self.visited_pairs
 
 		if(not same):
 			#If prey is not caught, move it
