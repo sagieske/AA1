@@ -314,13 +314,11 @@ In order to determine whether the zero initialization is indeed a border case, m
 \subsection{Learning types}
 Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
 
-\begin{figure}[h]
 \begin{center}
 	\includegraphics[scale=0.4]{learning_types}
-	\caption{Different learning types set out against one another}
+	\captionof{figure}{Different learning types set out against one another}
 	\label{fig:learningalgs}
 \end{center}
-\end{figure}
 
 The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence.
 
