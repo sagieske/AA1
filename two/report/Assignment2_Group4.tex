@@ -323,6 +323,39 @@ Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is i
 The figure shows that all algorithms converge. Q-learning and Sarsa both converge with almost the same speed. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal Q-values. %explain why
 %\subsection*{Sarsa}
 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{| l | c | c |}
+\hline
+& \textbf{Average} & \textbf{Standard Deviatio}n\\
+\hline
+\textbf{Q-learning} &  & \\
+\textbf{Sarsa} &  &  \\
+\textbf{On-policy Monte Carlo} &   & \\
+\hline
+\end{tabular}
+\caption{Average and standard deviation over first 1000 rounds in 4000-run}
+\end{center}
+\end{table}
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{| l | c | c |}
+\hline
+& \textbf{Average} & \textbf{Standard Deviatio}n\\
+\hline
+\textbf{Q-learning} & 14.108 & 20.1096577793\\
+\textbf{Sarsa} & 15.101 & 20.0231565693\\
+\textbf{On-policy Monte Carlo} & 14.648 & 21.8930147764\\
+\hline
+\end{tabular}
+\caption{Average and standard deviation over last 1000 rounds in 4000 run}
+\end{center}
+\end{table}
+
+
 \section*{Conclusion}
 Q-learning is an effective method to learn the Q-values of the states of environments. 
 
