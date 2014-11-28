@@ -224,6 +224,8 @@ The implementation consists of the following files:
 	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, Sarsa, $\epsilon$-greedy, softmax action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
 	\item[Newstate] \hfill \\ 
 	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs Q-Learning, Sarsa and Monte Carlo. It also uses $\epsilon$-greedy and softmax action selection. The results are printed in the command line and graphs are used for analysis.
+	\item[README] \hfill \\
+	Contains instructions on how to run the program.
 \end{description}
 \pagebreak
 \section{Analysis}
@@ -360,30 +362,27 @@ The point of convergence for the number of round until the prey is caught for of
 
 \pagebreak
 \section{Conclusion}
-Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. Neither Sarsa, nor on- or off-policy Monte Carlo methods have performed better for the problem at hand, which is as expected.
+Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. Neither Sarsa, nor on- or off-policy Monte Carlo methods have performed better for the problem at hand, which is as expected. However, if there is a high negative reward for certain cases, Sarsa should perform better.
 \subsection{Parameter settings}
 The effect of the discount factor on Q-learning shows that a high discount factor ($0.9$ in this case) leads to the best results. From the experiments, it is expected that a learning rate that balances old and new information (either $0.4$ or $0.5$ for this problem) is best. \\
 For the problem at hand, relatively greedy methods worked quite well, which is expected for a static environment. Softmax and $\epsilon$-greedy converged at around the same speed, but softmax performed a bit better after convergence, due to its ranking of suboptimal actions. \\
 When using optimistic initialization, the case of $\epsilon=0.1$ converged for all initial Q-values $\in \{-5,0,5,10,15\}$. This is expected, because exploration happens regardless due to $\epsilon$. However, the case of $\epsilon=0.0$ only converged for values $\le 0$. It seems that for this problem, $0$ is a tipping-point with regards to optimistic initialization.
 
-\subsubsection{Learning types}
-%This conclusion is probably incorrect as the analysis is incomplete!
-After analysing the results, it can be concluded that the use of both Monte Carlo methods as well as temporal difference methods converge quickly. However, temporal difference methods outperform on-policy Monte Carlo. Of the temporal difference methods, Q-learning outperforms Sarsa as well. The differences are minimal, but they are there. Nevertheless, both converge to almost the same result. This leads to the conclusion that either Sarsa or Q-learning can be implemented, whatever the requirements, and the same results can be expected.
 \pagebreak
 \section{Future work}
 In the report some results lead to more questions or needed more research than was conducted. Some of these questions were already mentioned in the report and are repeated here. 
 
 \subsection{Encoded version}
-Currently, the implementation is not encoded. This leads to long runtime. By implementing state space encoding, the runtime would decrease significantly. In state space encoding, the predator will try to minimize the distance between itself and the prey. In order to do so, the predator would calculate the distance to the prey and take action accordingly to minimize the distance to the prey. This leads to a reduced state space, leaving less states to visit and analyse. Also, implementation of state space encoding would most likely lead to better performance of off-policy Monte Carlo as this takes a lot of runs to learn an optimal policy. Because off-policy Monte Carlo takes into account the goal state, it takes a long time for the algorithm to converge. This will be solved using state space encoding, at the goal state will be closer to the predator and therefore less states have to be visited.
+Currently, the implementation is not encoded. This leads to a long runtime and bad convergence for off-policy Monte Carlo. By implementing state space encoding, the runtime would decrease significantly. In state space encoding, the predator will try to minimize the distance between itself and the prey. In order to do so, the predator would calculate the distance to the prey and take action accordingly to minimize the distance to the prey. This leads to a reduced state space, leaving less states to visit and analyse. 
 
 \subsection{Learning rate}
 The learning rate was researched between (and including) the values 0.1 - 0.5.  As shown in the analysis, the learning rates of 0.4 and 0.5 seem to have similar effect. This leads to the theory that this is a turning point and rewriting more old information will actually have a negative effect on the agents' learning. Further research will show what actually happens and an optimal learning rate can be decided upon.
 
 \subsection{Varying grid initialization}
-The varying grid initialization showed that the grid initialization with 0 lead to unexpected behaviour when using an explicitely greedy policy. This appears to be the a turning point. In other words; any lower grid initialization value will probably lead to non-convergence. Also, it is interesting to find out if grid initialization with 0 is indeed a turning point or if this sometimes leads to non-convergence as well. Further research will lead to answers to these questions. 
+The varying grid initialization showed that the grid initialization lower than 0 leads to unexpected behaviour when using an explicitely greedy policy. This appears to be the a turning point. In other words; any lower grid initialization value will probably lead to non-convergence. Also, it is interesting to find out if grid initialization with 0 is indeed a turning point or if this sometimes leads to non-convergence as well. Further research will lead to answers to these questions. 
 
 \subsection{Multiple experiments}
-At hindsight, performing multiple experiments with the same settings would give more insight in the performance of the implementation. Thus far, all tests were run once and conclusions were drawn. More certainty about the implementation and performance of the algorithms can be achieved by averaging all results over multiple runs.
+In hindsight, performing multiple experiments with the same settings would give more insight in the performance of the implementation. Thus far, all tests were run once and conclusions were drawn. More certainty about the implementation and performance of the algorithms can be achieved by averaging all results over multiple runs.
 \pagebreak
 \section{Files attached}
 \begin{itemize}
@@ -391,6 +390,7 @@ At hindsight, performing multiple experiments with the same settings would give 
 \item agents\_new.py
 \item other\_objects.py
 \item helpers.py \ldots
+\item README
 \end{itemize}
 
 \section{Sources}
