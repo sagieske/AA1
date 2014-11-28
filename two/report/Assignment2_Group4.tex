@@ -235,7 +235,7 @@ This section discusses the results of the implementations. In order to display a
 First, the effects of different discount factors on Q-learning is analysed. The results are displayed in the figure below.
 
 \begin{center}
-	\includegraphics[scale=0.4]{discount_factors}
+	\includegraphics[scale=0.2]{discount_factors}
 	\captionof{figure}{Q-learning using different discount factors}
 \end{center}
 
@@ -245,7 +245,7 @@ As shown, the higher the discount factor, the better the result. The height of t
 It is possible to set different learning rates in Q-learning. The learning rate determines to which extent the new information will overwrite the old information. The following graph shows how important the relationship of old and new information is to achieve an optimal policy.
 
 \begin{center}
-	\includegraphics[scale=0.4]{learning_rates}
+	\includegraphics[scale=0.2]{learning_rates}
 	\captionof{figure}{Q-learning using different learning rates}
 \end{center}
 
@@ -347,13 +347,13 @@ The following table shows how many rounds were needed, per learning type on aver
 \end{center}
 \end{table}
 
-A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence takes place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected as many random steps (and long episodes) are needed before the agent catches the prey in the first run, which results in very high action-values. A lot of episodes are needed after this to get these action-values to reasonable values. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
+A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence takes place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the tails of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
 
-The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms.
+The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[scale=0.5]{OFFMC_11x11_preyat_5x5}
+\includegraphics[scale=0.4]{OFFMC_11x11_preyat_5x5}
 \caption{Off-policy Monte Carlo for 4000 runs}
 \label{fig:offmc}
 \end{center}
