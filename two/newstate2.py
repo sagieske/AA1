@@ -6,9 +6,9 @@ import numpy as np
 import time
 from math import ceil, floor
 import pdb
-from agents_new import Predator, Prey
+from agents_new2 import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from other_objects2 import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
@@ -91,6 +91,7 @@ class Game:
 			returns = 10
 			self.predator.off_mc(self.visited_pairs, returns, discount_factor)
 		reward = 10
+		print "inthis: ", self.predator.get_policy_grid().get_policy([4,4,6,6])
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return reward, self.visited_pairs, steps, self.predator.get_policy_grid(), self.predator.get_mc_policy(), self.predator.get_N_policy_grid()
 
@@ -113,6 +114,7 @@ class Game:
 			predator_action = action[0]
 		else:
 			predator_location, predator_action = self.turn_predator(old_state)
+			print predator_action
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
 		if self.verbose > 0:
 			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
@@ -130,7 +132,8 @@ class Game:
 			greedy_action = self.predator.get_greedy_action(old_state)
 			if(greedy_action != predator_action):
 				self.predator.update_t_value(old_state, steps)
-				#print self.predator.get_N_policy(old_state)
+			print self.visited_pairs
+
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
@@ -169,7 +172,7 @@ class Game:
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
 		if(self.learning_type == "OFFMC"):
-			predator_move, action_name = self.predator.get_greedy_action(state)
+			predator_move, action_name = self.predator.get_action(state, epsilon=0.0)
 		else:
 			predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
@@ -292,12 +295,13 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		reward, visited_pairs, irrel_rounds, policy_grid, mc_policy, N_policy = game_learning.get_rounds(learning_rate, discount_factor, epsilon)
 		print policy_grid.get_policy([4,4,6,6])
 		predator = Predator(policy_grid)
+
 		if(learning_type == 'ONMC'):
 			predator.update_returns(visited_pairs, reward, discount_factor)
 			predator.update_q_values(visited_pairs)
 		#Initialize episode
 		print "Round ", x
-		game_testing = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=None)
+		game_testing = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type="None")
 		reward, visited_pairs, current_rounds, policy_grid, mc_policy, irrel_N_policy = game_testing.get_rounds(learning_rate, discount_factor, epsilon=0.0)
 		predator = Predator(policy_grid, N_policy=N_policy)
 		#Add rounds needed in this episode to total_rounds

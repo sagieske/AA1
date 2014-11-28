@@ -24,6 +24,7 @@ class Agent(object):
 	def off_mc(self, visited_pairs, returns, discount_factor):
 		amount_rounds = len(visited_pairs)
 		for pair in visited_pairs:
+			#print pair
 			pair_w = 0
 			pair_t = self.N_policy.get_N_policy(pair[0])[pair[1]][0]
 			for i in range(pair_t, amount_rounds-1):
