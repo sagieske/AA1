@@ -249,6 +249,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	average_list = []
 	counter=0
 	last_1000 = []
+	first_1000 = []
 	for x in range(0, N):
 		#Run episode until prey is caught
 		reward, visited_pairs, current_rounds, policy_grid, mc_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
@@ -276,9 +277,11 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		# Add last 1000 runs to list
 		if (N - x) <= 1000:
 			last_1000.append(current_rounds)
+		if x < 1000:
+			first_1000.append(current_rounds)
 		
-	print "rounds list: ", rounds_list
-	print "average_list: ", average_list
+	#print "rounds list: ", rounds_list
+	#print "average_list: ", average_list
 	#Compute average number of rounds needed
 	average_rounds = float(total_rounds)/N
 	#Compute list of variances
@@ -288,7 +291,15 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	#Compute standard deviation for N rounds
 	standard_deviation = math.sqrt(variance)
 	print "Average rounds needed over ", N, " episodes: ", average_rounds
-	print "Standard deviation: ", standard_deviation	
+	print "Standard deviation: ", standard_deviation
+
+	# FIRST 1000
+	average_rounds_1000_first = sum(first_1000)/float(len(first_1000))
+	var_list_1000_first = [(x-average_rounds_1000_first)**2 for x in first_1000]
+	variance_1000_first = float(sum(var_list_1000_first)/len(var_list_1000_first))
+	standard_deviation_1000_first = math.sqrt(variance_1000_first)
+	print "Average rounds needed over first", len(first_1000), " episodes: ", average_rounds_1000_first
+	print "Standard deviation: ", standard_deviation_1000_first	
 
 	# LAST 1000
 	average_rounds_1000 = sum(last_1000)/float(len(last_1000))
@@ -354,8 +365,10 @@ if __name__ == "__main__":
 	print "Qlearning"
 	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="Q-learning")
 	all_averages = []
+	print "SARSA"
 	average_list2 = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="Sarsa")
 	all_averages = []
+	print "ON MC"
 	average_list3 = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="ONMC")
 
 	# Doing softmax temperatures
