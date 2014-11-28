@@ -36,7 +36,7 @@ Some prominent model-free reinforcement learning methods are on- and off-policy 
 \section{Theory}
 \subsection{Temporal difference learning methods}
 Temporal difference (TD) learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
-Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. 
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model and they are similar to dynamic programming methods in that they both exploit the Bellman-equations and \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. However, since TD-methods do not require a model, the state- and action-value updates are slightly different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. However, as TD-methods do not require a model, the state- and action value updates are different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. The value update rule is displayed in \ref{eq:td0}. Updating the Q-values differs per learning method and are shown per section.
 \begin{mdframed}
 \begin{align}
 V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]\label{eq:bellmanV}\\
