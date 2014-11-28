@@ -59,7 +59,7 @@ Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{
 \end{mdframed}
 
 
-\begin{figure}[h!] 
+\begin{center} 
 \begin{mdframed}
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily \\
@@ -73,9 +73,9 @@ Repeat (for each episode):\\
 \tab until s is terminal\\
 \end{algorithm}
 \end{mdframed}
-\caption{The algorithm for one-step Q-learning\cite{bartosutton}}
+\captionof{figure}{The algorithm for one-step Q-learning\cite{bartosutton}}
 \label{alg:qlearning}
-\end{figure}
+\end{center}
 
 
 
@@ -88,7 +88,7 @@ Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma Q(s_{t+1},a_{
 \end{mdframed}
 
 
-\begin{figure}[h!]
+\begin{center}
 \begin{mdframed}
 \begin{algorithm}[H]
 Initialize Q(s,a) arbitrarily\\
@@ -103,9 +103,9 @@ Repeat (for each episode):\\
 \tab until s is terminal\\
 \end{algorithm}
 \end{mdframed}
-\caption{The algorithm for Sarsa \cite{bartosutton}}
+\captionof{figure}{The algorithm for Sarsa \cite{bartosutton}}
 \label{alg:sarsa}
-\end{figure}
+\end{center}
 
 
 
@@ -113,13 +113,17 @@ Repeat (for each episode):\\
 As stated before, there are several ways of learning a estimating value functions and discovering optimal policies. Again, Monte Carlo methods do not know (nor need) complete knowledge of the environment. Monte Carlo methods require only experience, such as sample sequences of states, actions, and rewards, from on-line interaction with an environment. Unlike TD-methods, Monte Carlo methods require a model. The model only needs to generate sample transitions, unlike Dynamic Programming methods which need complete probability distributions of all possible transitions. Therefore, Monte Carlo methods are an important tool for an agent to use when only the model is known.
 
 \subsection*{On-policy Monte Carlo Control}
-On-policy Monte Carlo control (OPMCC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OPMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+On-policy Monte Carlo control (ONMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OPMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
 
  
-\begin{figure}[h!]
+\begin{center}
 \begin{mdframed}
 \begin{algorithm}[H]
 Initialize, for all $s \in \mathcal(S), a \in \mathcal(A)(s)$\\
+\tab Q(s,a) $\leftarrow$ arbitrary \\
+\tab Returns(s,a) $\leftarrow$ empty list \\
+\tab $\pi \leftarrow$ an arbitrary $\epsilon$-soft policy \\
+ 
 Repeat forever:\\
 \tab Generate an episode using exploring starts and $\pi$\\
 \tab For each pair s,a appearing in the episode:\\
@@ -137,11 +141,41 @@ Repeat forever:\\
 \end{array}\right.\]
 \end{algorithm}
 \end{mdframed}
-\caption{The algorithm for on-policy Monte Carlo \cite{bartosutton}}
+\captionof{figure}{The algorithm for on-policy Monte Carlo \cite{bartosutton}}
 \label{alg:OPMCC}
-\end{figure}
+\end{center}
 
 
+\subsection*{Off-policy Monte Carlo Control}
+Off-policy Monte Carlo control (OFFMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OFMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+
+ 
+\begin{center}
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize, for all $s \in \mathcal{S}, a \in \mathcal{A}(s)$:\\
+\tab Q(s,a) $\leftarrow$ arbitrary\\
+\tab N(s,a) $\leftarrow$ 0; Numerator\\
+\tab D(s,a) $\leftarrow$ 0; Denominator of Q(s,a)\\
+\tab $\pi \leftarrow$ an arbitrary deterministic policy\\
+
+Repeat forever:\\
+\tab Select a policy $\pi '$ and use it to generate an episode:\\
+\dtab $s_0, a_0, r_1, s_1, r_2, ..., s_{T-1}, a_{T-1}, r_T, s_T$ \\
+\tab $\tau \leftarrow$ latest time at which $a_t \neq \pi (s_{\tau}, a_{\tau})$\\
+\tab For each pair s, a appearing in the episode at time $\tau$ or later:\\
+\dtab $\tau \leftarrow$ the time of first occurrence of s, a such that $t \leq \tau$\\
+\dtab $w \leftarrow \prod\limits_{k=t+1}^{T-1} \dfrac{1}{\pi'(s_k, a_k)}$\\
+\dtab N(s,a) $\leftarrow$ N(s,a) + $wR_t$\\
+\dtab D(s,a) $\leftarrow$ D(s,a) + $w$ \\
+\dtab Q(s,a) $\leftarrow \dfrac{N(s,a)}{D(s,a)}$ \\
+\tab For each $s \in \mathcal{S}$: \\
+\dtab $\pi(s) \leftarrow$ arg $\max_a$ Q(s,a)\\
+\end{algorithm}
+\end{mdframed}
+\captionof{figure}{The algorithm for off-policy Monte Carlo \cite{bartosutton}}
+\label{alg:OFFMC}
+\end{center}
 
 
 
@@ -166,7 +200,7 @@ Softmax action-selection offers a solution to one problem presented by $\epsilon
 \forall a: p_t(a) &= \frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} \label{eq:softmax}
 \end{align}
 \end{mdframed}
-The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$ and consequently those of e$^{Q_t(a)/\tau}$ to grow very larger, thus increasing their differences. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
+The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
 
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
 \pagebreak
@@ -244,7 +278,7 @@ It was advised to initialize the policy of the predator optimistically, when per
 	\captionof{figure}{Q-learning with different policy initialization values and $\epsilon$ is 0.1}
 \end{center}
 
-Each non-negative initialization appears to yield good results. Though it takes an initialization of 0 longer to converge, the policy does eventually converge to the same level as the optimistic policy. The negatively initialized policy behaves very poor. It does improve, but it takes significantly longer to converge than the non-negative initialized policies.
+Each non-negative initialization appears to yield good results. Though it takes an initialization of 0 longer to converge, the policy does eventually converge to the same level as the optimistic policy. The negatively initialized policy behaves very poor. It does improve, but it takes significantly longer to converge than the non-negative initialized policies. It is expected that both the negative and zero initialization lead to slow learning. However, it is possible that the zero initialization is a border case where this is (one of) the last case(s) where the algorithm still learns enough to perform well.
 
 %\begin{figure}[h]
 %\begin{center}
@@ -258,7 +292,9 @@ Now let's analyse the same initialization values with an $\epsilon$-value of 0.
 	\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
 	\captionof{figure}{Q-learning with different initialization values and $\epsilon$ is 0}
 \end{center}
-This leads to similar results as before. One of the differences is that the policy initialized with 0 performs slightly worse than before. Also, the negatively initialized policy does not converge. 
+This leads to similar results as before. One of the differences is that the policy initialized with 0 performs worse than before and does not converge. This behaviour can be expected. At the non-negative initializations, there are values larger than zero. Therefore, executing a greedy policy still leads to convergence. As stated, it is expected that the initialization with zero values should behave similar to the negative initialization. Again, this is not the case. This is still a border case, as stated before.
+
+In order to determine whether the zero initialization is indeed a border case, more runs can be performed. However, this falls beyond the scope of this report. It is important to test this is the future to determine the limits of this implementation.
 %\begin{figure}[h]
 %\begin{center}
 %\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
@@ -275,35 +311,16 @@ As the effect of $\epsilon$-greedy action selection on Q-learning has already be
 	\captionof{figure}{Q-learning using different temperatures in Soft-max}
 \end{center}
 
-The graph shows that all results converge. It shows that the lower the temperature, the better the results. % explain why and all
-%\begin{figure}[h]
-%\begin{center}
+The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as the lower the temperature leads to a greedy action selection. However, the temperature of the softmax action selection algorithm can not be zero, as the temperature is divided by. This ensures both optimal action selection and exploration. When analysing the higher temperatures, it these converge at about the same speed as the low temperatures. However, the higher the temperature, the less smooth the graph. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level. This causes the algorithm to converge, but also taking longer (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
 
-%\includegraphics[scale=0.4]{softmax_with_legend}
-%\caption{Q-learning using different temperatures in Soft-max}
-%\end{center}
-
-%\end{figure}
-Now let's look at the results between softmax and $\epsilon$-greedy. As stated in the theory, the difference in effect between softmax action selection and $\epsilon$-greedy action selection is unknown. The performance of either relies on the goal of the implementation, as well as human factors. Therefore, it is imperative to research the effects on this implementation.
+Now let's look at the results between softmax and $\epsilon$-greedy. As stated in the theory, the difference in effect between softmax action selection and $\epsilon$-greedy action selection is unknown. The performance of either relies on the goal of the implementation, as well as human factors. Therefore, it is imperative to research the effects on this implementation. The $\epsilon$ value chosen for the $\epsilon$-greedy algorithm is the same as the temperature, $\tau$. This means that both algorithms behave greedy, but still explore from time to time.
 
 \begin{center}
 	\includegraphics[scale=0.4]{softmax_vs_egreedy}
 	\captionof{figure}{Q-learning $\epsilon$-greedy and softmax action selection}
 \end{center}
-%what can we say here?
-%\begin{figure}[h]
-%\begin{center}
 
-%\includegraphics[scale=0.4]{softmax_vs_egreedy}
-%\caption{Q-learning $\epsilon$-greedy and softmax action selection}
-%\end{center}
-
-%\end{figure}
-The figure shows that both softmax and $\epsilon$-greedy action selection yield similar results. Therefore, either can be used. 
-%\subsection*{Effect of discount rates on learning}
-%\subsubsection*{Q-learning}
-%\includegraphics[scale=0.25]{discount_rates_qlearning}
-
+The figure shows that both softmax and $\epsilon$-greedy action selection converge at the same speed. However, softmax action selection eventually leads to capturing the prey in less rounds. Therefore, softmax action selection is preferred over epsilon-greedy action selection when the the prey needs to be caught in a minimum amount of timesteps.
 
 \subsection*{Learning types}
 Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
@@ -313,48 +330,22 @@ Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is i
 	\captionof{figure}{Different learning types set out against one another}
 \end{center}
 
-%\begin{figure}[h]
-%\begin{center}
+The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence. %explain why
 
-%\includegraphics[scale=0.4]{learning_types}
-%\caption{Different learning types set out against one another}
-%\end{center}
-%\end{figure}
-The figure shows that all algorithms converge. Q-learning and Sarsa both converge with almost the same speed. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal Q-values. %explain why
+The following table shows how many rounds were needed, on average, for the prey to catch the predator. This was calculated for the first 1000 and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
+
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+ & \parbox{2cm}{\textbf{Avg nr/rounds\\ (first 1000)}} & \parbox{2cm}{\textbf{Avg nr/rounds\\ (last 1000)}} & \parbox{2cm}{\textbf{STD\\ (first 1000)}} & \parbox{2cm}{\textbf{STD\\ (last 1000)}} \\
+\hline
+\textbf{Q-learning} & 88.68 & 14.52 & 124.39 & 18.84 \\
+\hline
+\textbf{Sarsa} & 80.61 & 14.70 & 109.74 & 22.45 \\
+\hline
+\textbf{ONMC} & 79.68 & 15.78 & 112.11 & 21.64 \\
+\hline
+\end{tabular}
 %\subsection*{Sarsa}
-
-
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{| l | c | c |}
-\hline
-& \textbf{Average} & \textbf{Standard Deviatio}n\\
-\hline
-\textbf{Q-learning} &  & \\
-\textbf{Sarsa} &  &  \\
-\textbf{On-policy Monte Carlo} &   & \\
-\hline
-\end{tabular}
-\caption{Average and standard deviation over first 1000 rounds in 4000-run}
-\end{center}
-\end{table}
-
-
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{| l | c | c |}
-\hline
-& \textbf{Average} & \textbf{Standard Deviatio}n\\
-\hline
-\textbf{Q-learning} & 14.108 & 20.1096577793\\
-\textbf{Sarsa} & 15.101 & 20.0231565693\\
-\textbf{On-policy Monte Carlo} & 14.648 & 21.8930147764\\
-\hline
-\end{tabular}
-\caption{Average and standard deviation over last 1000 rounds in 4000 run}
-\end{center}
-\end{table}
-
 
 \section*{Conclusion}
 Q-learning is an effective method to learn the Q-values of the states of environments. 
