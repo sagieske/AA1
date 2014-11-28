@@ -27,7 +27,7 @@
 
 \section*{Introduction}
 This report contains the analysis of an implementation of single agent reinforcement learning. In these algorithms, the agent has no prior knowledge of the transition or reward function. Two different solutions to this problem are presented: in model-based learning, the agent learns the model from experience and plans on the learned model. In model-free learning, the agent learns state-values or Q-values directly. In this paper, model-free learning methods are considered.\\
-Some prominent model-free reinforcement learning methods are on- and off-policy Monte Carlo, Q-learning (off-policy) and Sarsa (on-policy), where on-policy methods evaluate the values of a policy $\pi$ \textit{as it's being followed}, while off-policy methods allow the agent to follow a different policy $\pi'$. This paper reports on Q-learning and its on-policy equivalent, Sarsa. Moreover, the difference in action-selection between $\epsilon$-greedy and softmax are compared. 
+Some prominent model-free reinforcement learning methods are on- and off-policy Monte Carlo Control, Q-learning (off-policy) and Sarsa (on-policy), where on-policy methods evaluate the values of a policy $\pi$ \textit{as it's being followed}, while off-policy methods allow the agent to follow a different policy $\pi'$. This paper reports on Q-learning and its on-policy equivalent, Sarsa. Moreover, the difference in action-selection between $\epsilon$-greedy and softmax are compared. 
 \pagebreak
 
 \section*{Theory}
@@ -123,7 +123,7 @@ Initialize, for all $s \in \mathcal(S), a \in \mathcal(A)(s)$\\
 Repeat forever:\\
 \tab Generate an episode using exploring starts and $\pi$\\
 \tab For each pair s,a appearing in the episode:\\
-\dtab $\mathcal{R} \leftarrow $ return following the first occurence of s,a\\
+\dtab $\mathcal{R} \leftarrow $ return following the first occurrence of s,a\\
 \ttab Append $\mathcal{R}$ to $Returns(s,a)$\\
 \ttab $Q(s,a) \leftarrow$ average($Returns(s,a)$)\\
 \dtab For each $s$ in the episode:\\
