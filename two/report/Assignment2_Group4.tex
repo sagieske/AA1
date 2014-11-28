@@ -22,7 +22,7 @@
 
 \author{By Group 4: Gieske, Gornishka, Koster, Loor}
 \maketitle
-
+\pagebreak
 \tableofcontents
 
 
@@ -116,7 +116,7 @@ Repeat (for each episode):\\
 As stated before, there are several ways of learning an estimating value functions and discovering optimal policies. Again, Monte Carlo methods do not know (nor need) complete knowledge of the environment. Monte Carlo methods require only experience, such as sample sequences of states, actions, and rewards, from on-line interaction with an environment. Unlike TD-methods, Monte Carlo methods require a model. The model only needs to generate sample transitions, unlike Dynamic Programming methods which need complete probability distributions of all possible transitions. This is a big advantage, since obtaining the whole probability distribution might be a tedious, even infeasible task in cases when sampling is still possible. Therefore, Monte Carlo methods are an important tool for an agent to use when only the model is known.
 
 \subsection{On-policy Monte Carlo Control}
-On-policy Monte Carlo control (ONMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OPMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+On-policy Monte Carlo control (ONMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. This is done by using an $\epsilon$-greedy algorithm, which guarantees exploration. There are two ways of implementing ONMC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
 
  
 \begin{center}
@@ -150,7 +150,7 @@ Repeat forever:\\
 
 
 \subsection{Off-policy Monte Carlo Control}
-Off-policy Monte Carlo control (OFFMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OFMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+Similarly to ONMC, off-policy Monte Carlo control (OFFMC) does not use exploring starts. Thus, an $\epsilon$-greedy algorithm is used again to ensure exploration. The main difference between OFFMC and ONMC is in that ONMC estimates the value of a policy while using it for control (i.e. exploration and exploitation are done together), whereas OFFMC uses two different policies. The first one is called behavior policy and it is only used to generate behavior (i.e. this policy is used in the exploration part). The second one is called an estimation policy and it's the one that is being evaluated and improved (i.e this policy is used in the exploitation part). There are again two ways of implementing OFMCC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
 
  
 \begin{center}
@@ -316,8 +316,11 @@ Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is i
 	\captionof{figure}{Different learning types set out against one another}
 \end{center}
 
-The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence. %yeah, not sure... at all!!
-% CHECK THIS AS I AM REALLY NOT CERTAIN!
+The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence.
+
+Q-learning is an off-policy learning algorithm that doesn't care about the reward when learning. Sarsa does, as it learns on-policy. This also means that Sara needs to be more careful when learning, factoring in the possibility of receiving a negative reward. Therefore, Sarsa will explore less than Q-learning, leading to Q-learning learning more than Sarsa.
+
+% but why does ONMC sucks so hard?
 
 The following table shows how many rounds were needed, per learning type on average, for the prey to catch the predator. This was calculated for the first 1000 runs  and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
 
@@ -332,6 +335,7 @@ The following table shows how many rounds were needed, per learning type on aver
 \textbf{ONMC} & 79.68 & 15.78 & 112.11 & 21.64 \\
 \hline
 \end{tabular}
+
 \pagebreak
 \section{Conclusion}
 Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. 
@@ -376,7 +380,10 @@ Currently, the implementation is not encoded. This leads to long runtime. By imp
 The learning rate was researched between (and including) the values 0.1 - 0.5.  As shown in the analysis, the learning rates of 0.4 and 0.5 seem to have similar effect. This leads to the theory that this is a turning point and rewriting more old information will actually have a negative effect on the agents' learning. Further research will show what actually happens and an optimal learning rate can be decided upon.
 
 \subsection{Varying grid initialization}
-The varying grid initialization showed that the grid initialization with 0 lead to unexpected behaviour when using an explicitely greedy policy. This appears to be the a turning point. In other words; any lower grid initialization value will probably lead to non-convergence. Also, it is interesting to find out if grid initialization with 0 is indeed a turning point or if this sometimes leads to non-convergence as well. Further research will lead to answers to these questions. % we are pondering...
+The varying grid initialization showed that the grid initialization with 0 lead to unexpected behaviour when using an explicitely greedy policy. This appears to be the a turning point. In other words; any lower grid initialization value will probably lead to non-convergence. Also, it is interesting to find out if grid initialization with 0 is indeed a turning point or if this sometimes leads to non-convergence as well. Further research will lead to answers to these questions. 
+
+\subsection{Multiple experiments}
+At hindsight, performing multiple experiments with the same settings would give more insight in the performance of the implementation. Thus far, all tests were run once and conclusions were drawn. More certainty about the implementation and performance of the algorithms can be achieved by averaging all results over multiple runs.
 \pagebreak
 \section{Files attached}
 \begin{itemize}
