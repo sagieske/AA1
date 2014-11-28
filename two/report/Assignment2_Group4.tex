@@ -206,7 +206,7 @@ Softmax action-selection offers a solution to one problem presented by $\epsilon
 \forall a: p_t(a) &= \frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} \label{eq:softmax}
 \end{align}
 \end{mdframed}
-The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
+The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities, where in the limit $\tau\rightarrow0$, softmax becomes greedy action selection [1].
 . For high temperatures, the opposite is true.
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
 \pagebreak
@@ -239,7 +239,7 @@ First, the effects of different discount factors on Q-learning is analysed. The 
 	\captionof{figure}{Q-learning using different discount factors}
 \end{center}
 
-As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour can be expected. 
+As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour is expected. 
 
 \subsubsection{Different learning rates}
 It is possible to set different learning rates in Q-learning. The learning rate determines to which extent the new information will overwrite the old information. The following graph shows how important the relationship of old and new information is to achieve an optimal policy.
@@ -266,17 +266,16 @@ As Q-learning is a learning algorithm, exploration and exploitation must be bala
 	\captionof{figure}{Q-learning using different epsilon values}
 \end{center}
 
-As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. This shows how important explorations is and how strong an $\epsilon$-greedy policy is. Even with the slightest bit of greedy behaviour, good results are achieved.
+As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. However, the value of 0.9 still performs a lot worse than more exploitative policies, which is expected because the environment is static (with only the prey exhibiting \textit{slightly} stochastic behavior) and thus after a while, exploration stops being useful.
 
 \subsubsection{Softmax action selection}
-Next to $\epsilon$-greedy action selection, there is another method to determine which action to take. That is softmax action selection. Let's analyse the effect of softmax action value selection. 
-
+Besides $\epsilon$-greedy action selection, softmax action selection was implemented. The graph and analysis can be found below. 
 \begin{center}
 	\includegraphics[scale=0.4]{softmax_with_legend}
 	\captionof{figure}{Q-learning using different temperatures in Soft-max}
 \end{center}
 
-The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as the lower the temperature leads to a greedy action selection. However, the temperature of the softmax action selection algorithm can not be zero, as the temperature is divided by. This ensures both optimal action selection and exploration. When analysing the higher temperatures, it these converge at about the same speed as the low temperatures. However, the higher the temperature, the less smooth the graph. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level. This causes the algorithm to converge, but also taking longer (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
+The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as lower temperatures lead to a more greedy action selection, which was shown above to perform better for this problem. However, the temperature of the softmax action selection algorithm can not be zero, as that would lead the algorithm to divide by zero. This ensures both optimal action selection and exploration. When analyzing the higher temperatures, it these converge at about the same speed as the lower temperatures. However, the higher temperatures, lead to less smooth graphs. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level (going towards greedy action selection). This causes the algorithm to converge, but slower (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
 
 
 \subsubsection{$\epsilon$-greedy vs. softmax}
@@ -312,7 +311,7 @@ This leads to similar results as before. One of the differences is that the poli
 In order to determine whether the zero initialization is indeed a border case, more runs can be performed. However, this falls beyond the scope of this report. It is important to test this is the future to determine the limits of this implementation.
 
 \subsection{Learning types}
-Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
+Aside from Q-learning, Sarsa and on- and off-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results of the first three are shown in the figure below.
 
 \begin{center}
 	\includegraphics[scale=0.4]{learning_types}
@@ -345,9 +344,9 @@ The following table shows how many rounds were needed, per learning type on aver
 \end{center}
 \end{table}
 
-A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence takes place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the tails of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
+A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence seems to take place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the latest states of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
 
-The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms.
+The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms. Therefore, it is recommended to run the algorithm with a much larger amount of episodes in future work.
 
 \begin{figure}[H]
 \begin{center}
