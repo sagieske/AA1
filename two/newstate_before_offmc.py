@@ -248,6 +248,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
 	average_list = []
 	counter=0
+	last_1000 = []
 	for x in range(0, N):
 		#Run episode until prey is caught
 		reward, visited_pairs, current_rounds, policy_grid, mc_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
@@ -272,6 +273,10 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 			average_list.append(average_rounds)
 			total_rounds = 0
 			counter= 0
+		# Add last 1000 runs to list
+		if (N - x) <= 1000:
+			last_1000.append(current_rounds)
+		
 	print "rounds list: ", rounds_list
 	print "average_list: ", average_list
 	#Compute average number of rounds needed
@@ -284,6 +289,15 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	standard_deviation = math.sqrt(variance)
 	print "Average rounds needed over ", N, " episodes: ", average_rounds
 	print "Standard deviation: ", standard_deviation	
+
+	# LAST 1000
+	average_rounds_1000 = sum(last_1000)/float(len(last_1000))
+	var_list_1000 = [(x-average_rounds_1000)**2 for x in last_1000]
+	variance_1000 = float(sum(var_list_1000)/len(var_list_1000))
+	standard_deviation_1000 = math.sqrt(variance_1000)
+	print "Average rounds needed over last", len(last_1000), " episodes: ", average_rounds_1000
+	print "Standard deviation: ", standard_deviation_1000	
+
 	return average_list
 
 
@@ -335,20 +349,25 @@ if __name__ == "__main__":
 	epsilon_list = [0.1, 0.3,0.5,0.9,1.0]
 	discount_factor=0.9
 	learning_rate = 0.5
-	#epsilon = 0.1
-	#all_averages = []
-	#average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
-	
+	epsilon = 0.1
+	all_averages = []
+	print "Qlearning"
+	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="Q-learning")
+	all_averages = []
+	average_list2 = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="Sarsa")
+	all_averages = []
+	average_list3 = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type="ONMC")
+
 	# Doing softmax temperatures
-	for epsilon in epsilon_list:
-		print "Start run of temperature: ", epsilon
-		all_averages = []
-		average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
-		plt.plot(average_list, label="temperature: %f" %(epsilon))
-	
+	#for epsilon in epsilon_list:
+	#	print "Start run of temperature: ", epsilon
+	#	all_averages = []
+	#	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
+	#	plt.plot(average_list, label="temperature: %f" %(epsilon))
+	"""
 	plt.title("Plot of Q-learning with Softmax, disc=0.9, alpha=0.5")
 	plt.ylabel('Rounds needed before catch')
 	plt.xlabel('Number of rounds')
 	plt.legend()
 	plt.show()
-
+	"""
