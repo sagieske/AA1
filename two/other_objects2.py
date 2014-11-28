@@ -5,6 +5,7 @@ import math
 import operator
 import sys
 import operator
+import random
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -163,6 +164,8 @@ class Policy:
 			if new_pol[action] > max_value:
 				max_value = new_pol[action]
 				max_action = action
+		if(max_action == ""):
+			max_action = random.choice(new_pol.keys())
 		move = self.actions[max_action]
 		return move, max_action
 

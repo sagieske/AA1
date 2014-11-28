@@ -25,24 +25,24 @@ class Agent(object):
 		amount_rounds = len(visited_pairs)
 		for pair in visited_pairs:
 			#print pair
-			pair_w = 0
+			pair_w = 1
 			pair_t = self.N_policy.get_N_policy(pair[0])[pair[1]][0]
 			for i in range(pair_t, amount_rounds-1):
 				k_pair = visited_pairs[i]
 				policy = self.N_policy.get_policy(k_pair[0])
 				current_prob = self.N_policy.get_e_greedy_policy(policy, epsilon=0.0)[k_pair[1]]
 				pair_w+=(1.0/current_prob)
-			power = amount_rounds - pair_t - 1
+			power = amount_rounds - pair_t
+			#print "amount_rounds: ", amount_rounds, " pair_t: ", pair_t, " power: ", power
 			discounted_cumulative_reward = 10 * (discount_factor**power)
+			#print "pair_w: ", pair_w, ", nom: ", pair_w * discounted_cumulative_reward
+			#print pair[0], " reward: ", discounted_cumulative_reward
 			current_values = self.N_policy.get_N_policy(pair[0])[pair[1]]
 			N = current_values[2] + pair_w * discounted_cumulative_reward
 			D = current_values[3] + pair_w
-			if(D==0):
-				D=1
 			Q = (N/D)
 			self.N_policy.update_values(N,D,Q,pair)
 			self.policy_grid.update_Q_values(Q, pair)
-			#print self.policy_grid.get_policy(pair[0])
 			
 	def get_N_policy(self, old_state):
 		return self.N_policy.get_N_policy(old_state)

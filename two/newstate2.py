@@ -85,13 +85,17 @@ class Game:
 			#Run turn and see if prey has been caught
 			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, steps, action)
 			self.predator.update_reward(0)
+			newstate = self.environment.get_state()
 		#If the prey has been caught, the predator receives a reward of 10
 		self.predator.update_reward(10)
 		if(learning_type == "OFFMC"):
 			returns = 10
 			self.predator.off_mc(self.visited_pairs, returns, discount_factor)
+			#if(self.learning_type=="OFFMC"):
+			#	print "state: ", newstate
+			#	print self.predator.get_policy_grid().get_policy(newstate)
 		reward = 10
-		print "inthis: ", self.predator.get_policy_grid().get_policy([4,4,6,6])
+		
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
 		return reward, self.visited_pairs, steps, self.predator.get_policy_grid(), self.predator.get_mc_policy(), self.predator.get_N_policy_grid()
 
@@ -131,7 +135,11 @@ class Game:
 			greedy_action = self.predator.get_greedy_action(old_state)
 			if(greedy_action != predator_action):
 				self.predator.update_t_value(old_state, steps)
-			#print self.visited_pairs
+			#print self.predator.get_N_policy_grid().get_N_policy(old_state)
+			#print old_state
+		#else:
+		#	print self.predator.get_policy_grid().get_policy(old_state)
+		#	print predator_action
 
 		if(not same):
 			#If prey is not caught, move it
@@ -171,7 +179,12 @@ class Game:
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
 		if(self.learning_type == "OFFMC"):
+			predator_move, action_name = self.predator.get_action(state, epsilon=1.0)
+		elif(self.learning_type == "None"):
 			predator_move, action_name = self.predator.get_action(state, epsilon=0.0)
+			#print "action: ", action_name
+			#print "policy: ", self.predator.get_policy_grid().get_policy(state)
+			#print "state: ", state
 		else:
 			predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
@@ -292,7 +305,6 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		print "current_rounds: ", current_rounds
 		game_learning = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
 		reward, visited_pairs, irrel_rounds, policy_grid, mc_policy, N_policy = game_learning.get_rounds(learning_rate, discount_factor, epsilon)
-		print policy_grid.get_policy([4,4,6,6])
 		predator = Predator(policy_grid)
 
 		if(learning_type == 'ONMC'):
@@ -308,8 +320,8 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		#Add rounds needed in this episode to the list of rounds
 		rounds_list.append(current_rounds)
 		counter+=1
-		if(counter == 1):
-			average_rounds = float(total_rounds)/1
+		if(counter == 100):
+			average_rounds = float(total_rounds)/100
 			average_list.append(average_rounds)
 			total_rounds = 0
 			counter= 0
