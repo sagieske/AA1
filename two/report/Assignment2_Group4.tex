@@ -236,24 +236,7 @@ First, the effects of different discount factors on Q-learning is analysed. The 
 	\captionof{figure}{Q-learning using different discount factors}
 \end{center}
 
-%\begin{figure}[h!]
-%\begin{center}
-%\includegraphics[scale=0.4]{discount_factors}
-%\caption{Q-learning using different discount factors}
-%\end{center}
-%\end{figure}
-
 As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour can be expected. 
-
-\subsubsection{The effect of $\epsilon$}
-As Q-learning is a learning algorithm, exploration and exploitation must be balanced well to find the optimal behaviour. The following graph shows different settings for $\epsilon$. 
-
-\begin{center}
-	\includegraphics[scale=0.4]{epsilons}
-	\captionof{figure}{Q-learning using different epsilon values}
-\end{center}
-
-As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. This shows how important explorations is and how strong an $\epsilon$-greedy policy is. Even with the slightest bit of greedy behaviour, good results are achieved.
 
 \subsubsection{Different learning rates}
 It is possible to set different learning rates in Q-learning. The learning rate determines to which extent the new information will overwrite the old information. The following graph shows how important the relationship of old and new information is to achieve an optimal policy.
@@ -272,6 +255,39 @@ It is possible to set different learning rates in Q-learning. The learning rate 
 %\end{figure}
 
 The figure above shows that for each learning rate between, and including, 0.1 and 0.5 leads to conversion. However, a low conversion rate leads to slower conversion than a high conversion rate. It is interesting to note that the learning rates of both 0.4 and 0.5 appear to converge at about the same speed. Remember that the learning rate determines to which extent the new information will overwrite the old information. It appears that, even when storing little new data, this leads to convergence. The more new data overwrites the old data the quicker the algorithm converges. Intuitively, this seems to be correct. However, overwriting all old data might lead to less than optimal behaviour. As stated before, learning rates of 0.4 and 0.5 seem to yield the same result. It is well possible that this is the limit until which the learning rate factor is beneficial to the algorithm. As this lies beyond the scope of this report, this can be researched in the future.
+\subsubsection{The effect of $\epsilon$}
+As Q-learning is a learning algorithm, exploration and exploitation must be balanced well to find the optimal behaviour. The following graph shows different settings for $\epsilon$. 
+
+\begin{center}
+	\includegraphics[scale=0.4]{epsilons}
+	\captionof{figure}{Q-learning using different epsilon values}
+\end{center}
+
+As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. This shows how important explorations is and how strong an $\epsilon$-greedy policy is. Even with the slightest bit of greedy behaviour, good results are achieved.
+
+\subsubsection{Softmax action selection}
+Next to $\epsilon$-greedy action selection, there is another method to determine which action to take. That is softmax action selection. Let's analyse the effect of softmax action value selection. 
+
+\begin{center}
+	\includegraphics[scale=0.4]{softmax_with_legend}
+	\captionof{figure}{Q-learning using different temperatures in Soft-max}
+\end{center}
+
+The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as the lower the temperature leads to a greedy action selection. However, the temperature of the softmax action selection algorithm can not be zero, as the temperature is divided by. This ensures both optimal action selection and exploration. When analysing the higher temperatures, it these converge at about the same speed as the low temperatures. However, the higher the temperature, the less smooth the graph. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level. This causes the algorithm to converge, but also taking longer (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
+
+
+\subsubsection{$\epsilon$-greedy vs. softmax}
+% Explain that smaller grid takes longer to converge, since the predator is more likely to catch the prey, so it takes more rounds to actually explore enough. On the other hand, in a bigger grid the predator is highly unlikely to catch the prey, so it would explore a lot even in one round by the time it catches the prey.
+
+Now let's look at the results between softmax and $\epsilon$-greedy. As stated in the theory, the difference in effect between softmax action selection and $\epsilon$-greedy action selection is unknown. The performance of either relies on the goal of the implementation, as well as human factors. Therefore, it is imperative to research the effects on this implementation. The $\epsilon$ value chosen for the $\epsilon$-greedy algorithm is the same as the temperature, $\tau$. This means that both algorithms behave greedy, but still explore from time to time.
+
+\begin{center}
+	\includegraphics[scale=0.4]{softmax_vs_egreedy}
+	\captionof{figure}{Q-learning $\epsilon$-greedy and softmax action selection}
+\end{center}
+
+The figure shows that both softmax and $\epsilon$-greedy action selection converge at the same speed. However, softmax action selection eventually leads to capturing the prey in less rounds. Therefore, softmax action selection is preferred over epsilon-greedy action selection when the the prey needs to be caught in a minimum amount of timesteps.
+
 
 \subsubsection{Different initialization for Q-learning}
 It was advised to initialize the policy of the predator optimistically, when performing Q-learning. When initializing a policy optimistically, it is interesting to see what happens when a policy is not optimistically initialized. The values chosen are 15, 10, 5, 0 and -5. Also, to see the effect of learning, the $\epsilon$-value was set to either 0 or 0.1. The figure below shows the results of $\epsilon$ value 0.1.
@@ -283,13 +299,6 @@ It was advised to initialize the policy of the predator optimistically, when per
 
 Each non-negative initialization appears to yield good results. Though it takes an initialization of 0 longer to converge, the policy does eventually converge to the same level as the optimistic policy. The negatively initialized policy behaves very poor. It does improve, but it takes significantly longer to converge than the non-negative initialized policies. It is expected that both the negative and zero initialization lead to slow learning. However, it is possible that the zero initialization is a border case where this is (one of) the last case(s) where the algorithm still learns enough to perform well.
 
-%\begin{figure}[h]
-%\begin{center}
-%\includegraphics[scale=0.4]{q_learnin_diff_init_epsilon_0_1}
-%\caption{Q-learning with different initialization values and $\epsilon$ is 0.1}
-%\end{center}
-%\end{figure}
-
 Now let's analyse the same initialization values with an $\epsilon$-value of 0.
 \begin{center}
 	\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
@@ -298,32 +307,6 @@ Now let's analyse the same initialization values with an $\epsilon$-value of 0.
 This leads to similar results as before. One of the differences is that the policy initialized with 0 performs worse than before and does not converge. This behaviour can be expected. At the non-negative initializations, there are values larger than zero. Therefore, executing a greedy policy still leads to convergence. As stated, it is expected that the initialization with zero values should behave similar to the negative initialization. Again, this is not the case. This is still a border case, as stated before.
 
 In order to determine whether the zero initialization is indeed a border case, more runs can be performed. However, this falls beyond the scope of this report. It is important to test this is the future to determine the limits of this implementation.
-%\begin{figure}[h]
-%\begin{center}
-%\includegraphics[scale=0.4]{q_learning_diff_init_epsilon_0}
-%\caption{Q-learning with different initialization values and $\epsilon$ is 0}
-%\end{center}
-%\end{figure}
-
-\subsubsection{$\epsilon$-greedy vs. softmax}
-As the effect of $\epsilon$-greedy action selection on Q-learning has already been discussed, let's analyse the effect of softmax action value selection. 
-% Explain that smaller grid takes longer to converge, since the predator is more likely to catch the prey, so it takes more rounds to actually explore enough. On the other hand, in a bigger grid the predator is highly unlikely to catch the prey, so it would explore a lot even in one round by the time it catches the prey.
-
-\begin{center}
-	\includegraphics[scale=0.4]{softmax_with_legend}
-	\captionof{figure}{Q-learning using different temperatures in Soft-max}
-\end{center}
-
-The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as the lower the temperature leads to a greedy action selection. However, the temperature of the softmax action selection algorithm can not be zero, as the temperature is divided by. This ensures both optimal action selection and exploration. When analysing the higher temperatures, it these converge at about the same speed as the low temperatures. However, the higher the temperature, the less smooth the graph. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level. This causes the algorithm to converge, but also taking longer (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
-
-Now let's look at the results between softmax and $\epsilon$-greedy. As stated in the theory, the difference in effect between softmax action selection and $\epsilon$-greedy action selection is unknown. The performance of either relies on the goal of the implementation, as well as human factors. Therefore, it is imperative to research the effects on this implementation. The $\epsilon$ value chosen for the $\epsilon$-greedy algorithm is the same as the temperature, $\tau$. This means that both algorithms behave greedy, but still explore from time to time.
-
-\begin{center}
-	\includegraphics[scale=0.4]{softmax_vs_egreedy}
-	\captionof{figure}{Q-learning $\epsilon$-greedy and softmax action selection}
-\end{center}
-
-The figure shows that both softmax and $\epsilon$-greedy action selection converge at the same speed. However, softmax action selection eventually leads to capturing the prey in less rounds. Therefore, softmax action selection is preferred over epsilon-greedy action selection when the the prey needs to be caught in a minimum amount of timesteps.
 
 \subsection{Learning types}
 Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
@@ -349,7 +332,7 @@ The following table shows how many rounds were needed, per learning type on aver
 \textbf{ONMC} & 79.68 & 15.78 & 112.11 & 21.64 \\
 \hline
 \end{tabular}
-
+\pagebreak
 \section{Conclusion}
 Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. 
 
@@ -382,12 +365,19 @@ In the case of $\epsilon$ is 0, again all non-negative initialized grids lead to
 \subsubsection{Learning types}
 %This conclusion is probably incorrect as the analysis is incomplete!
 After analysing the results, it can be concluded that the use of both Monte Carlo methods as well as temporal difference methods converge quickly. However, temporal difference methods outperform on-policy Monte Carlo. Of the temporal difference methods, Q-learning outperforms Sarsa as well. The differences are minimal, but they are there. Nevertheless, both converge to almost the same result. This leads to the conclusion that either Sarsa or Q-learning can be implemented, whatever the requirements, and the same results can be expected.
-
+\pagebreak
 \section{Future work}
 In the report some results lead to more questions or needed more research than was conducted. Some of these questions were already mentioned in the report and are repeated here. 
-Encoded version
-learning rate > 0.5
 
+\subsection{Encoded version}
+Currently, the implementation is not encoded. This leads to long runtime. By implementing state space encoding, the runtime would decrease significantly. In state space encoding, the predator will try to minimize the distance between itself and the prey. In order to do so, the predator would calculate the distance to the prey and take action accordingly to minimize the distance to the prey. This leads to a reduced state space, leaving less states to visit and analyse. Also, implementation of state space encoding would most likely lead to better performance of off-policy Monte Carlo as this takes a lot of runs to learn an optimal policy. Because off-policy Monte Carlo takes into account the goal state, it takes a long time for the algorithm to converge. This will be solved using state space encoding, at the goal state will be closer to the predator and therefore less states have to be visited.
+
+\subsection{Learning rate}
+The learning rate was researched between (and including) the values 0.1 - 0.5.  As shown in the analysis, the learning rates of 0.4 and 0.5 seem to have similar effect. This leads to the theory that this is a turning point and rewriting more old information will actually have a negative effect on the agents' learning. Further research will show what actually happens and an optimal learning rate can be decided upon.
+
+\subsection{Varying grid initialization}
+The varying grid initialization showed that the grid initialization with 0 lead to unexpected behaviour when using an explicitely greedy policy. This appears to be the a turning point. In other words; any lower grid initialization value will probably lead to non-convergence. Also, it is interesting to find out if grid initialization with 0 is indeed a turning point or if this sometimes leads to non-convergence as well. Further research will lead to answers to these questions. % we are pondering...
+\pagebreak
 \section{Files attached}
 \begin{itemize}
 \item newstate.py
