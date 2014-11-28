@@ -150,7 +150,10 @@ Repeat forever:\\
 
 
 \subsection{Off-policy Monte Carlo Control}
-Similarly to ONMC, off-policy Monte Carlo control (OFFMC) does not use exploring starts. Thus, an $\epsilon$-greedy algorithm is used again to ensure exploration. The main difference between OFFMC and ONMC is in that ONMC estimates the value of a policy while using it for control (i.e. exploration and exploitation are done together), whereas OFFMC uses two different policies. The first one is called behavior policy and it is only used to generate behavior (i.e. this policy is used in the exploration part). The second one is called an estimation policy and it's the one that is being evaluated and improved (i.e this policy is used in the exploitation part). There are again two ways of implementing OFMCC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+Similarly to ONMC, off-policy Monte Carlo control (OFFMC) does not use exploring starts. Thus, an $\epsilon$-greedy algorithm is used again to ensure exploration. The main difference between OFFMC and ONMC is in that ONMC estimates the value of a policy while using it for control (i.e. exploration and exploitation are done together), whereas OFFMC uses two different policies. The first one is called behavior policy and it is only used to generate behavior (i.e. this policy is used in the exploration part). The second one is called an estimation policy and it's the one that is being evaluated and improved (i.e this policy is used in the exploitation part). There are again two ways of implementing OFMCC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm in figure 4. \\
+First, an episode is generated and its corresponding state,action pairs are stored. If the greedy-policy would select a different action than the behavioral policy, the time-step $t$ at which this happens is stored, to ensure that later on in the algorithm, we only evaluate the Q-values of state-action pairs that follow the deterministic (greedy) policy. This is done because when the weights $w$ are calculated, the probability of the deterministic action is divided by the probability of the behavioral action. However, the first is either zero (if it is not the greedy action) or one (if it is the greedy action). Thus, storing $t$ will save a lot of computation time. \\
+The, for each visited pair in the episode, the weight is calculated, and the nominator and denominator are updated by adding $wR_t$ (where $R_t$ is the return) and $w$ respectively. The Q-value is then $\frac{nominator}{denominator}$. The nominator, denominator and Q-values are stored, and the computed Q-values are used to update the deterministic policy greedily according to $\pi(s) \leftarrow \underset{a}{\text{argmax }} Q(s,a)$.
+
 
  
 \begin{center}
@@ -203,8 +206,8 @@ Softmax action-selection offers a solution to one problem presented by $\epsilon
 \forall a: p_t(a) &= \frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} \label{eq:softmax}
 \end{align}
 \end{mdframed}
-The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
-
+The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
+. For high temperatures, the opposite is true.
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
 \pagebreak
 
