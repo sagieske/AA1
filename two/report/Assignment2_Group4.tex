@@ -8,7 +8,7 @@
 \usepackage{cite}
 \usepackage{caption}
 \usepackage{mdframed}
-
+\usepackage{float}
 %\usepackage{soul}
 
 \newcommand{\tab}{\hspace{10mm}}
@@ -328,7 +328,7 @@ Q-learning is an off-policy learning algorithm that doesn't care about the rewar
 
 The following table shows how many rounds were needed, per learning type on average, for the prey to catch the predator. This was calculated for the first 1000 runs  and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
 
-\begin{table}[h]
+\begin{table}[H]
 \begin{center}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
@@ -349,7 +349,7 @@ A late addition to the implemented learning algorithms is the off-policy Monte C
 
 The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \begin{center}
 \includegraphics[scale=0.4]{OFFMC_11x11_preyat_5x5}
 \caption{Off-policy Monte Carlo for 4000 runs}
