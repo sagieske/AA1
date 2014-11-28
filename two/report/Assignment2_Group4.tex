@@ -36,7 +36,7 @@ Some prominent model-free reinforcement learning methods are on- and off-policy 
 \section{Theory}
 \subsection{Temporal difference learning methods}
 Temporal difference (TD) learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
-Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. 
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model and they are similar to dynamic programming methods in that they both exploit the Bellman-equations and \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. However, since TD-methods do not require a model, the state- and action-value updates are slightly different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. However, as TD-methods do not require a model, the state- and action value updates are different than shown in \ref{eq:bellmanV} and \ref{eq:bellmanQ}. The value update rule is displayed in \ref{eq:td0}. Updating the Q-values differs per learning method and are shown per section.
 \begin{mdframed}
 \begin{align}
 V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]\label{eq:bellmanV}\\
@@ -150,7 +150,10 @@ Repeat forever:\\
 
 
 \subsection{Off-policy Monte Carlo Control}
-Similarly to ONMC, off-policy Monte Carlo control (OFFMC) does not use exploring starts. Thus, an $\epsilon$-greedy algorithm is used again to ensure exploration. The main difference between OFFMC and ONMC is in that ONMC estimates the value of a policy while using it for control (i.e. exploration and exploitation are done together), whereas OFFMC uses two different policies. The first one is called behavior policy and it is only used to generate behavior (i.e. this policy is used in the exploration part). The second one is called an estimation policy and it's the one that is being evaluated and improved (i.e this policy is used in the exploitation part). There are again two ways of implementing OFMCC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
+Similarly to ONMC, off-policy Monte Carlo control (OFFMC) does not use exploring starts. Thus, an $\epsilon$-greedy algorithm is used again to ensure exploration. The main difference between OFFMC and ONMC is in that ONMC estimates the value of a policy while using it for control (i.e. exploration and exploitation are done together), whereas OFFMC uses two different policies. The first one is called behavior policy and it is only used to generate behavior (i.e. this policy is used in the exploration part). The second one is called an estimation policy and it's the one that is being evaluated and improved (i.e this policy is used in the exploitation part). There are again two ways of implementing OFMCC: first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm in figure 4. \\
+First, an episode is generated and its corresponding state,action pairs are stored. If the greedy-policy would select a different action than the behavioral policy, the time-step $t$ at which this happens is stored, to ensure that later on in the algorithm, we only evaluate the Q-values of state-action pairs that follow the deterministic (greedy) policy. This is done because when the weights $w$ are calculated, the probability of the deterministic action is divided by the probability of the behavioral action. However, the first is either zero (if it is not the greedy action) or one (if it is the greedy action). Thus, storing $t$ will save a lot of computation time. \\
+The, for each visited pair in the episode, the weight is calculated, and the nominator and denominator are updated by adding $wR_t$ (where $R_t$ is the return) and $w$ respectively. The Q-value is then $\frac{nominator}{denominator}$. The nominator, denominator and Q-values are stored, and the computed Q-values are used to update the deterministic policy greedily according to $\pi(s) \leftarrow \underset{a}{\text{argmax }} Q(s,a)$.
+
 
  
 \begin{center}
@@ -203,8 +206,8 @@ Softmax action-selection offers a solution to one problem presented by $\epsilon
 \forall a: p_t(a) &= \frac{\text{e}^{Q_t(a)/\tau}}{\sum^n_{b=1}\text{e}^{Q_t(b)/\tau}} \label{eq:softmax}
 \end{align}
 \end{mdframed}
-The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities. For high temperatures, the opposite is true, where in the limit $\tau\rightarrow0$, all actions become equiprobable [1].
-
+The parameter $\tau$ in equation $(2)$ is the \textit{temperature} of the distribution. Low temperatures cause the values of $Q_t(a)$, and consequently those of e$^{Q_t(a)/\tau}$, to grow much larger, thus increasing their differences. This leads to assigning a high probability to the optimal action and assigning lower probabilities to suboptimal actions. Of course, terrible actions get very low probabilities, where in the limit $\tau\rightarrow0$, softmax becomes greedy action selection [1].
+. For high temperatures, the opposite is true.
 It is unclear whether $\epsilon$-greedy action selection is better than softmax action selection. The performance of either method may depend on the task at hand and human factors. Experimenting with both methods will lead to more insight in both algorithms.
 \pagebreak
 
@@ -236,7 +239,7 @@ First, the effects of different discount factors on Q-learning is analysed. The 
 	\captionof{figure}{Q-learning using different discount factors}
 \end{center}
 
-As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour can be expected. 
+As shown, the higher the discount factor, the better the result. The height of the discount factor determines the importance of future rewards. A low discount rate tries to achieve a high immediate reward and a high discount rate tries to achieve a high overall reward. Since reaching each state yields a reward of 0, except for the goal state which yields a reward of 10, the future reward must be maximized. Therefore, this behaviour is expected. 
 
 \subsubsection{Different learning rates}
 It is possible to set different learning rates in Q-learning. The learning rate determines to which extent the new information will overwrite the old information. The following graph shows how important the relationship of old and new information is to achieve an optimal policy.
@@ -263,17 +266,16 @@ As Q-learning is a learning algorithm, exploration and exploitation must be bala
 	\captionof{figure}{Q-learning using different epsilon values}
 \end{center}
 
-As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. This shows how important explorations is and how strong an $\epsilon$-greedy policy is. Even with the slightest bit of greedy behaviour, good results are achieved.
+As shown in the figure above, the lower the $\epsilon$ value is, the quicker the algorithm finds the optimal path. This can be expected since, as stated in the theory, an $\epsilon$ value of 0 leads to a greedy algorithm. What is interesting is that an $\epsilon$ value of 0.9 performs quite well compared to a completely exploratory policy, which seems to lead to random results. However, the value of 0.9 still performs a lot worse than more exploitative policies, which is expected because the environment is static (with only the prey exhibiting \textit{slightly} stochastic behavior) and thus after a while, exploration stops being useful.
 
 \subsubsection{Softmax action selection}
-Next to $\epsilon$-greedy action selection, there is another method to determine which action to take. That is softmax action selection. Let's analyse the effect of softmax action value selection. 
-
+Besides $\epsilon$-greedy action selection, softmax action selection was implemented. The graph and analysis can be found below. 
 \begin{center}
 	\includegraphics[scale=0.4]{softmax_with_legend}
 	\captionof{figure}{Q-learning using different temperatures in Soft-max}
 \end{center}
 
-The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as the lower the temperature leads to a greedy action selection. However, the temperature of the softmax action selection algorithm can not be zero, as the temperature is divided by. This ensures both optimal action selection and exploration. When analysing the higher temperatures, it these converge at about the same speed as the low temperatures. However, the higher the temperature, the less smooth the graph. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level. This causes the algorithm to converge, but also taking longer (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
+The graph shows that all results converge. It shows that the lower the temperature, the better the results. This is to be expected, as lower temperatures lead to a more greedy action selection, which was shown above to perform better for this problem. However, the temperature of the softmax action selection algorithm can not be zero, as that would lead the algorithm to divide by zero. This ensures both optimal action selection and exploration. When analyzing the higher temperatures, it these converge at about the same speed as the lower temperatures. However, the higher temperatures, lead to less smooth graphs. As a high temperature (e.g. $\tau$ is 1) leads to an equiprobable action selection, the algoritm both explores and exploits to a certain level (going towards greedy action selection). This causes the algorithm to converge, but slower (compared to lower temperatures such as $\tau$ is 0.1) to catch the prey in an episode.
 
 
 \subsubsection{$\epsilon$-greedy vs. softmax}
@@ -309,15 +311,13 @@ This leads to similar results as before. One of the differences is that the poli
 In order to determine whether the zero initialization is indeed a border case, more runs can be performed. However, this falls beyond the scope of this report. It is important to test this is the future to determine the limits of this implementation.
 
 \subsection{Learning types}
-Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
+Aside from Q-learning, Sarsa and on- and off-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results of the first three are shown in the figure below.
 
-\begin{figure}[h]
 \begin{center}
 	\includegraphics[scale=0.4]{learning_types}
-	\caption{Different learning types set out against one another}
+	\captionof{figure}{Different learning types set out against one another}
 	\label{fig:learningalgs}
 \end{center}
-\end{figure}
 
 The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence.
 
@@ -344,9 +344,11 @@ The following table shows how many rounds were needed, per learning type on aver
 \end{center}
 \end{table}
 
-A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence takes place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the tails of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
+Here it is concluded that Q-learning eventually leads to needing the least amount of time steps for the predator to catch the prey, although it starts worse. Sarsa performs similarly, though it starts exploiting earlier, so the avarage number of rounds is already lower in the beginning. In the end, the number of time steps any algorithm needs lie close to one another. This shows that all these algorithms are quick to converge and yield similar results. Therefore, either algorithm can be used if there is no reward given for reaching the goal state in a minimal amount of time steps. Also, Q-learning yields less deviation after convergence. This shows that Q-learning performs best out of these algorithms.
 
-The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms.
+A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence seems to take place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected this algorithm learns only from the latest states of episodes, after the last non-greedy action. In this game, it is rare to have all subsequent actions greedy and this results in slower learning. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
+
+The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms. This is possible due to the late convergence as the number of rounds needed to catch the prey may  still decrease slightly after 4000 runs and will converge to the same values as the other learning algorithms. Therefore, it is recommended to run the algorithm with a much larger amount of episodes in future work.
 
 \begin{figure}[H]
 \begin{center}
@@ -358,33 +360,11 @@ The point of convergence for the number of round until the prey is caught for of
 
 \pagebreak
 \section{Conclusion}
-Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. 
-
-\subsection{Discount factor}
-The effects of the discount factor on Q-learning shows that a high discount factor leads to best results. This makes the future rewards more important. As stated in the analysis, this is expected as the reward for all stated, but the goal state, is 0. The reward of the goal state is 10, at which the episode ends. This leads to a very important future reward that must be maximized.
-
-\subsection{Learning rates}
-Different learning rates determine how important old information is. The higher the learning rate, the more new information overwrites the old information. As the effects of learning rates of 0.1 to 0.5 are tested, it is clear that the height of the learning rate affects the convergence speed. However, it appears that a learning rate of 0.4 and 0.5 perform almost equally well. This could be the tipping point of the effect of the learning rate. It is very well possible that a learning rate higher than 0.5 leads to worse results. This occurs due to the tradeoff between the learning speed and learning wrong behaviour. It is possible the goal state was reached due to luck. This means that the optimal behaviour, determined with a learning rate higher than 0.5, can be based on coincidence. 
-
-\subsection{Action selection methods}
-When choosing an action selection method, two of the most common methods are $\epsilon$-greedy action selection and softmax action selection. As the optimal tradeoff between exploration and exploitation is difficult to balance, these algorithms can be tested and the best performing algorithm with the best settings can be chosen. In order to determine how important these algorithms are, both were tested with Q-learning. Also, a relatively greedy policy was tested in both cases and compared to one another. 
-
-\subsubsection{$\epsilon$-greedy action selection}
-When using the $\epsilon$-greedy action selection, an $\epsilon$ value of 1 leads to a completely exploratory behaviour. This does not lead to convergence. Any $\epsilon$ value lower than 1 leads to convergence. The lower the $\epsilon$ value, the quicker convergence is achieved. Also, the lower the $\epsilon$ value, the less timesteps the predator needs to capture the prey. This is caused by the fact that an $\epsilon$ value of 0 leads to a greedy policy.	As the environment is fairly static, the predator does not need to learn much to at least get near the prey. In addition, the optimal grid initialization leads to quite radical changes in Q-values. Meaning, if a visited state is not optimal, the Q-value of that state will drop significantly. On the other hand, optimal states will maintain a high value. 
-
-\subsubsection{Softmax action selection}
-Softmax action selection shows that the lower the temperature, the quicker and better Q-learning converges. This is to be expected as the lower the temperature, the more greedy the action selection algorithm behaves. The difference between $\epsilon$-greedy and softmax is that softmax cannot become explicitly greedy. The algorithm will always explore, as the temperature cannot become 0. In the algorithm, this will lead to dividing by 0 and this is impossible. 
-
-\subsubsection{Softmax vs. $\epsilon$-greedy}
-When setting out $\epsilon$-greedy action selection against softmax action selection, it appears that both perform well. Both converge at similar speeds, but softmax action selection makes the predator catch the prey in less timesteps.
-
-\subsubsection{Varying grid initialization}
-As the grid was initialized optimistically, it is interesting to see what happens when the grid is not optimistically initialized. The grid was initialized with the values 15, 10, 5, 0 and -5. This way, changes while lowering the grid initialization will become clear. In order to research what happens with different $\epsilon$ values, this was tested with $\epsilon$ values of 0 and 0.1. 
-
-In the case of $\epsilon$ is 0.1, all initializations lead to convergence. However, the negative initialization lead to very slow convergence. In this case, it is expected for the grid initialization of 0 to behave similarly to the negative initialization. This, because the Q-value is 0 and therefore already is very low. This is not the case and leads to the conclusion that the grid initialization with 0 leads to a border case, where this is (one of) the smallest value(s) for the algorithm to converge.
-
-In the case of $\epsilon$ is 0, again all non-negative initialized grids lead to convergence. The grid initialized with zeros does converge slowest and has the lowest convergence values (in other words, it takes longest for the predator to catch the prey). The negative initialized grid does not converge. This can be attributed to the fact that the policy is explicitly greedy. In this case, that leads to following a path that does not improve over time and no learning. 
-
+Q-learning is an effective method to learn the Q-values of the states of environments. This leads to learning about the states of an environment and planning to take the optimal action. Several parameters need to be tuned to achieve optimal performance. These parameters are the learning rate  ($\alpha$), the discount factor ($gamma$), the action selection method, $\epsilon$, $\tau$ and the behavioural initialization. Neither Sarsa, nor on- or off-policy Monte Carlo methods have performed better for the problem at hand, which is as expected.
+\subsection{Parameter settings}
+The effect of the discount factor on Q-learning shows that a high discount factor ($0.9$ in this case) leads to the best results. From the experiments, it is expected that a learning rate that balances old and new information (either $0.4$ or $0.5$ for this problem) is best. \\
+For the problem at hand, relatively greedy methods worked quite well, which is expected for a static environment. Softmax and $\epsilon$-greedy converged at around the same speed, but softmax performed a bit better after convergence, due to its ranking of suboptimal actions. \\
+When using optimistic initialization, the case of $\epsilon=0.1$ converged for all initial Q-values $\in \{-5,0,5,10,15\}$. This is expected, because exploration happens regardless due to $\epsilon$. However, the case of $\epsilon=0.0$ only converged for values $\le 0$. It seems that for this problem, $0$ is a tipping-point with regards to optimistic initialization.
 
 \subsubsection{Learning types}
 %This conclusion is probably incorrect as the analysis is incomplete!
@@ -408,8 +388,6 @@ At hindsight, performing multiple experiments with the same settings would give 
 \subsection{Exploration-Exploitation optimization}
 In order to optimize the exploration-exploitation trade-off, different techniques can be implemented. Upper confidence methods use a upper confidence bound on the probability that an action is optimal which can be used to limit the regret for a policy \cite{auer2009near}. Another possible implementation are PAC-methods. For example, the V-max\cite{rao:aamas12} algorithm uses optimistic view on state-action pairs experienced viewer than m times and adjusts this based on experience to perform efficient exploration and exploitation. Bayesian Q-learning \cite{dearden1998bayesian} can also be used to optimize the exploration-exploitation trade-off as it keeps track of probabilities over Q values and chooses exploration and exploitation actions on basis of the expected value of the information retrieved from taking this action.
 These algorithms can possibly improve the agents learning and would be interesting to implement.
-
-
 \pagebreak
 \section{Files attached}
 \begin{itemize}
