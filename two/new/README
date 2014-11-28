@@ -1,0 +1,19 @@
+==========SINGLE AGENT LEARNING==========
+To test and compare the different algorithms, you may call the file "newstate.py" and set it with a number of different parameters.
+It will output a plot with on the y-axis the amount of steps needed per episode (smoothed over 100 episodes) and on the x-axis the amount of episodes that have passed.
+==========SETTING PARAMETERS==========
+The different parameters may be set as follows:
+Flag               |     Default value     | Function
+-----------------------------------------------
+-runs              | 100                   | How many episodes should be run
+-discount          | 0.9                   | Discount factor
+-learning_rate     | 0.5                   | Learning rate
+-epsilon           | 0.1                   | Exploration rate/temperature (if softmax)
+-learning_type     | "Q-learning"          | Which learning algorithm to use ("Q-learning", "Sarsa", "ONMC", "OFFMC")
+-softmax           | False                 | Turns softmax on if string "yes" is supplied
+-grid_size         | 11                    | Creates nxn grid with n=grid_size. Note: prey is initialized at 5x5 so grids smaller than 6x6 don't work
+-verbose           | 2                     | Different levels of output, 0,1 or 2. 0 outputs least, 2 outputs most.
+=========DEMO RUN==========
+To run the function with Sarsa, for 1000 episodes, using softmax with a temperature of 0.2, discount factor 0f 0.7 and learning rate of 0.5, you may enter the following into the command line:
+
+python newstate.py -runs 1000 -epsilon 0.2 -softmax yes -discount 0.7 -learning_rate 0.5 -learning_type Sarsa
