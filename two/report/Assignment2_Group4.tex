@@ -311,10 +311,13 @@ In order to determine whether the zero initialization is indeed a border case, m
 \subsection{Learning types}
 Aside from Q-learning, Sarsa and on-policy Monte Carlo were implemented. It is interesting to see the difference in performance between the algorithms. The results are shown in the figure below.
 
+\begin{figure}[h]
 \begin{center}
 	\includegraphics[scale=0.4]{learning_types}
-	\captionof{figure}{Different learning types set out against one another}
+	\caption{Different learning types set out against one another}
+	\label{fig:learningalgs}
 \end{center}
+\end{figure}
 
 The figure shows that all algorithms converge. Q-learning converges quickest, with Sarsa not much slower. On-policy Monte Carlo also converges quickly, but it starts with the worst Q-values. It also shows that of all algorithms, on-policy Monte Carlo converges to the least optimal number of rounds that lead to convergence.
 
@@ -324,6 +327,8 @@ Q-learning is an off-policy learning algorithm that doesn't care about the rewar
 
 The following table shows how many rounds were needed, per learning type on average, for the prey to catch the predator. This was calculated for the first 1000 runs  and the last 1000 runs. This means that the learning in the very beginning and the learning in the very end are set out against each other.
 
+\begin{table}[h]
+\begin{center}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
  & \parbox{2cm}{\textbf{Avg nr/rounds\\ (first 1000)}} & \parbox{2cm}{\textbf{Avg nr/rounds\\ (last 1000)}} & \parbox{2cm}{\textbf{STD\\ (first 1000)}} & \parbox{2cm}{\textbf{STD\\ (last 1000)}} \\
@@ -335,6 +340,21 @@ The following table shows how many rounds were needed, per learning type on aver
 \textbf{ONMC} & 79.68 & 15.78 & 112.11 & 21.64 \\
 \hline
 \end{tabular}
+\caption{Average \# rounds and standard deviation of learning algorithms}
+\end{center}
+\end{table}
+
+A late addition to the implemented learning algorithms is the off-policy Monte Carlo learning algorithm. It is therefore shown in a separate graph in Fig. \ref{fig:offmc}. As you can see in comparison to the other learning algorithms in Fig. \ref{fig:learningalgs}, the off-policy Monte Carlo starts at an equivalent amount of rounds before the prey is caught as the on-policy Monte Carlo method. The graph also shows that the off-policy Monte Carlo takes more time to converge than the other algorithms: convergence takes place at approximately 2000 rounds for off-policy Monte Carlo and for the other learning algorithms at approximately 500 rounds. This result is expected as many random steps (and long episodes) are needed before the agent catches the prey in the first run, which results in very high action-values. A lot of episodes are needed after this to get these action-values to reasonable values. Therefore, the convergence of the off-policy Monte Carlo is slow. This makes the learning of games that include long episodes inefficient.
+
+The point of convergence for the number of round until the prey is caught for off-policy Monte Carlo also appears to stay at a slightly higher value than the other algorithms.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[scale=0.5]{OFFMC_11x11_preyat_5x5}
+\caption{Off-policy Monte Carlo for 4000 runs}
+\label{fig:offmc}
+\end{center}
+\end{figure}
 
 \pagebreak
 \section{Conclusion}
