@@ -30,13 +30,13 @@
 
 \section{Introduction}
 This report contains the analysis of an implementation of single agent reinforcement learning. In these algorithms, the agent has no prior knowledge of the transition or reward function. Two different solutions to this problem are presented: in model-based learning, the agent learns the model from experience and plans on the learned model. In model-free learning, the agent learns state-values or Q-values directly. In this paper, model-free learning methods are considered.\\
-Some prominent model-free reinforcement learning methods are on- and off-policy Monte Carlo Control, Q-learning (off-policy) and Sarsa (on-policy), where on-policy methods evaluate the values of a policy $\pi$ \textit{as it's being followed}, while off-policy methods allow the agent to follow a different policy $\pi'$. This paper reports on Q-learning and its on-policy equivalent, Sarsa. Moreover, the difference in action-selection between $\epsilon$-greedy and softmax are compared. 
+Some prominent model-free reinforcement learning methods are on- and off-policy Monte Carlo Control, Q-learning (off-policy) and Sarsa (on-policy), where on-policy methods evaluate the values of a policy $\pi$ \textit{as it's being followed}, while off-policy methods allow the agent to follow a different policy $\pi'$. This paper reports on Q-learning, its on-policy equivalent, Sarsa, as well as on On- and Off-Policy Monte Carlo Control methods. Moreover, the difference in action-selection between $\epsilon$-greedy and softmax are compared. 
 \pagebreak
 
 \section{Theory}
 \subsection{Temporal difference learning methods}
-Temporal difference learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
-Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates. 
+Temporal difference (TD) learning methods estimate state-values or Q-values by updating them on every time step (as opposed to the episodic updates of Monte Carlo-methods).
+Temporal difference learning methods are similar to Monte Carlo methods in that they both learn from experience directly, without requiring a model (thus, they do not exploit the Bellman-equations in equations \ref{eq:bellmanV} and \ref{eq:bellmanQ}) and they are similar to dynamic programming methods in that they both \textit{bootstrap}, i.e. they estimate values based on earlier estimates, without waiting for the final outcome. 
 \begin{mdframed}
 \begin{align}
 V^*(s) &= \sum_{s'} \mathcal{P}^a_{ss'}\left[ \mathcal{R}^a_{ss'} + \gamma \underset{a}{\text{max}}V^*(s') \right]\label{eq:bellmanV}\\
@@ -53,7 +53,7 @@ V(s) \leftarrow V(s) + \alpha [r+\gamma V(s') - V(s)]\label{eq:td0}
 Both Q-learning and Sarsa are TD-methods, and are described in more detail in sections Q-learning and Sarsa.
 
 \subsection{Q-Learning} 
-Q-learning is a temporal difference method that uses\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
+Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} is a temporal difference method that uses the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
 
 \begin{mdframed}
 \begin{align}
@@ -113,7 +113,7 @@ Repeat (for each episode):\\
 
 
 \subsection{Monte Carlo Methods}
-As stated before, there are several ways of learning a estimating value functions and discovering optimal policies. Again, Monte Carlo methods do not know (nor need) complete knowledge of the environment. Monte Carlo methods require only experience, such as sample sequences of states, actions, and rewards, from on-line interaction with an environment. Unlike TD-methods, Monte Carlo methods require a model. The model only needs to generate sample transitions, unlike Dynamic Programming methods which need complete probability distributions of all possible transitions. Therefore, Monte Carlo methods are an important tool for an agent to use when only the model is known.
+As stated before, there are several ways of learning an estimating value functions and discovering optimal policies. Again, Monte Carlo methods do not know (nor need) complete knowledge of the environment. Monte Carlo methods require only experience, such as sample sequences of states, actions, and rewards, from on-line interaction with an environment. Unlike TD-methods, Monte Carlo methods require a model. The model only needs to generate sample transitions, unlike Dynamic Programming methods which need complete probability distributions of all possible transitions. This is a big advantage, since obtaining the whole probability distribution might be a tedious, even infeasible task in cases when sampling is still possible. Therefore, Monte Carlo methods are an important tool for an agent to use when only the model is known.
 
 \subsection{On-policy Monte Carlo Control}
 On-policy Monte Carlo control (ONMC) does not use exploring starts. In order to ensure that each state is visited and each action is selected infinitely often is to keep selecting these actions. There are two ways of implementing OPMCC; first-visit Monte Carlo and every-visit Monte Carlo. In this case, every-visit Monte Carlo is implemented which is reflected in the algorithm below. 
