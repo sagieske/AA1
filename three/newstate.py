@@ -232,8 +232,8 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		#If we're using off-policy MC, initialize a learning and then a testing episode
 		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 		predator = Predator(policy_grid)
-		print policy_grid.get_policy([4,4,5,5])
-		print policy_grid.get_policy([5,5,6,6])
+		#print policy_grid.get_policy([4,4,5,5])
+		#print policy_grid.get_policy([5,5,6,6])
 		#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
 		
 		print "Finished episode: ", x

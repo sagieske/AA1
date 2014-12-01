@@ -19,8 +19,9 @@ def distance_to_action(current_state):
 		# get new state
 		new_state = get_new_location(predator_state,action)
 		# get xydistance
-		action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [11,11])
-		dist_to_action[tuple(action_distance)] = (name, new_state)
+		action_distance = xy_distance([new_state[0], new_state[1], prey_state[0],prey_state[1]], [11,11])
+		dist_to_action[name] = (action_distance, new_state)
+
 	return dist_to_action
 
 # ONLY NEEDED FOR DEBUG
