@@ -12,55 +12,27 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, reset=False, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, verbose=2, grid_size=[11,11], learning_type='Q-learning'):
+	def __init__(self, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
 		print "Learning algorithm used in this episode: ", learning_type
 		#Store the learning type
 		self.learning_type = learning_type
-		#Created empty list to store all visited pairs
-		self.visited_pairs = []
-		#If we're using ONMC, create a grid to store the returns_list for each state, action pair
-		if(self.learning_type == "ONMC" and predator is None):
-			mc_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=True)
-			N_policy = None
-		#If we're using OFFMC [and there is no predator yet], create a grid to store t, denominator and nominator
-		elif(self.learning_type == "OFFMC" and predator is None):
-			N_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose, mc=False, off_policy=True)
-			mc_policy = None
-		#If we're not using OFFMC, initialize N_policy to be empty (we don't need it)
-		else:
-			if(self.learning_type != "OFFMC"):
-				N_policy = None
-			mc_policy = None
 		#Instantiate environment object with correct size, predator and prey locations
 		self.environment = Environment(grid_size, predator_location, prey_location)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True, softmax=softmax, verbose=verbose)
+			prey_policy = Policy(grid_size, prey=True, softmax=softmax)
 			self.prey = Prey(prey_policy)
 		#Else, store prey
 		else:
 			self.prey = prey
-			if reset:
-				self.environment.place_object('predator', prey_location)
 		#Create predator if none was given
 		if(predator==None):
-			predator_policy = Policy(grid_size, prey=False, softmax=softmax, verbose=verbose)
-			if(self.learning_type != "OFFMC"):
-				self.predator = Predator(predator_policy, mc_policy)
-			else:
-				self.predator = Predator(predator_policy, mc_policy=None, N_policy=N_policy)
+			predator_policy = Policy(grid_size, prey=False, softmax=softmax)
+			self.predator = Predator(predator_policy)
 		#Else, store the predator
 		else:
 			self.predator = predator
-			if reset:
-				self.environment.place_object('prey', predator_location)
-
-		#Store the level of output
-		self.verbose = verbose
-		#Print if needed
-		if self.verbose > 0:
-			self.environment.print_grid()
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
@@ -82,20 +54,10 @@ class Game:
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
 			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, steps, action)
-			self.predator.update_reward(0)
 			newstate = self.environment.get_state()
-		#If the prey has been caught, the predator receives a reward of 10
-		self.predator.update_reward(10)
-		if(learning_type == "OFFMC"):
-			returns = 10
-			self.predator.off_mc(self.visited_pairs, returns, discount_factor)
-			#if(self.learning_type=="OFFMC"):
-			#	print "state: ", newstate
-			#	print self.predator.get_policy_grid().get_policy(newstate)
-		reward = 10
 		
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		return reward, self.visited_pairs, steps, self.predator.get_policy_grid(), self.predator.get_mc_policy(), self.predator.get_N_policy_grid()
+		return steps, self.predator.get_policy_grid()
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -117,8 +79,6 @@ class Game:
 		else:
 			predator_location, predator_action = self.turn_predator(old_state)
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
-		if self.verbose > 0:
-			print "predator_location: ", predator_location, " prey_location: ", prey_location, " old state: ", old_state, " new state: ", new_state
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
 
@@ -128,30 +88,12 @@ class Game:
 		#If we're using Sarsa, update the q-values using the policy to select an action in the next state
 		elif(self.learning_type == 'Sarsa'):
 			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
-		#If we're using on-policy Monte Carlo, store the visited pairs
-		elif(self.learning_type == 'ONMC'):
-			self.visited_pairs.append((old_state, predator_action))
-		#If we're using off-policy Monte Carlo
-		elif(self.learning_type == 'OFFMC'):
-			#Store the visited pairs
-			self.visited_pairs.append((old_state, predator_action))
-			#Get the action following the deterministic policy
-			greedy_action = self.predator.get_greedy_action(old_state)
-			#If the greedy action and the behavioral action are different
-			if(greedy_action != predator_action):
-				#Store the time-step we're in
-				self.predator.update_t_value(old_state, steps)
 
 		if(not same):
 			#If prey is not caught, move it
 			prey_location = self.turn_prey(old_state, predator_location, epsilon)
 			#Print effect of this turn
-			if (self.verbose == 1 and same):
-				print 'States: '
-				print 'Predator: ', predator_location[0], ',', predator_location[1]
-				print 'Prey: ', prey_location[0], ',', prey_location[1]
-				self.environment.print_grid()
-			elif self.verbose == 2:
+			if (same):
 				print 'States: '
 				print 'Predator: ', predator_location[0], ',', predator_location[1]
 				print 'Prey: ', prey_location[0], ',', prey_location[1]
@@ -165,13 +107,6 @@ class Game:
 		prey_move, action_name = self.prey.get_action(state, epsilon)
 		#Turn action into new location
 		new_location = self.get_new_location('prey', prey_move)
-		#Check if the new location contains the predator, and if so, pick different action
-		if new_location == predator_location:
-			print "PREDATOR IS HERE YO - DONT GO THERE (we say to the prey)"
-			#Get action, restricted by predator location
-			prey_move, action_name = self.prey.get_action(state, epsilon, restricted=[action_name])
-			#Turn action into new location
-			new_prey_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
 		self.environment.move_object('prey', new_location)
 		return new_location
@@ -180,14 +115,7 @@ class Game:
 		""" Perform turn for predator """
 		#Retrieve the action for the predator for this state
 		#If we're using off-policy mc, use completely random action
-		if(self.learning_type == "OFFMC"):
-			predator_move, action_name = self.predator.get_action(state, epsilon=1.0)
-		#If we're doing a test-run, use completely greedy action
-		elif(self.learning_type == "None"):
-			predator_move, action_name = self.predator.get_action(state, epsilon=0.0)
-		#For other algorithms, use regular action-selection
-		else:
-			predator_move, action_name = self.predator.get_action(state, epsilon)
+		predator_move, action_name = self.predator.get_action(state, epsilon)
 		#Turn the action into new location
 		new_location = self.get_new_location('predator', predator_move)
 		#Move the predator to the new location
@@ -294,12 +222,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 	total_rounds = 0
 	rounds_list = []
 	#If we're using off-policy MC, initialize game/predator differently to allow separated learn/test runs
-	if(learning_type=="OFFMC"):
-		policy_grid = Policy(grid_size)
-		N_policy = Policy(grid_size,off_policy=True)
-		predator = Predator(policy_grid, N_policy=N_policy)
-	else:
-		game = Game(grid_size=grid_size, softmax=softmax, verbose=verbose, learning_type=learning_type)
+	game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type)
 	average_list = []
 	counter=0
 	current_rounds=0
@@ -307,28 +230,14 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		print "Rounds needed to catch prey: ", current_rounds
 		#Initialize episode
 		#If we're using off-policy MC, initialize a learning and then a testing episode
-		if(learning_type=="OFFMC"):
-			#Learning episode
-			game_learning = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)
-			reward, visited_pairs, irrel_rounds, policy_grid, mc_policy, N_policy = game_learning.get_rounds(learning_rate, discount_factor, epsilon)
-			#Testing episode
-			predator = Predator(policy_grid)
-			game_testing = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type="None")
-			reward, visited_pairs, current_rounds, policy_grid, mc_policy, irrel_N_policy = game_testing.get_rounds(learning_rate, discount_factor, epsilon=0.0)
-			predator = Predator(policy_grid, N_policy=N_policy)
-		#For other algorithms, initialize a general learning+testing episode
-		else:
-			reward, visited_pairs, current_rounds, policy_grid, mc_policy, N_policy = game.get_rounds(learning_rate, discount_factor, epsilon)
-			predator = Predator(policy_grid, mc_policy)
+		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+		predator = Predator(policy_grid)
+		print policy_grid.get_policy([4,4,5,5])
+		print policy_grid.get_policy([5,5,6,6])
 		#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
-		if(learning_type == 'ONMC'):
-			predator.update_returns(visited_pairs, reward, discount_factor)
-			predator.update_q_values(visited_pairs)
 		
 		print "Finished episode: ", x
-		#Create new game
-		if(learning_type != "OFFMC"):
-			game = Game(grid_size=grid_size, predator=predator, softmax=softmax, verbose=verbose, learning_type=learning_type)	
+		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, learning_type=learning_type)	
 
 		#Add rounds needed in test episode to total_rounds	
 		total_rounds += current_rounds
@@ -402,12 +311,9 @@ if __name__ == "__main__":
 	else:
 		verbose = 2
 
-	#If we're using off-policy MC, ensure greedy action-selection
-	if(learning_type == "OFFMC"):
-		epsilon = 0.0
 
 	all_averages = []
-	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, verbose=verbose, learning_type=learning_type)
+	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, learning_type=learning_type)
 	plt.plot(average_list)
 	plt.title("Steps needed versus episode number")
 	plt.ylabel('Steps needed before catch')
