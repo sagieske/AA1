@@ -383,6 +383,10 @@ The varying grid initialization showed that the grid initialization lower than 0
 
 \subsection{Multiple experiments}
 In hindsight, performing multiple experiments with the same settings would give more insight in the performance of the implementation. Thus far, all tests were run once and conclusions were drawn. More certainty about the implementation and performance of the algorithms can be achieved by averaging all results over multiple runs.
+
+\subsection{Exploration-Exploitation optimization}
+In order to optimize the exploration-exploitation trade-off, different techniques can be implemented. Upper confidence methods use a upper confidence bound on the probability that an action is optimal which can be used to limit the regret for a policy \cite{auer2009near}. Another possible implementation are PAC-methods. For example, the V-max\cite{rao:aamas12} algorithm uses optimistic view on state-action pairs experienced viewer than m times and adjusts this based on experience to perform efficient exploration and exploitation. Bayesian Q-learning \cite{dearden1998bayesian} can also be used to optimize the exploration-exploitation trade-off as it keeps track of probabilities over Q values and chooses exploration and exploitation actions on basis of the expected value of the information retrieved from taking this action.
+These algorithms can possibly improve the agents' learning and would be interesting to implement.
 \pagebreak
 \section{Files attached}
 \begin{itemize}
@@ -397,8 +401,5 @@ In hindsight, performing multiple experiments with the same settings would give 
 
 \bibliography{bibliography}
 \bibliographystyle{plain}
-\begin{itemize}
-	\item [1] Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html) \ldots
-\end{itemize}
 
 \end{document}
