@@ -4,6 +4,48 @@ from operator import add,mul, sub
 import sys
 import time
 
+def distance_to_action(current_state):
+	"""
+	Given the new chosen distance, return corresponding action
+	"""
+	predator_state = [current_state[0],current_state[1]]
+	prey_state = [current_state[2],current_state[3]]
+	grid_size = [11,11]
+	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
+
+	dist_to_action = {}
+	# Loop through all possible actions to check for xy_distance
+	for name, action in actions.iteritems():
+		# get new state
+		new_state = get_new_location(predator_state,action)
+		# get xydistance
+		action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [11,11])
+		dist_to_action[tuple(action_distance)] = (name, new_state)
+	return dist_to_action
+
+# ONLY NEEDED FOR DEBUG
+def action_to_distance(current_state, action):
+	predator_state = [current_state[0],current_state[1]]
+	prey_state = [current_state[2],current_state[3]]
+	grid_size = [11,11]
+	new_state = get_new_location(predator_state,action)
+	action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [11,11])
+
+
+
+def get_new_location(object_location, transformation):
+	""" Returns new location of an object when performs the chosen move """
+	new_location = []
+	#Retrieve the agent's position in the grid
+	#Get the size of the environment
+	environment_size = [11,11]
+	#Wrap edges to make grid toroidal
+	new_location.append((object_location[0] + transformation[0]) % environment_size[0])
+	new_location.append((object_location[1] + transformation[1]) % environment_size[1])
+	return new_location
+
+	
+
 def timer(start_time, name):
 	""" Stops timer and prints total time of function
 	PUT THIS IN BEGINNING OF FUNCTION:
@@ -16,16 +58,18 @@ def timer(start_time, name):
 	end_time = time.time() - start_time
 	print name, " - time taken: ", end_time
 
-def xy_distance(predator_location, prey_location, grid_size, toroidal=True):
+def xy_distance(state, grid_size, toroidal=True):
 	""" Calculate xy distance using a toroidal grid"""
-	x_distance = abs(predator_location[0] - prey_location[0])
-	y_distance = abs(predator_location[1] - prey_location[1])
+	x_distance = abs(state[0] - state[2])
+	y_distance = abs(state[1] - state[3])
 
 	if toroidal:
 		# Make use of toroidal grid
 		x_distance = min(x_distance, grid_size[0] - x_distance)
 		y_distance = min(y_distance, grid_size[1] - y_distance)
 	return [x_distance, y_distance]
+
+
 
 def get_rotation(predator_location, prey_location):
 	""" Returns unit vector of distance to predator location using prey_location as center """

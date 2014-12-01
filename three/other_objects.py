@@ -6,6 +6,7 @@ import operator
 import sys
 import operator
 import random
+import helpers
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -120,7 +121,18 @@ class Policy:
 			range_max_distance_y = range(0, max_distance_y)
 			# Get all possible absolute distances from prey
 			distances = list(itertools.product(range_max_distance_x , range_max_distance_y))
-			self.distance_dict = dict.fromkeys(distances, 15)
+			self.distance_dict = {}
+			for i,j in distances:
+				possible_states_dict = {}
+				new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+				for possible_state in new_possible_states:
+					if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] == self.grid_size[0]:
+						print "skip state:", possible_state
+						continue
+					possible_states_dict[tuple(possible_state)] = 15
+				self.distance_dict[(i,j)] = possible_states_dict
+			print self.distance_dict
+
 		self.softmax = softmax
 
 	def update_Q_values(self,Q, pair):
@@ -150,7 +162,12 @@ class Policy:
 
 	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
 		#Get the q-value of the current state, action pair
+		current_xy = helpers.xy_distance(old_state, self.grid_size)
+		new_xy = helpers.xy_distance(new_state,  self.grid_size)
+		test_current_q_value = self.distance_dict[tuple(current_xy)][tuple(new_xy)]
+		#print test_current_q_value
 		current_q_value = self.get_policy(old_state)[action]
+
 		#Get the reward for the new state (10 if caught, 0 otherwise)
 		reward = self.reward(new_state)
 		#Get the max action for the new state
@@ -160,12 +177,34 @@ class Policy:
 		self.softmax = softmax_backup
 		#Get the q-value for the new state and its max action
 		new_q_value = self.get_policy(new_state)[new_max_action]
+
+
+		print "-----------ENCODED?----------------"
+		max_location_new_state = self.get_new_location([new_state[0], new_state[1]], new_move)
+		max_xy_new_state = helpers.xy_distance([max_location_new_state[0], max_location_new_state[1], new_state[2], new_state[3]],  self.grid_size)
+		print "start:", old_state, "rel distance:", current_xy
+		print "new_state:", new_state, " using action: ", action, "rel distance:", new_xy
+		print "max location from new state", [max_location_new_state[0], max_location_new_state[1], new_state[2], new_state[3]], "goes to", "using ", new_max_action, "rel distance:", max_xy_new_state
+
+		test_new_q_value = self.distance_dict[tuple(new_xy)][tuple(max_xy_new_state)]
+		#new_xy = helpers.xy_distance(new_state,  self.grid_size)
+
+
 		discounted_next = discount_factor*new_q_value
 		difference_q = discounted_next - current_q_value
 		#Update the q_value for the current state by adding reward + discounted next q-value - current q-value, discounted by learning rate
 		updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
+
+		print "normal Q:", updated_q_value, " = ", current_q_value, " + ", learning_rate, " * (",reward, " + ",discount_factor, " * ",new_q_value, " - ", current_q_value," ) "
 		#Update the q-value for the old state, action pair
 		self.get_policy(old_state)[action] = updated_q_value
+
+
+		test_updated_q_value = test_current_q_value + learning_rate * (reward + discount_factor * test_new_q_value - test_current_q_value)
+		print "test Q:",test_updated_q_value, " = ",test_current_q_value, " + ",learning_rate, " * (",reward, " + ",discount_factor, " * ",test_new_q_value, " - ", test_current_q_value, ")"
+
+		self.distance_dict[tuple(current_xy)][tuple(new_xy)] = test_updated_q_value
+		print "-", updated_q_value, test_updated_q_value
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
