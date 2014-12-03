@@ -145,6 +145,47 @@ class Policy:
 				# Initialize total distance dictionary
 				self.distance_dict[(i,j)] = possible_states_dict
 
+	
+			amount_agents = 4	
+			#Create all possible combination for distances
+			distances_agent = list(itertools.product(range_max_distance_x , range_max_distance_y))
+			list_distance_agent = [distances_agent] * (amount_agents-1)
+			# Create all possible combinations for distances to other agents
+			total_combos = list(itertools.product(*list_distance_agent))
+
+			self.party_dict = {}
+			# fill in 
+			for distance_to_rest in total_combos:
+				key = distance_to_rest
+				inner_dict= {}
+				tuple_array = list(distance_to_rest)
+				# loop over distances to agents and adjust possible states
+				for index in range(0, len(tuple_array)):
+					# get distances before and after current index
+					agents_before = tuple_array[:index]
+					agents_after = tuple_array[index+1:]
+					i,j = distance_to_rest[index]
+					# get possible states
+					new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+					for possible_state in new_possible_states:
+						# impossible distance
+						if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] ==self.grid_size[0]:
+							continue
+						# Get new state where distance to agents before and agents after did not change
+						#TODO: IT CAN CHANGE OH NO
+						next_state_key = agents_before + [tuple(possible_state)] + agents_after	
+						# initialize with 15				
+						inner_dict[tuple(next_state_key)] = 15
+				# Set this dictionary for distances to parties
+				self.party_dict[key] = inner_dict
+
+			#for key, item in self.party_dict.iteritems():
+				#print "KEY:", key
+				#print "value:",item, "\n"
+				#print len(item)
+
+				
+
 		self.softmax = softmax
 
 
