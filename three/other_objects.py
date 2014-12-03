@@ -146,7 +146,7 @@ class Policy:
 				self.distance_dict[(i,j)] = possible_states_dict
 
 	
-			amount_agents = 4	
+			amount_agents = 3	
 			#Create all possible combination for distances
 			distances_agent = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			list_distance_agent = [distances_agent] * (amount_agents-1)
@@ -154,36 +154,44 @@ class Policy:
 			total_combos = list(itertools.product(*list_distance_agent))
 
 			self.party_dict = {}
-			# fill in 
+			# loop over all possible combination of distances to other agents and use them as keys in party_dict 
 			for distance_to_rest in total_combos:
 				key = distance_to_rest
+				# initialize inner dict for that key
 				inner_dict= {}
 				tuple_array = list(distance_to_rest)
-				# loop over distances to agents and adjust possible states
+				# Array to store arrays (# agents-10) and in those arrays the possible new distances to that agent
+				possible_variations = []
+				# Get all possible new state combinations from current state combo (key)
 				for index in range(0, len(tuple_array)):
-					# get distances before and after current index
-					agents_before = tuple_array[:index]
-					agents_after = tuple_array[index+1:]
-					i,j = distance_to_rest[index]
+					i,j = tuple_array[index]
+					distance_changes = []
 					# get possible states
 					new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
 					for possible_state in new_possible_states:
 						# impossible distance
 						if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] ==self.grid_size[0]:
-							continue
-						# Get new state where distance to agents before and agents after did not change
-						#TODO: IT CAN CHANGE OH NO
-						next_state_key = agents_before + [tuple(possible_state)] + agents_after	
-						# initialize with 15				
-						inner_dict[tuple(next_state_key)] = 15
-				# Set this dictionary for distances to parties
+							continue		
+						# Add as possible new state
+						distance_changes.append(tuple(possible_state))		
+					
+					# Add possible variation in this state to array
+					possible_variations.append(distance_changes)
+
+				# Get all possible combinations from array of possible new distances to other agents
+				possible_new_state_combos = list(itertools.product(*possible_variations))
+				# Initialize every item to 15
+				for item in possible_new_state_combos:
+					inner_dict[item] = 15
+				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
 
-			#for key, item in self.party_dict.iteritems():
-				#print "KEY:", key
-				#print "value:",item, "\n"
-				#print len(item)
-
+			#for key, value in self.party_dict.iteritems():
+			#	print "key:", key
+			#	print "possible new states: ", value
+			#	print "-"
+			#	print len(value)
+			
 				
 
 		self.softmax = softmax
