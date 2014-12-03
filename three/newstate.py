@@ -12,9 +12,10 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, grid_size=[11,11], learning_type='Q-learning'):
+	def __init__(self, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, grid_size=[11,11], learning_type='Q-learning', predator_list=None):
 		""" Initalize environment and agents """
 		print "Learning algorithm used in this episode: ", learning_type
+		
 		#Store the learning type
 		self.learning_type = learning_type
 		#Instantiate environment object with correct size, predator and prey locations
@@ -22,17 +23,17 @@ class Game:
 		#Create prey if none was given
 		if(prey==None):
 			prey_policy = Policy(grid_size, prey=True, softmax=softmax)
-			self.prey = Prey(prey_policy)
+			self.prey = Prey(prey_policy, len(predator_list)+1)
 		#Else, store prey
 		else:
 			self.prey = prey
 		#Create predator if none was given
-		if(predator==None):
+		if(predator_list==None):
 			predator_policy = Policy(grid_size, prey=False, softmax=softmax)
-			self.predator = Predator(predator_policy)
+			self.predator_list = [Predator(predator_policy)]
 		#Else, store the predator
 		else:
-			self.predator = predator
+			self.predator_list = predator_list
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
@@ -223,63 +224,72 @@ class Game:
 
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
-	total_rounds = 0
-	rounds_list = []
+	amount_predators = 2
+	for y in range(0, 100):
+		predator_list = []
+		for i in range(0, amount_predators):
+			pred_pol = Policy(grid_size, amount_agents=amount_predators+1)
+			predator_list.append(Predator(pred_pol))
+		total_rounds = 0
+		rounds_list = []
 	#If we're using off-policy MC, initialize game/predator differently to allow separated learn/test runs
-	game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type)
-	average_list = []
-	counter=0
-	current_rounds=0
-	for x in range(0, N):
-		print "Rounds needed to catch prey: ", current_rounds
-		#Initialize episode
-		#If we're using off-policy MC, initialize a learning and then a testing episode
-		#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
-		current_rounds, policy_grid, distance_dict = game.get_rounds(learning_rate, discount_factor, epsilon)
-		#predator = Predator(policy_grid)
-		predator = Predator(policy_grid)
-		policy_grid_pred = predator.get_policy_grid()
-		policy_grid_pred.set_distance_dict(distance_dict)
+		game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, predator_list=predator_list)
+		average_list = []
+		counter=0
+		current_rounds=0
+	
+		y_list = []
+		for x in range(0, N):
+			print "Rounds needed to catch prey: ", current_rounds
+			#Initialize episode
+			#If we're using off-policy MC, initialize a learning and then a testing episode
+			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+			current_rounds, policy_grid, distance_dict = game.get_rounds(learning_rate, discount_factor, epsilon)
+			#predator = Predator(policy_grid)
+			predator = Predator(policy_grid)
+			policy_grid_pred = predator.get_policy_grid()
+			policy_grid_pred.set_distance_dict(distance_dict)
 
-		print "item 2,2"
-		print policy_grid_pred.distance_dict[(2,2)]
-		print "item 1,1"
-		print policy_grid_pred.distance_dict[(1,1)]
-		print "item 0,1"
-		print policy_grid_pred.distance_dict[(0,1)]
+			print "item 2,2"
+			print policy_grid_pred.distance_dict[(2,2)]
+			print "item 1,1"
+			print policy_grid_pred.distance_dict[(1,1)]
+			print "item 0,1"
+			print policy_grid_pred.distance_dict[(0,1)]
 
-		#print policy_grid.get_policy([4,4,5,5])
-		#print policy_grid.get_policy([5,5,6,6])
-		#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
-		
-		print "Finished episode: ", x
-		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, learning_type=learning_type)	
+			#print policy_grid.get_policy([4,4,5,5])
+			#print policy_grid.get_policy([5,5,6,6])
+			#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
+			
+			print "Finished episode: ", x
+			game = Game(grid_size=grid_size, predator=predator, softmax=softmax, learning_type=learning_type, predator_list=predator_list)	
 
-		#Add rounds needed in test episode to total_rounds	
-		total_rounds += current_rounds
-		#Add rounds needed in this episode to the list of rounds
-		rounds_list.append(current_rounds)
-
+			#Add rounds needed in test episode to total_rounds	
+			total_rounds += current_rounds
+			#Add rounds needed in this episode to the list of rounds
+			rounds_list.append(current_rounds)
+		y_list.append(rounds_list)
 		#Smooth graph
-		counter+=1
-		if(counter == 100):
-			average_rounds = float(total_rounds)/100
-			average_list.append(average_rounds)
-			total_rounds = 0
-			counter= 0
+	average_rounds = []
+	for number in range(0, len(rounds_list)):
+		yl_number = 0
+		for yl in y_list:
+			yl_number += yl[number]
+		average_rounds.append(yl_number)
+
 	print "List of steps needed per episode: ", rounds_list
-	print "List of smoothed averages: ", average_list
+	print "List of smoothed averages: ", average_rounds
 	#Compute average number of rounds needed
-	average_rounds = float(total_rounds)/N
+	#average_rounds = float(average_rounds)/N
 	#Compute list of variances
-	var_list = [(x-average_rounds)**2 for x in rounds_list]
+	#var_list = [(x-average_rounds)**2 for x in rounds_list]
 	#Compute average variance
-	variance = float(sum(var_list)/len(var_list))
+	#variance = float(sum(var_list)/len(var_list))
 	#Compute standard deviation for N rounds
-	standard_deviation = math.sqrt(variance)
-	print "Average rounds needed over ", N, " episodes: ", average_rounds
-	print "Standard deviation: ", standard_deviation	
-	return average_list
+	#standard_deviation = math.sqrt(variance)
+	#print "Average rounds needed over ", N, " episodes: ", average_rounds
+	#print "Standard deviation: ", standard_deviation	
+	return average_rounds
 
 
 if __name__ == "__main__":

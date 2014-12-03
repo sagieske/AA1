@@ -90,7 +90,7 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		#Store prey boolean
 		self.prey = prey
@@ -98,17 +98,24 @@ class Policy:
 		#Store grid size
 		self.grid_size = grid_size
 		#If the agent is not a prey, set the policy to random with initialization value
-		if prey==False:
-			self.policy = {'North':15, 'East':15, 'South':15, 'West':15, 'Wait':15}
-		#If the agent is a prey, set the policy to the prey-policy (80% wait, 20% action)
-		else:
-			self.policy = {'North':0.05, 'East':0.05, 'South':0.05, 'West':0.05, 'Wait':0.8}
+		self.policy = {'North':15, 'East':15, 'South':15, 'West':15, 'Wait':15}
 		#If a policy_grid is given, store it
 		if(policy_grid is not None):
 			self.policy_grid = policy_grid
 			#self.distance_dict = policy_grid
 		else:
-			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]	
+			index_numbers = []
+			#for agent_number in range(0, amount_agents):
+			#	index_numbers.append(agent_number)
+			print amount_agents
+			party_dict = np.empty((11,11,2*amount_agents), dtype=dict)
+			party_dict.fill(copy.deepcopy(self.policy))
+			print "dikke fissa"
+			print party_dict
+			#print index_numbers
+
+
+			#self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]	
 		#Store the actions and their corresponding transformations
 		self.actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 
