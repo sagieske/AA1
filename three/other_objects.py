@@ -108,7 +108,7 @@ class Policy:
 			#for agent_number in range(0, amount_agents):
 			#	index_numbers.append(agent_number)
 			print amount_agents
-			party_dict = np.empty((11,11,2*amount_agents), dtype=dict)
+			party_dict = np.empty((amount_agents,11,11), dtype=dict)
 			party_dict.fill(copy.deepcopy(self.policy))
 			print "dikke fissa"
 			print party_dict
