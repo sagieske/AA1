@@ -4,6 +4,13 @@
 \usepackage{url}
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
+\usepackage{verbatim}
+
+
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{bibliography.bib}
+
+
 
 \title{Autonomous Agents 1 \\ Assignment 3}
 
@@ -35,6 +42,25 @@ The word \textbf{Abstract} must be centered, bold, and in point size 12. Two
 line spaces precede the abstract. The abstract must be limited to one
 paragraph.
 \end{abstract}
+
+
+\section{Introduction}
+
+\section{Theory}
+
+\section{Independent Q-learning}
+
+\section{Minmax Q-learning}
+
+
+% TODO update the name of the `other learning'
+\section{Other learning}
+
+\section{Conclusion}
+
+
+GENERAL SHIT FROM THE TEMPLATE AFTER HERE!!!! \\
+
 
 \section{Submission of papers to NIPS 2014}
 
@@ -399,6 +425,14 @@ acknowledgments go at the end of the paper. Do not include
 acknowledgments in the anonymized submission, only in the 
 final paper. 
 
+
+\nocite{*}
+\printbibliography
+
+
+
+% Original reference from the template:
+\begin{comment}
 \subsubsection*{References}
 
 References follow the acknowledgments. Use unnumbered third level heading for
@@ -422,5 +456,6 @@ and recall at excitatory recurrent synapses and cholinergic modulation
 in rat hippocampal region CA3. {\it Journal of Neuroscience}
 {\bf 15}(7):5249-5262.
 }
+\end{comment}
 
 \end{document}
