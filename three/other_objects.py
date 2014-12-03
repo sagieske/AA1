@@ -106,6 +106,7 @@ class Policy:
 		#If a policy_grid is given, store it
 		if(policy_grid is not None):
 			self.policy_grid = policy_grid
+			#self.distance_dict = policy_grid
 		else:
 			self.policy_grid = [[[[copy.deepcopy(self.policy) for i in range(0, self.grid_size[1])] for j in range(0, self.grid_size[0])] for k in range(0, self.grid_size[1])] for l in range(0, self.grid_size[0])]	
 		#Store the actions and their corresponding transformations
@@ -139,6 +140,9 @@ class Policy:
 
 		self.softmax = softmax
 
+
+
+
 	def update_Q_values(self,Q, pair):
 		state = pair[0]
 		i = state[0]
@@ -155,6 +159,9 @@ class Policy:
 		k = state[2]
 		l = state[3]
 		return self.policy_grid[i][j][k][l]	
+
+	def set_distance_dict(self, distance_dict):
+		self.distance_dict = distance_dict
 
 	def get_action(self, state, epsilon=0.0):
 		""" Choose an action and turn it into a move """

@@ -57,7 +57,11 @@ class Game:
 			newstate = self.environment.get_state()
 		
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		return steps, self.predator.get_policy_grid()
+		distance_dict_test = self.predator.get_policy_grid().distance_dict
+		#print self.predator.get_policy_grid().distance_dict
+			
+		#return steps, self.predator.get_policy_grid()
+		return steps,  self.predator.get_policy_grid(), distance_dict_test
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -230,8 +234,20 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		print "Rounds needed to catch prey: ", current_rounds
 		#Initialize episode
 		#If we're using off-policy MC, initialize a learning and then a testing episode
-		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+		#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+		current_rounds, policy_grid, distance_dict = game.get_rounds(learning_rate, discount_factor, epsilon)
+		#predator = Predator(policy_grid)
 		predator = Predator(policy_grid)
+		policy_grid_pred = predator.get_policy_grid()
+		policy_grid_pred.set_distance_dict(distance_dict)
+
+		print "item 2,2"
+		print policy_grid_pred.distance_dict[(2,2)]
+		print "item 1,1"
+		print policy_grid_pred.distance_dict[(1,1)]
+		print "item 0,1"
+		print policy_grid_pred.distance_dict[(0,1)]
+
 		#print policy_grid.get_policy([4,4,5,5])
 		#print policy_grid.get_policy([5,5,6,6])
 		#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
