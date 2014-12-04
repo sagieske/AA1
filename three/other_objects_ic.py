@@ -15,15 +15,18 @@ class Environment:
 		#Create empty grid
 		self.grid = [[ ' ' for i in range(0, grid_size[0])] for y in range(0, grid_size[1])]
 		#Get indices of predator, prey locations
-		i = predator_location_list[0].get_location()[0]
-		j = predator_location_list[0].get_location()[1]
+		i = predator_location_list[0][0]
+		j = predator_location_list[0][1]
 		k = prey_location[0]
 		l = prey_location[1]
 		#Set representations of agents in grid
 		self.grid[i][j] = 'X'
 		self.grid[k][l] = 'O'
 		#Store predator, prey locations
-		self.predator_location = predator_location
+		# Create and populate predator location list with locations
+		self.predator_location_list = []
+		for i in range(0, len(predator_location_list)):
+                	self.predator_location_list.append(predator_location_list[i])
 		self.prey_location = prey_location
 
 	def print_grid(self):
@@ -48,28 +51,30 @@ class Environment:
 			#Update prey location
 			self.prey_location = new_location
 
-	def move_object(self, object_name, new_location):
+	def move_object(self, object_name, new_location_list):
 		""" Move object from old to new location in the grid """
 		#If predator
 		if(object_name == 'predator'):
 			#Get old location
-			old_location = self.predator_location
+			old_location_list = self.predator_location_list
 			#Update predator location
-			self.predator_location = new_location
-			#Empty old location in grid
-			self.grid[old_location[0]][old_location[1]] = ' '
-			#Set new location in grid to 'X'
-			self.grid[new_location[0]][new_location[1]] = 'X'
+			self.predator_location_list = new_location_list
+			for i in range(0, len(old_location_list)):
+				#Empty old location in grid
+				self.grid[old_location_list[i][0]][old_location_list[i][1]] = ' '
+				#Set new location in grid to 'X'
+				self.grid[new_location_list[i][0]][new_location_list[i][1]] = 'X'
 		#If prey
 		elif(object_name == 'prey'):
+			#print 'new location list: ', new_location_list 
 			#Get old location
 			old_location = self.prey_location
 			#Update prey location
-			self.prey_location = new_location
+			self.prey_location = new_location_list
 			#Empty old location in grid
 			self.grid[old_location[0]][old_location[1]] = ' '
 			#Set new location in grid to 'O'
-			self.grid[new_location[0]][new_location[1]] = 'O'			
+			self.grid[new_location_list[0]][new_location_list[1]] = 'O'			
 
 	def get_size(self):
 		""" Return environment size"""
@@ -77,13 +82,13 @@ class Environment:
 
 	def get_state(self):
 		""" Return the current state that the environment's in """
-		return [self.predator_location[0], self.predator_location[1], self.prey_location[0], self.prey_location[1]]
+		return self.predator_location_list, self.prey_location #[self.predator_location[0], self.predator_location[1], self.prey_location[0], self.prey_location[1]]
 
-	def get_location(self, object_name):
+	def get_location(self, object_name, index=0):
 		""" Retrieve location of agent in grid """
 		#Check which agent, and return its location
 		if(object_name == 'predator'):
-			return self.predator_location
+			return self.predator_location_list[index]
 		elif(object_name == 'prey'):
 			return self.prey_location
 
@@ -96,9 +101,10 @@ class Policy:
 		#Store on-policy MC boolean
 		#Store grid size
 		self.grid_size = grid_size
+		self.multi_agents = True
 		#If the agent is not a prey, set the policy to random with initialization value
 		if prey==False:
-			self.policy = {'North':15, 'East':15, 'South':15, 'West':15, 'Wait':15}
+			self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
 		#If the agent is a prey, set the policy to the prey-policy (80% wait, 20% action)
 		else:
 			self.policy = {'North':0.2, 'East':0.2, 'South':0.2, 'West':0.2, 'Wait':0.2}
@@ -134,11 +140,14 @@ class Policy:
 
 	def get_policy(self, state):
 		""" Return the policy dictionary for a state """
-		i = state[0]
-		j = state[1]
-		k = state[2]
-		l = state[3]
-		return self.policy_grid[i][j][k][l]	
+		if self.multi_agents == False:
+			i = state[0]
+			j = state[1]
+			k = state[2]
+			l = state[3]
+			return self.policy_grid[i][j][k][l]
+		else:
+			return {'North': 0.2, 'East': 0.2, 'South':0.2, 'West':0.2, 'Wait':0.2} 	
 
 	def get_action(self, state, epsilon=0.0):
 		""" Choose an action and turn it into a move """
