@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{xcolor,colortbl}
+\usepackage[]{algorithm2e}
+%\usepackage{cite}
+\usepackage{caption}
+\usepackage{mdframed}
+\usepackage{float}
+%\usepackage{soul}
+
+
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{bibliography.bib}
+
+
+\newcommand{\tab}{\hspace{10mm}}
+\newcommand{\dtab}{\hspace{20mm}}
+\newcommand{\ttab}{\hspace{30mm}}
+\newcommand{\qtab}{\hspace{40mm}}
+
+\begin{document}
+
+\title{Autonomous Agents 1 \\ Assignment 3}
+
+\author{By Group 4: Gieske, Gornishka, Koster, Loor}
+\maketitle
+\pagebreak
+\tableofcontents
+
+
+\pagebreak
+
+\section{Introduction}
+
+
+\pagebreak
+
+\section{Theory}
+
+\subsection{Independent Q-learning}
+
+\subsection{Minmax Q-Learning} 
+
+% Update which one is the `other leanring'
+\subsection{Other learning}
+
+
+
+\section{Implementation}
+The implementation consists of the following files:
+\begin{description}
+	\item[Agents\_new] \hfill \\ 
+	This file contains implementions of the Agent class, the Prey class and the Predator class. Both the predator and the prey inherit functions of the Agent class. The Agent class contains functions any agent needs, such as a set of actions, a policy and other functions. As the predator is the agent is the agent this implementation focuses on, the predator class contains more functions than the predator class.
+	
+	\item[Helpers] \hfill \\ 
+	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
+	
+	\item[Other\_objects] \hfill \\ % uncertain about policy class description
+	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, Sarsa, $\epsilon$-greedy, softmax action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
+	\item[Newstate] \hfill \\ 
+	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs Q-Learning, Sarsa and Monte Carlo. It also uses $\epsilon$-greedy and softmax action selection. The results are printed in the command line and graphs are used for analysis.
+\end{description}
+
+\pagebreak
+
+
+\section{Analysis}
+This section discusses the results of the implementations. In order to display and compare results, graphs are used. The title describes which parameters are analysed and the legend shows which color represents which setting of said parameters.
+
+\subsection{Independent Q-Learning}
+
+\subsection{Minmax Q-learning}
+
+\subsection{Other Learning}
+
+\pagebreak
+
+
+\section{Conclusion}
+
+\pagebreak
+
+
+\section{Future work}
+
+\pagebreak
+
+
+\section{Files attached}
+
+\begin{itemize}
+\item newstate.py
+\item agents\_new.py
+\item other\_objects.py
+\item helpers.py \ldots
+\end{itemize}
+
+
+\section{Sources}
+
+% TODO Update the bibliography according to the new assignment
+\nocite{*}
+\printbibliography
+
+
+\begin{comment}
+\bibliography{bibliography}
+\bibliographystyle{plain}
+\begin{itemize}
+	\item [1] Barto and Sutton (http://webdocs.cs.ualberta.ca/~sutton/book/the-book.html) \ldots
+\end{itemize}
+\end{comment}
+
+
+\end{document}

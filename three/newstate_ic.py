@@ -8,21 +8,28 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from other_objects_ic import Environment, Policy
 import matplotlib.pyplot as plt
 
+# location list to test: [[0,0], [10,0], [10,10], [0,10]]
 class Game:
-	def __init__(self, prey=None, predator_list=None, predator_location_list=[[0,0], [4,4], [7,7]], prey_location=[5,5], softmax=False, grid_size=[11,11], learning_type='Q-learning'):
+	def __init__(self, prey=None, predator_list=None, predator_location_list=[[0,0]], prey_location=[5,5], nr_of_predators=1, softmax=False, grid_size=[11,11], learning_type='Q-learning'):
 		""" Initalize environment and agents """
 		print "Learning algorithm used in this episode: ", learning_type
+		print "nr of predators: ", nr_of_predators
 		#Store the learning type
+		self.predator_location_list = []
 		self.learning_type = learning_type
+		if predator_list is None and len(predator_location_list) == nr_of_predators:
+			self.predator_location_list = predator_location_list
+		else:
+			self.predator_location_list = self.init_predator_location_list(nr_of_predators)
 		#Instantiate environment object with correct size, predator and prey locations
-		self.environment = Environment(grid_size, predator_location_list, prey_location)
+		self.environment = Environment(grid_size, self.predator_location_list, prey_location)
 		#Create prey if none was given
 		if(prey==None):
 			prey_policy = Policy(grid_size, prey=True, softmax=softmax)
-			self.lonely_prey = Prey(prey_policy)
+			self.prey = Prey(prey_policy)
 		#Else, store prey
 		else:
 			self.prey = prey
@@ -33,9 +40,23 @@ class Game:
 			self.predator_list = [Predator(predator_policy) for predator_policy in [Policy(grid_size, prey=False, softmax=softmax) for 							location in predator_location_list]]
 		#Else, store the predator
 		else:
-			self.list_of_agents = list_of_agents
+			self.predator_list = predator_list 
 
-		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
+		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location_list[0], ", prey at location ", prey_location
+
+	def init_predator_location_list(self, nr_of_predators):
+		predator_location_list = []
+		for i in range(0, nr_of_predators):
+			if i == 0:
+				predator_location_list.append([0,0])
+			elif i == 2:
+				predator_location_list.append([10,0])
+			elif i == 3:
+				predator_location_list.append([0,10])
+			elif i == 4: 
+				predator_location_list.append([10,10])
+				return predator_location_list
+		return predator_location_list
 
 	def get_rounds(self, learning_rate, discount_factor, epsilon):
 		""" Return rounds played """
@@ -48,17 +69,24 @@ class Game:
 		steps = 0
 		caught = 0
 		#Runs turns until the prey is caught
-		action=None
+		predator_action_list=None
 		while(caught == 0):
 			steps +=1
 			#Get the current state
-			state = self.environment.get_state()
+			#FIX ENVIRONMENT
+			predator_state_list, prey_state = self.environment.get_state()
+			#print "predator_state_list: ", predator_state_list
 			#Run turn and see if prey has been caught
-			caught, action = self.turn(state, learning_rate, discount_factor, epsilon, steps, action)
-			newstate = self.environment.get_state()
+			caught, predator_action_list = self.turn(predator_state_list, prey_state, learning_rate, discount_factor, epsilon, steps, predator_action_list)
+			print "caught: ", caught
+			#pdb.set_trace()
+			predator_state_list, prey_state = self.environment.get_state()
 		
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		return steps, self.predator.get_policy_grid()
+		predator_policy_grids = []
+		for i in range(0, len(predator_state_list)):
+			predator_policy_grids.append(self.predator_list[i].get_policy_grid())
+		return steps, predator_policy_grids
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -69,63 +97,87 @@ class Game:
 		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
 		return [distance_x, distance_y]
 
-	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps, action=None):
+        def check_locations(self, predator_location_list, prey_location):
+		#ignore last loop.
+		print "checking locations!"
+		not_caught = 0
+		confusion = 1
+		caught = 2
+		nr_of_predators = len(predator_location_list)
+		if nr_of_predators > 1:
+			for i in range(0, nr_of_predators):
+				if(predator_location_list[i] == predator_location_list[i+1]):
+					# 2 predators are on the same location
+					# we are confused and the prey got away :(
+					return confusion
+		for i in range(0, nr_of_predators):
+			print "predator_location[i]: ", predator_location_list[i], " prey_location: ", prey_location
+			if(predator_location_list[i] == prey_location):
+				# Check if any predator caught the prey
+				return caught
+		return not_caught
+        
+	def turn(self, old_predator_state_list, old_prey_state, learning_rate, discount_factor, epsilon, steps, action=None):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get current prey location
-		prey_location = [old_state[2], old_state[3]]
-		#Move the predator
-		if(action is not None):
-			predator_location = self.get_new_location('predator', action[1])
-			predator_action = action[0]
-		else:
-			predator_location, predator_action = self.turn_predator(old_state)
-		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
+		#prey_location = [old_prey_state[0], old_prey_state[1]]
+		#Move the predator and the prey
+		new_predator_state_list, predator_action_list = self.turn_predator(old_predator_state_list, old_prey_state)
+		prey_location = self.turn_prey(old_prey_state, epsilon)
+		#new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
+
 		#If predator moves into the prey, the prey is caught
-		same = (predator_location == prey_location)
+		boardstate = self.check_locations(new_predator_state_list, prey_location)
+		self.environment.print_grid()
+                return boardstate, predator_action_list
+		# returns an integer. Int is an enum: 0 = not caught, 1 is confusion, 2 is caught
+		#same = (predator_location == prey_location)
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
-		if(self.learning_type == 'Q-learning'):
-			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
-		#If we're using Sarsa, update the q-values using the policy to select an action in the next state
-		elif(self.learning_type == 'Sarsa'):
-			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
+		#if(self.learning_type == 'Q-learning'):
+		#	self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 
-		if(not same):
-			#If prey is not caught, move it
-			prey_location = self.turn_prey(old_state, predator_location, epsilon)
-			#Print effect of this turn
-			if (same):
-				print 'States: '
-				print 'Predator: ', predator_location[0], ',', predator_location[1]
-				print 'Prey: ', prey_location[0], ',', prey_location[1]
-				self.environment.print_grid()
+		#if(not same):
+		#	#If prey is not caught, move it
+		#	prey_location = self.turn_prey(old_state, predator_location, epsilon)
+		#	#Print effect of this turn
+		#	if (same):
+		#		print 'States: '
+		#		print 'Predator: ', predator_location[0], ',', predator_location[1]
+		#		print 'Prey: ', prey_location[0], ',', prey_location[1]
+		#		self.environment.print_grid()
 		#Return caught or not
-		return same, action
+		#return same, action
 
-	def turn_prey(self, state, predator_location, epsilon):
+	def turn_prey(self, state, epsilon):
 		""" Perform turn for prey """
 		#Retrieve the action for the prey for this state
 		prey_move, action_name = self.prey.get_action(state, epsilon)
-        	if action_name is not "Wait":
+		if action_name is not "Wait":
 			if random.randint(1, 10) <= 2:
-		    		prey_move = [0,0]
-		    		action_name = 'Trip'
+				prey_move = [0,0]
+				action_name = 'Trip'
 		#Turn action into new location
-        	new_location = self.get_new_location('prey', prey_move)
+		new_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
-        	self.environment.move_object('prey', new_location)
-        	return new_location
+		self.environment.move_object('prey', new_location)
+		return new_location
 
-	def turn_predator(self, state):
+	def turn_predator(self, state_list, old_prey_state):
 		""" Perform turn for predator """
-		#Retrieve the action for the predator for this state
+		#Retrieve the action for the predator for this state per predator
 		#If we're using off-policy mc, use completely random action
-		predator_move, action_name = self.predator.get_action(state, epsilon)
-		#Turn the action into new location
-		new_location = self.get_new_location('predator', predator_move)
-		#Move the predator to the new location
-		self.environment.move_object('predator', new_location)
-		return new_location, action_name
+		new_location_list = []
+		action_name_list = []
+		#print "state_list: ", state_list, " len: ",  len(state_list)
+		for i in range(0, len(state_list)):
+        		predator_move, action_name = self.predator_list[i].get_action([state_list[i][0], state_list[i][1], old_prey_state[0], old_prey_state[1]], epsilon)
+        		action_name_list.append(action_name)
+                        #Turn the action into new location
+                        new_location_list.append(self.get_new_location('predator', predator_move))
+                        #Move the predator to the new location
+		self.environment.move_object('predator', new_location_list)
+		return new_location_list, action_name_list
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
@@ -222,12 +274,12 @@ class Game:
 		else:
 			return 0.05
 
-def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
+def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, nr_of_predators=1, softmax=False, verbose=0, learning_type=None):
 	""" Run N episodes and compute average """
 	total_rounds = 0
 	rounds_list = []
 	#If we're using off-policy MC, initialize game/predator differently to allow separated learn/test runs
-	game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type)
+	game = Game(grid_size=grid_size, nr_of_predators=nr_of_predators, softmax=softmax, learning_type=learning_type)
 	average_list = []
 	counter=0
 	current_rounds=0
@@ -235,14 +287,17 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=
 		print "Rounds needed to catch prey: ", current_rounds
 		#Initialize episode
 		#If we're using off-policy MC, initialize a learning and then a testing episode
-		current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
-		predator = Predator(policy_grid)
-		print policy_grid.get_policy([4,4,5,5])
-		print policy_grid.get_policy([5,5,6,6])
+		current_rounds, predator_policy_grids = game.get_rounds(learning_rate, discount_factor, epsilon)
+		
+		predator_list = []
+		for i in range(0, len(predator_policy_grids)):
+			predator_list.append(Predator(predator_policy_grids[i]))
+		#print policy_grid.get_policy([4,4,5,5])
+		#print policy_grid.get_policy([5,5,6,6])
 		#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
 		
 		print "Finished episode: ", x
-		game = Game(grid_size=grid_size, predator=predator, softmax=softmax, learning_type=learning_type)	
+		game = Game(grid_size=grid_size, predator_list=predator_list, nr_of_predators=nr_of_predators, softmax=softmax, learning_type=learning_type)	
 
 		#Add rounds needed in test episode to total_rounds	
 		total_rounds += current_rounds
@@ -282,6 +337,7 @@ if __name__ == "__main__":
 	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
 	parser.add_argument('-learning_type', metavar='Specify learning type', type=str)
 	parser.add_argument('-softmax', metavar='Use softmax', type=str)
+	parser.add_argument('-predators', metavar='Determine amount of predators', type=int)
 	args = parser.parse_args()
 
 	#Default parameter values
@@ -292,10 +348,13 @@ if __name__ == "__main__":
 	grid_size = 11
 	softmax = False	
 	learning_type = "Q-learning"
+	nr_of_predators = 1
 
 	#Command line parsing
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['predators'] is not None):
+		nr_of_predators = vars(args)['predators']
 	if(vars(args)['learning_type'] is not None):
 		learning_type = vars(args)['learning_type']
 	if(vars(args)['runs'] is not None):
@@ -318,7 +377,9 @@ if __name__ == "__main__":
 
 
 	all_averages = []
-	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, learning_type=learning_type)
+
+
+	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, nr_of_predators=nr_of_predators, softmax=softmax, learning_type=learning_type)
 	plt.plot(average_list)
 	plt.title("Steps needed versus episode number")
 	plt.ylabel('Steps needed before catch')
