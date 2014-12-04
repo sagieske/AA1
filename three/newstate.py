@@ -89,7 +89,7 @@ class Game:
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
 		if(self.learning_type == 'Q-learning'):
-			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
+			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon, predator_list.append(self.prey))
 		#If we're using Sarsa, update the q-values using the policy to select an action in the next state
 		elif(self.learning_type == 'Sarsa'):
 			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
