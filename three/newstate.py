@@ -110,6 +110,13 @@ class Game:
 		""" Perform turn for prey """
 		#Retrieve the action for the prey for this state
 		prey_move, action_name = self.prey.get_action(state, epsilon)
+		
+		# The prey can trip 20% of the time
+		if action_name is not "Wait":
+			if random.randint(1, 10) <= 2:
+				prey_move = [0,0]
+				action_name = 'Trip'
+
 		#Turn action into new location
 		new_location = self.get_new_location('prey', prey_move)
 		#Move the prey to the new location
@@ -222,9 +229,8 @@ class Game:
 		else:
 			return 0.05
 
-def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, softmax=False, verbose=0, learning_type='Q-learning'):
+def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
-	amount_predators = 2
 	for y in range(0, 100):
 		predator_list = []
 		for i in range(0, amount_predators):
@@ -303,6 +309,7 @@ if __name__ == "__main__":
 	parser.add_argument('-grid_size', metavar='Specify grid size', type=int)
 	parser.add_argument('-learning_type', metavar='Specify learning type', type=str)
 	parser.add_argument('-softmax', metavar='Use softmax', type=str)
+	parser.add_argument('-predators', metavar='Specify number of predators', type=int)
 	args = parser.parse_args()
 
 	#Default parameter values
@@ -313,6 +320,7 @@ if __name__ == "__main__":
 	grid_size = 11
 	softmax = False	
 	learning_type = "Q-learning"
+	amount_predators = 2
 
 	#Command line parsing
 	if(vars(args)['runs'] is not None):
@@ -321,6 +329,8 @@ if __name__ == "__main__":
 		learning_type = vars(args)['learning_type']
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['predators'] is not None):
+		amount_predators = vars(args)['predators']
 	if(vars(args)['softmax'] is not None):
 		if(vars(args)['softmax'] == "yes"):
 			softmax = True
@@ -339,7 +349,7 @@ if __name__ == "__main__":
 
 
 	all_averages = []
-	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, softmax=softmax, learning_type=learning_type)
+	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
 	plt.plot(average_list)
 	plt.title("Steps needed versus episode number")
 	plt.ylabel('Steps needed before catch')
