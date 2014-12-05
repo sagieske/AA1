@@ -69,8 +69,9 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
+		self.agent_name = agent_name
 		#Store prey boolean
 		self.prey = prey
 		#Store on-policy MC boolean
@@ -86,11 +87,8 @@ class Policy:
 			index_numbers = []
 			#for agent_number in range(0, amount_agents):
 			#	index_numbers.append(agent_number)
-			print amount_agents
 			party_dict = np.empty((amount_agents,11,11), dtype=dict)
 			party_dict.fill(copy.deepcopy(self.policy))
-			print "dikke fissa"
-			print party_dict
 			#print index_numbers
 
 
@@ -125,7 +123,7 @@ class Policy:
 				self.distance_dict[(i,j)] = possible_states_dict
 
 	
-			amount_agents = 3	
+				
 			#Create all possible combination for distances
 			distances_agent = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			list_distance_agent = [distances_agent] * (amount_agents-1)
@@ -171,7 +169,6 @@ class Policy:
 			#	print "-"
 			#	print len(value)
 			
-				
 
 		self.softmax = softmax
 
@@ -268,22 +265,28 @@ class Policy:
 			return 0
 
 	def dict_to_state(self, state):
-		state_list = []
 		agent_list = state.keys()
 		agent_list.sort()
+		state_tuple = ()
+		print "Agent ", self.agent_name, " at location ", state[self.agent_name]
 		for location in agent_list:
-			state_list.append(state[location][0])
-			state_list.append(state[location][1])
-		print state_list
-		return state_list
+			if(location != self.agent_name):
+				print "Computing distance with agent ", location, " at location ", state[location]
+				state_list = [state[location][0], state[location][1], state[self.agent_name][0], state[self.agent_name][1]]
+				distance_to_other = helpers.xy_distance(state_list, self.grid_size)
+				print "Computed distance: ", distance_to_other
+				state_tuple += (distance_to_other,)
+		print state_tuple
+		return state_tuple
 
-	def pick_action(self, state, action_selection_var): #def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
+	def tuple_to_old_state(self, tup):
+		return [tup[0], tup[1]]
+
+	def pick_action(self, state, action_selection_var): #t
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
-		state = self.dict_to_state(state)
-		current_xy = helpers.xy_distance(state, self.grid_size)
-
+		new_state = self.dict_to_state(state)
 		dist_to_action = helpers.distance_to_action(state)
 
 		test_policy = {}

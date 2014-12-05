@@ -21,14 +21,14 @@ class Game:
 		self.environment = Environment(grid_size, location_dict)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True, softmax=softmax, amount_agents=len(agent_list))
+			prey_policy = Policy(grid_size, prey=True, softmax=softmax, amount_agents=len(agent_list), agent_name='0')
 			self.prey = Prey(prey_policy, str(0))
 		#Else, store prey
 		else:
 			self.prey = prey
 		#Create predator if none was given
 		if(agent_list==None):
-			predator_policy = Policy(grid_size, prey=False, softmax=softmax, amount_agents=1)
+			predator_policy = Policy(grid_size, prey=False, softmax=softmax, amount_agents=1, agent_name='1')
 			self.agent_list = [self.prey, Predator(predator_policy)]
 		#Else, store the predator
 		else:
@@ -46,22 +46,24 @@ class Game:
 	def until_caught(self, learning_rate, discount_factor, epsilon):
 		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
 		steps = 0
-		caught = 0
+		prey_caught = 0
+		predators_bumped = 0
 		#Runs turns until the prey is caught
-		while(caught == 0):
+		while(prey_caught == 0 and predators_bumped == 0):
 			steps +=1
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
 			prey_caught, predators_bumped = self.turn(state, learning_rate, discount_factor, epsilon, steps)
 			newstate = self.environment.get_state()
+			self.environment.print_grid()
 		
 		print "Caught prey in " + str(steps) + " rounds!\n=========="
-		distance_dict_test = self.predator.get_policy_grid().distance_dict
+		#distance_dict_test = self.predator.get_policy_grid().distance_dict
 		#print self.predator.get_policy_grid().distance_dict
 			
 		#return steps, self.predator.get_policy_grid()
-		return steps,  self.predator.get_policy_grid(), distance_dict_test
+		return steps,  self.agent_list
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -103,55 +105,25 @@ class Game:
 		#Determine rewards for this turn:
 		#If the predators bumped into eachother, they lose:
 		if(predators_bumped):
-			rewards_list = [-10 for x in range(0, len(self.agents_list)-1)]
-			rewards_list.prepend(10)
+			rewards_list = [-10 for x in range(0, len(self.agent_list)-1)]
+			[10]+rewards_list
 		#If the predators avoided eachother, and caught the prey, they win:
 		elif(prey_caught):
-			rewards_list = [10 for x in range(0, len(self.agents_list)-1)]
-			rewards_list.prepend(-10)
+			rewards_list = [10 for x in range(0, len(self.agent_list)-1)]
+			[-10]+rewards_list
+		else:
+			rewards_list = [0 for x in range(0, len(self.agent_list))]
 
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
+		'''
 		if(self.learning_type == 'Q-learning'):
 			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon, self.agents_list, rewards_list)
+		'''
 
-		if(not predators_bumped and not prey_caught):
-			#Print effect of this turn
-			if (same):
-				print 'States: '
-				print 'Predator: ', predator_location[0], ',', predator_location[1]
-				print 'Prey: ', prey_location[0], ',', prey_location[1]
-				self.environment.print_grid()
 		#Return caught or not
 		return prey_caught, predators_bumped
 
-	def turn_prey(self, state, predator_location, epsilon):
-		""" Perform turn for prey """
-		#Retrieve the action for the prey for this state
-		prey_move, action_name = self.prey.get_action(state, epsilon)
-		
-		# The prey can trip 20% of the time
-		if action_name is not "Wait":
-			if random.randint(1, 10) <= 2:
-				prey_move = [0,0]
-				action_name = 'Trip'
-
-		#Turn action into new location
-		new_location = self.get_new_location('prey', prey_move)
-		#Move the prey to the new location
-		self.environment.move_object('prey', new_location)
-		return new_location
-
-	def turn_predator(self, state):
-		""" Perform turn for predator """
-		#Retrieve the action for the predator for this state
-		#If we're using off-policy mc, use completely random action
-		predator_move, action_name = self.predator.get_action(state, epsilon)
-		#Turn the action into new location
-		new_location = self.get_new_location('predator', predator_move)
-		#Move the predator to the new location
-		self.environment.move_object('predator', new_location)
-		return new_location, action_name
 
 	def get_new_location(self, chosen_object, chosen_move):
 		""" Returns new location of an object when performs the chosen move """
@@ -250,13 +222,13 @@ class Game:
 
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
-	for y in range(0, 100):
-		prey_pol = Policy(grid_size, amount_agents=amount_predators+1)
+	for y in range(0, 1):
+		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
 		agent_list = [Prey(prey_pol, str(0))]
 		#Prey has a name 0 and a location 5,5
 		location_dict = {"0": [5,5]}
 		for i in range(0, amount_predators):
-			pred_pol = Policy(grid_size, amount_agents=amount_predators+1)
+			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1))
 			agent_list.append(Predator(pred_pol, str(i+1)))
 			if(i == 0):
 				location = [0,0]
@@ -283,18 +255,11 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 
 			#TODO: Return agentlist and pass to next game
-			current_rounds, policy_grid, distance_dict = game.get_rounds(learning_rate, discount_factor, epsilon)
+			current_rounds, agent_list = game.get_rounds(learning_rate, discount_factor, epsilon)
 			#predator = Predator(policy_grid)
 			#predator = Predator(policy_grid, amount_agents=amount_predators+1, 0)
 			#policy_grid_pred = predator.get_policy_grid()
 			#policy_grid_pred.set_distance_dict(distance_dict)
-
-			print "item 2,2"
-			print policy_grid_pred.distance_dict[(2,2)]
-			print "item 1,1"
-			print policy_grid_pred.distance_dict[(1,1)]
-			print "item 0,1"
-			print policy_grid_pred.distance_dict[(0,1)]
 
 			#print policy_grid.get_policy([4,4,5,5])
 			#print policy_grid.get_policy([5,5,6,6])
