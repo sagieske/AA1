@@ -12,28 +12,29 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 
 class Game:
-	def __init__(self, prey=None, predator=None, predator_location=[0,0], prey_location=[5,5], softmax=False, grid_size=[11,11], learning_type='Q-learning', predator_list=None):
+	def __init__(self, prey=None, predator=None, softmax=False, grid_size=[11,11], learning_type='Q-learning', predator_list=None, location_dict=None):
 		""" Initalize environment and agents """
 		print "Learning algorithm used in this episode: ", learning_type
-		
 		#Store the learning type
 		self.learning_type = learning_type
 		#Instantiate environment object with correct size, predator and prey locations
-		self.environment = Environment(grid_size, predator_location, prey_location)
+		self.environment = Environment(grid_size, location_dict)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True, softmax=softmax)
-			self.prey = Prey(prey_policy, len(predator_list)+1)
+			prey_policy = Policy(grid_size, prey=True, softmax=softmax, amount_agents=len(predator_list)+1)
+			self.prey = Prey(prey_policy)
 		#Else, store prey
 		else:
 			self.prey = prey
 		#Create predator if none was given
 		if(predator_list==None):
-			predator_policy = Policy(grid_size, prey=False, softmax=softmax)
+			predator_policy = Policy(grid_size, prey=False, softmax=softmax, amount_agents=1)
 			self.predator_list = [Predator(predator_policy)]
 		#Else, store the predator
 		else:
 			self.predator_list = predator_list
+
+		self.agents_list = self.predator_list.append(self.prey)
 
 		print "Episode created with grid size ", grid_size, ", predator at location ", predator_location, ", prey at location ", prey_location
 
@@ -73,16 +74,17 @@ class Game:
 		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
 		return [distance_x, distance_y]
 
-	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps, action=None):
+	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
+
+		for agent in self.agents_list:
+			agent_move, agent_action = agent.get_action(state, epsilon)
+			#implement agent names in agents and env
+			new_location = self.get_new_location(agent.get_name, agent_move)
+			self.environment.move_object(agent.get_name, new_location)
 		#Get current prey location
 		prey_location = [old_state[2], old_state[3]]
-		#Move the predator
-		if(action is not None):
-			predator_location = self.get_new_location('predator', action[1])
-			predator_action = action[0]
-		else:
-			predator_location, predator_action = self.turn_predator(old_state)
+		predator_location, predator_action = self.turn_predator(old_state)
 		new_state = [predator_location[0], predator_location[1], prey_location[0], prey_location[1]]
 		#If predator moves into the prey, the prey is caught
 		same = (predator_location == prey_location)
@@ -90,9 +92,6 @@ class Game:
 		#If we're using q-learning, update the q-values using a greedy action in next state
 		if(self.learning_type == 'Q-learning'):
 			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon, predator_list.append(self.prey))
-		#If we're using Sarsa, update the q-values using the policy to select an action in the next state
-		elif(self.learning_type == 'Sarsa'):
-			action = self.predator.sarsa(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon)
 
 		if(not same):
 			#If prey is not caught, move it
@@ -233,13 +232,24 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	""" Run N episodes and compute average """
 	for y in range(0, 100):
 		predator_list = []
+		#Prey has a name 0 and a location 5,5
+		location_dict = {"0": [5,5]}
 		for i in range(0, amount_predators):
 			pred_pol = Policy(grid_size, amount_agents=amount_predators+1)
-			predator_list.append(Predator(pred_pol))
+			predator_list.append(Predator(pred_pol), str(i+1))
+			if(i == 0):
+				location = [0,0]
+			elif(i==1):
+				location = [10,10]
+			elif(i==2):
+				location = [10,0]
+			elif(i==3):
+				location = [0,10]
+			location_dict[str(i+1)] = location
 		total_rounds = 0
 		rounds_list = []
 	#If we're using off-policy MC, initialize game/predator differently to allow separated learn/test runs
-		game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, predator_list=predator_list)
+		game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, predator_list=predator_list, location_dict=location_dict)
 		average_list = []
 		counter=0
 		current_rounds=0
@@ -250,11 +260,13 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			#Initialize episode
 			#If we're using off-policy MC, initialize a learning and then a testing episode
 			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
+
+			#TODO: Return agentlist and pass to next game
 			current_rounds, policy_grid, distance_dict = game.get_rounds(learning_rate, discount_factor, epsilon)
 			#predator = Predator(policy_grid)
-			predator = Predator(policy_grid)
-			policy_grid_pred = predator.get_policy_grid()
-			policy_grid_pred.set_distance_dict(distance_dict)
+			#predator = Predator(policy_grid, amount_agents=amount_predators+1, 0)
+			#policy_grid_pred = predator.get_policy_grid()
+			#policy_grid_pred.set_distance_dict(distance_dict)
 
 			print "item 2,2"
 			print policy_grid_pred.distance_dict[(2,2)]
@@ -268,7 +280,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
 			
 			print "Finished episode: ", x
-			game = Game(grid_size=grid_size, predator=predator, softmax=softmax, learning_type=learning_type, predator_list=predator_list)	
+			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, predator_list=predator_list, location_dict=location_dict)	
 
 			#Add rounds needed in test episode to total_rounds	
 			total_rounds += current_rounds

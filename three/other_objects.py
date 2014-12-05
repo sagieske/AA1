@@ -10,7 +10,7 @@ import helpers
 
 class Environment:
 	""" Grid object that stores agent locations and state """
-	def __init__(self, grid_size, predator_location, prey_location):
+	def __init__(self, grid_size, location_dict):
 		""" Initialize environment of given size and predator, prey locations """
 		self.grid_size = grid_size
 		#Create empty grid
@@ -24,8 +24,7 @@ class Environment:
 		self.grid[i][j] = 'X'
 		self.grid[k][l] = 'O'
 		#Store predator, prey locations
-		self.predator_location = predator_location
-		self.prey_location = prey_location
+		self.location_dict = location_dict
 
 	def print_grid(self):
 		""" Print the environment """
@@ -83,10 +82,7 @@ class Environment:
 	def get_location(self, object_name):
 		""" Retrieve location of agent in grid """
 		#Check which agent, and return its location
-		if(object_name == 'predator'):
-			return self.predator_location
-		elif(object_name == 'prey'):
-			return self.prey_location
+		return self.location_dict[object_name]
 
 class Policy:
 	""" Policy object that stores action values for each state """
@@ -227,7 +223,7 @@ class Policy:
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_action		
 
-	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
+	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon, agents_list):
 
 		# Get current qvalue of movement from current distance state to new distance state
 		current_xy = helpers.xy_distance(old_state, self.grid_size)
