@@ -15,16 +15,15 @@ class Environment:
 		self.grid_size = grid_size
 		#Create empty grid
 		self.grid = [[ ' ' for i in range(0, grid_size[0])] for y in range(0, grid_size[1])]
-		#Get indices of predator, prey locations
-		i = predator_location[0]
-		j = predator_location[1]
-		k = prey_location[0]
-		l = prey_location[1]
-		#Set representations of agents in grid
-		self.grid[i][j] = 'X'
-		self.grid[k][l] = 'O'
 		#Store predator, prey locations
 		self.location_dict = location_dict
+
+		for agent_name in location_dict.keys():
+			location = location_dict[agent_name]
+			if agent_name == "0":
+				self.grid[location[0]][location[1]] = 'O'
+			else:
+				self.grid[location[0]][location[1]] = 'X'
 
 	def print_grid(self):
 		""" Print the environment """
@@ -33,43 +32,27 @@ class Environment:
 			print row
 		print "=========="
 
-	def place_object(self, grid_object, new_location):
+	def place_object(self, agent_name, new_location):
 		""" Place an object at a given location in the environment"""
-		#If predator
-		if(grid_object == 'predator'):
-			#Set 'X' at new location in grid
-			self.grid[new_location[0]][new_location[1]] = 'X'
-			#Update predator location
-			self.predator_location = new_location
-		#If prey
-		elif(grid_object == 'prey'):
-			#Set 'O' at new location in grid
+		if(agent_name=='0'):
+			#Update grid
 			self.grid[new_location[0]][new_location[1]] = 'O'
-			#Update prey location
-			self.prey_location = new_location
-
-	def move_object(self, object_name, new_location):
-		""" Move object from old to new location in the grid """
-		#If predator
-		if(object_name == 'predator'):
-			#Get old location
-			old_location = self.predator_location
-			#Update predator location
-			self.predator_location = new_location
-			#Empty old location in grid
-			self.grid[old_location[0]][old_location[1]] = ' '
-			#Set new location in grid to 'X'
+		else:
 			self.grid[new_location[0]][new_location[1]] = 'X'
-		#If prey
-		elif(object_name == 'prey'):
-			#Get old location
-			old_location = self.prey_location
-			#Update prey location
-			self.prey_location = new_location
-			#Empty old location in grid
-			self.grid[old_location[0]][old_location[1]] = ' '
-			#Set new location in grid to 'O'
-			self.grid[new_location[0]][new_location[1]] = 'O'			
+		#Update location dict
+		self.location_dict[agent_name] = new_location
+
+	def move_object(self, agent_name, new_location):
+		""" Move object from old to new location in the grid """
+		old_location = self.location_dict[agent_name]
+		if(agent_name == '0'):
+			self.grid[new_location[0]][new_location[1]] = '0'
+		else:
+			self.grid[new_location[0]][new_location[1]] = 'X'
+
+		self.grid[old_location[0]][old_location[1]] = ' '
+		#Update location dict
+		self.location_dict[agent_name] = new_location		
 
 	def get_size(self):
 		""" Return environment size"""
@@ -77,7 +60,7 @@ class Environment:
 
 	def get_state(self):
 		""" Return the current state that the environment's in """
-		return [self.predator_location[0], self.predator_location[1], self.prey_location[0], self.prey_location[1]]
+		return self.location_dict
 
 	def get_location(self, object_name):
 		""" Retrieve location of agent in grid """
@@ -284,10 +267,21 @@ class Policy:
 		else:
 			return 0
 
+	def dict_to_state(self, state):
+		state_list = []
+		agent_list = state.keys()
+		agent_list.sort()
+		for location in agent_list:
+			state_list.append(state[location][0])
+			state_list.append(state[location][1])
+		print state_list
+		return state_list
+
 	def pick_action(self, state, action_selection_var): #def pick_action(self, state, epsilon, e_greedy=True, softmax=False):
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
+		state = self.dict_to_state(state)
 		current_xy = helpers.xy_distance(state, self.grid_size)
 
 		dist_to_action = helpers.distance_to_action(state)
