@@ -287,7 +287,7 @@ class Policy:
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
 		new_state = self.dict_to_state(state)
-		dist_to_action = helpers.distance_to_action(state)
+		dist_to_action = helpers.distance_to_action(new_state)
 
 		test_policy = {}
 		#for key, value in self.distance_dict[tuple(current_xy)].iteritems():

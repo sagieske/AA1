@@ -8,6 +8,8 @@ def distance_to_action(current_state):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
+	print "dist to action ", current_state
+	
 	predator_state = [current_state[0],current_state[1]]
 	prey_state = [current_state[2],current_state[3]]
 	grid_size = [11,11]
