@@ -7,6 +7,7 @@ import sys
 import operator
 import random
 import helpers
+import ast
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -71,6 +72,7 @@ class Policy:
 	""" Policy object that stores action values for each state """
 	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
+		print "agenten: ", amount_agents
 		self.agent_name = agent_name
 		#Store prey boolean
 		self.prey = prey
@@ -199,9 +201,9 @@ class Policy:
 		""" Choose an action and turn it into a move """
 		chosen_action = self.pick_action(state, epsilon)
 		#Get the transformation corresponding to the chosen action
-		chosen_move = self.actions[chosen_action]
+		chosen_name, chosen_move = helpers.distance_to_action(state, self.agent_name, ast.literal_eval(chosen_action))
 		#Return the name and transformation of the selected action
-		return chosen_move, chosen_action		
+		return chosen_move, chosen_name		
 
 	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon, agents_list):
 
@@ -271,35 +273,37 @@ class Policy:
 		print "Agent ", self.agent_name, " at location ", state[self.agent_name]
 		for location in agent_list:
 			if(location != self.agent_name):
-				print "Computing distance with agent ", location, " at location ", state[location]
 				state_list = [state[location][0], state[location][1], state[self.agent_name][0], state[self.agent_name][1]]
 				distance_to_other = helpers.xy_distance(state_list, self.grid_size)
-				print "Computed distance: ", distance_to_other
-				state_tuple += (distance_to_other,)
-		print state_tuple
+				state_tuple += (tuple(distance_to_other),)
 		return state_tuple
 
 	def tuple_to_old_state(self, tup):
 		return [tup[0], tup[1]]
+
+	def get_encoded_policy(self, state):
+		return self.party_dict[state]
 
 	def pick_action(self, state, action_selection_var): #t
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
 		new_state = self.dict_to_state(state)
-		dist_to_action = helpers.distance_to_action(new_state)
+		print "statenow: ", state
+		#dist_to_action = helpers.distance_to_action(new_state, self.agent_name, self.location_dict)
+		policy = self.get_encoded_policy(new_state)
 
-		test_policy = {}
+		#test_policy = {}
 		#for key, value in self.distance_dict[tuple(current_xy)].iteritems():
-		for key,value in dist_to_action.iteritems():
-			test_policy[key] = self.distance_dict[tuple(current_xy)][tuple(value[0])]
+		#for key,value in dist_to_action.iteritems():
+		#	test_policy[key] = self.distance_dict[tuple(current_xy)][tuple(value[0])]
 
 		if self.softmax == True and self.prey==False:
 			#policy = self.get_softmax_action_selection(self.get_policy(state), action_selection_var)
-			policy = self.get_softmax_action_selection(test_policy, action_selection_var)
+			policy = self.get_softmax_action_selection(policy, action_selection_var)
 		else:
 			#policy = self.get_e_greedy_policy(self.get_policy(state), action_selection_var)
-			policy = self.get_e_greedy_policy(test_policy, action_selection_var)
+			policy = self.get_e_greedy_policy(policy, action_selection_var)
 
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
@@ -327,10 +331,10 @@ class Policy:
 		for action in policy.iteritems():
 			#If value is max, append to best_action_list
 			if action[1] == max_value:
-				best_action_list.append(action[0])
+				best_action_list.append(str(action[0]))
 			#Otherwise, append to other_action_list
 			else:
-				other_action_list.append(action[0])
+				other_action_list.append(str(action[0]))
 		probability_dict = {}
 		#Compute the probability of the best actions
 		best_actions_probability = (1.0 - epsilon)/len(best_action_list)

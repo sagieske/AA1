@@ -223,11 +223,13 @@ class Game:
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
 	for y in range(0, 1):
+		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
 		agent_list = [Prey(prey_pol, str(0))]
 		#Prey has a name 0 and a location 5,5
 		location_dict = {"0": [5,5]}
 		for i in range(0, amount_predators):
+			print "initializing predator ", i, "..."
 			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1))
 			agent_list.append(Predator(pred_pol, str(i+1)))
 			if(i == 0):
@@ -256,14 +258,6 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 
 			#TODO: Return agentlist and pass to next game
 			current_rounds, agent_list = game.get_rounds(learning_rate, discount_factor, epsilon)
-			#predator = Predator(policy_grid)
-			#predator = Predator(policy_grid, amount_agents=amount_predators+1, 0)
-			#policy_grid_pred = predator.get_policy_grid()
-			#policy_grid_pred.set_distance_dict(distance_dict)
-
-			#print policy_grid.get_policy([4,4,5,5])
-			#print policy_grid.get_policy([5,5,6,6])
-			#If we're using on-policy Monte Carlo, calculate the average using the returns for each state,action pair
 			
 			print "Finished episode: ", x
 			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, agent_list=agent_list, location_dict=location_dict)	
@@ -347,6 +341,7 @@ if __name__ == "__main__":
 
 
 	all_averages = []
+	print "starting game.."
 	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
 	plt.plot(average_list)
 	plt.title("Steps needed versus episode number")

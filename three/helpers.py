@@ -2,29 +2,46 @@ import numpy as np
 import math
 from operator import add,mul, sub
 import sys
+import random
 import time
 
-def distance_to_action(current_state):
+def distance_to_action(state, agent_name, new_distance):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
-	print "dist to action ", current_state
-	
-	predator_state = [current_state[0],current_state[1]]
-	prey_state = [current_state[2],current_state[3]]
+	#predator_state = [current_state[0],current_state[1]]
+	#prey_state = [current_state[2],current_state[3]]
 	grid_size = [11,11]
 	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 
 	dist_to_action = {}
+	#need locations dict:
+	#Create dictionary of allowed actions (deepcopy actions)
+	#For every agent !this agent: compute current distance, compute distance after action
+	#If correct, keep action in allowed. if incorrect, remove from allowed
+	#If all goes well, at the end there is only one action left!
+
 	# Loop through all possible actions to check for xy_distance
 	for name, action in actions.iteritems():
-		# get new state
-		new_state = get_new_location(predator_state,action)
-		# get xydistance
-		action_distance = xy_distance([new_state[0], new_state[1], prey_state[0],prey_state[1]], [11,11])
-		dist_to_action[name] = (action_distance, new_state)
+		#Get the result of doing this action, location-wise
+		new_state = get_new_location(state[agent_name],action)
+		agent_list = state.keys()
+		agent_list.sort()	
 
-	return dist_to_action
+		amount_correct_actions = 0
+		amount_distances = len(new_distance)
+		for agent in agent_list:
+			if agent != agent_name:
+				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [11,11]))
+				
+				if new_distance[int(agent)-1] == action_distance:
+					amount_correct_actions+=1
+					if amount_correct_actions == amount_distances:
+						return name,action
+				else:
+					break
+	random_action = random.choice(actions.keys())
+	return random_action, actions[random_action]
 
 # ONLY NEEDED FOR DEBUG
 def action_to_distance(current_state, action):
