@@ -21,6 +21,7 @@ class Environment:
 
 		for agent_name in location_dict.keys():
 			location = location_dict[agent_name]
+			# Agent 0 is prey, all other agents are the predators
 			if agent_name == "0":
 				self.grid[location[0]][location[1]] = 'O'
 			else:
@@ -46,12 +47,15 @@ class Environment:
 	def move_object(self, agent_name, new_location):
 		""" Move object from old to new location in the grid """
 		old_location = self.location_dict[agent_name]
+		# First overwrite old location
+		self.grid[old_location[0]][old_location[1]] = ' '
+
+		# Then write to new location		
 		if(agent_name == '0'):
 			self.grid[new_location[0]][new_location[1]] = '0'
 		else:
 			self.grid[new_location[0]][new_location[1]] = 'X'
-
-		self.grid[old_location[0]][old_location[1]] = ' '
+		
 		#Update location dict
 		self.location_dict[agent_name] = new_location		
 

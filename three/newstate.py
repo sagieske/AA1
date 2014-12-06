@@ -10,6 +10,7 @@ from agents_new import Predator, Prey
 import helpers
 from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
+import copy
 
 class Game:
 	def __init__(self, prey=None, predator=None, softmax=False, grid_size=[11,11], learning_type='Q-learning', agent_list=None, location_dict=None):
@@ -56,9 +57,15 @@ class Game:
 			#Run turn and see if prey has been caught
 			prey_caught, predators_bumped = self.turn(state, learning_rate, discount_factor, epsilon, steps)
 			newstate = self.environment.get_state()
+			print "updated state: ", newstate
 			self.environment.print_grid()
 		
-		print "Caught prey in " + str(steps) + " rounds!\n=========="
+		if prey_caught == True:
+			print "Caught prey in " + str(steps) + " rounds!\n=========="
+		elif predators_bumped == True:
+			print "Predators bumped into each other in round " + str(steps) + "!\n=========="
+		else:
+			print "Game ended in " + str(steps) + " rounds!\n=========="
 		#distance_dict_test = self.predator.get_policy_grid().distance_dict
 		#print self.predator.get_policy_grid().distance_dict
 			
@@ -77,8 +84,10 @@ class Game:
 	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get each agent's new location and move them within the environment
+		# Copied old_state
+		copy_old_state = copy.deepcopy(old_state)
 		for agent in self.agent_list:
-			agent_move, agent_action = agent.get_action(old_state, epsilon)
+			agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
 			new_location = self.get_new_location(agent.get_name(), agent_move)
 			self.environment.move_object(agent.get_name(), new_location)
 		#Retrieve the new state (location per agent)
