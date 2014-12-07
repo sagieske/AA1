@@ -294,6 +294,7 @@ class Policy:
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
 		new_state = self.dict_to_state(state)
 		print "statenow: ", state
+		print "new state: ", new_state
 		#dist_to_action = helpers.distance_to_action(new_state, self.agent_name, self.location_dict)
 		policy = self.get_encoded_policy(new_state)
 
@@ -311,8 +312,10 @@ class Policy:
 
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
+		print "action_name: ", list(action_name)
 		#Use np.random.choice to select actions according to probabilities
 		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
+		print "action selected: ", choice_index
 		#Return name of action
 		return choice_index	
 
