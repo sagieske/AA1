@@ -12,6 +12,7 @@ from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
+
 class Game:
 	def __init__(self, prey=None, predator=None, softmax=False, grid_size=[11,11], learning_type='Q-learning', agent_list=None, location_dict=None):
 		""" Initalize environment and agents """
@@ -34,6 +35,7 @@ class Game:
 		#Else, store the predator
 		else:
 			self.agent_list = agent_list
+
 
 		print "Episode created with grid size ", grid_size
 
@@ -87,6 +89,12 @@ class Game:
 		copy_old_state = copy.deepcopy(old_state)
 		for agent in self.agent_list:
 			agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
+			# Prey trips with probability of 0.2
+			if agent.get_name() == '0' and random.randint(1, 10) <= 2:
+				agent_move = [0,0]
+				agent_action = 'Trip'
+				print 'THE PREY BROKE ITS LEG AND TRIPPED!'
+				
 			new_location = self.get_new_location(agent.get_name(), agent_move)
 			self.environment.move_object(agent.get_name(), new_location)
 		#Retrieve the new state (location per agent)
@@ -299,6 +307,8 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 
 
 if __name__ == "__main__":
+
+    
 	#Command line arguments
 	parser = argparse.ArgumentParser(description="Run simulation")
 	parser.add_argument('-runs', metavar='How many simulations should be run?', type=int)
