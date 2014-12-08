@@ -8,6 +8,7 @@ import operator
 import random
 import helpers
 import ast
+import pdb
 
 class Environment:
 	""" Grid object that stores agent locations and state """
@@ -76,7 +77,7 @@ class Policy:
 	""" Policy object that stores action values for each state """
 	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
-		print "agenten: ", amount_agents
+		print "number of agents: ", amount_agents
 		self.agent_name = agent_name
 		#Store prey boolean
 		self.prey = prey

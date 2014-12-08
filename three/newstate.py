@@ -228,6 +228,22 @@ class Game:
 		else:
 			return 0.05
 
+def reset_agents(location_dict):
+	#reset agents to original place on board!
+	for agent in location_dict:
+		if agent == "0":
+			location_dict["0"] = [5,5]
+		elif agent == "1":
+			location_dict["1"] = [0,0]
+		elif agent == "2":
+			location_dict["2"] = [10,10]
+		elif agent == "3":
+			location_dict["3"] = [10,0]
+		elif agent == "4":
+			location_dict["4"] = [0,10]
+
+	return location_dict
+
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
 	for y in range(0, 1):
@@ -266,9 +282,9 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 
 			#TODO: Return agentlist and pass to next game
 			current_rounds, agent_list = game.get_rounds(learning_rate, discount_factor, epsilon)
-			
-			print "Finished episode: ", x
-			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, agent_list=agent_list, location_dict=location_dict)	
+
+			location_dict = reset_agents(location_dict)
+			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, agent_list=agent_list, location_dict=location_dict)
 
 			#Add rounds needed in test episode to total_rounds	
 			total_rounds += current_rounds
