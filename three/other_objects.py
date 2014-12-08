@@ -203,9 +203,13 @@ class Policy:
 
 	def get_action(self, state, epsilon=0.0):
 		""" Choose an action and turn it into a move """
-		chosen_action = self.pick_action(state, epsilon)
+		#chosen_action = self.pick_action(state, epsilon)
 		#Get the transformation corresponding to the chosen action
-		chosen_name, chosen_move = helpers.distance_to_action(state, self.agent_name, ast.literal_eval(chosen_action))
+		#chosen_name, chosen_move = helpers.distance_to_action(state, self.agent_name, ast.literal_eval(chosen_action))
+
+
+		chosen_name, chosen_move = self.pick_action(state, epsilon)	
+
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_name		
 
@@ -280,7 +284,7 @@ class Policy:
 				state_list = [state[location][0], state[location][1], state[self.agent_name][0], state[self.agent_name][1]]
 				distance_to_other = helpers.xy_distance(state_list, self.grid_size)
 				state_tuple += (tuple(distance_to_other),)
-		return state_tuple
+		return state_tuple, self.agent_name
 
 	def tuple_to_old_state(self, tup):
 		return [tup[0], tup[1]]
@@ -292,11 +296,13 @@ class Policy:
 		""" Use the probabilities in the policy to pick a move """
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
-		new_state = self.dict_to_state(state)
+		new_state, agent_name = self.dict_to_state(state)
 		print "statenow: ", state
 		print "new state: ", new_state
 		#dist_to_action = helpers.distance_to_action(new_state, self.agent_name, self.location_dict)
 		policy = self.get_encoded_policy(new_state)
+
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(state), agent_name, policy)
 
 		#test_policy = {}
 		#for key, value in self.distance_dict[tuple(current_xy)].iteritems():
@@ -312,12 +318,15 @@ class Policy:
 
 		#Zip the policy into a tuple of names, and a tuple of values
 		action_name, policy = zip(*policy.items())
-		print "action_name: ", list(action_name)
+#		print "action_name: ", list(action_name)
 		#Use np.random.choice to select actions according to probabilities
 		choice_index = np.random.choice(list(action_name), 1, p=list(policy))[0]
-		print "action selected: ", choice_index
-		#Return name of action
-		return choice_index	
+		choice_index = ast.literal_eval(choice_index)
+		#Get the action name
+		action_name = policy_with_action.get(choice_index, None)
+
+		#Return name of action and corresponding transformation
+		return action_name, self.actions[action_name]	
 
 	def get_e_greedy_policy(self, policy, epsilon=0.0):
 		"""
