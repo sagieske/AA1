@@ -228,39 +228,46 @@ class Policy:
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
 		#Get current Q-value
 		current_q = policy[new_state]
-		
+		#Get reward
 		reward = reward_list[int(agent_name)]
-
-		#Get the max action for the new state
 		softmax_backup = self.softmax
 		self.softmax = False
+		#Get the max action for the new state
 		new_move, new_max_action = self.get_action(s_prime, 0.0)
 		
 		self.softmax = softmax_backup
+
 		#Get the q-value for the new state and its max action
 		#new_q_value = self.get_policy(new_state)[new_max_action]
 		prime_agent_location = s_prime[agent_name]
 		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
+		print "old: ", prime_agent_location
+		print "max: ", max_prime_agent_location
 
 		new_state_dict = copy.deepcopy(s_prime)
-		new_state_dict[agent_name] = max_prime_agent_location
-		max_state = self.dict_to_state(new_state_dict)[0]
+		print "oldstdict ", s, " distance: ", new_state
+		
+		s_prime_distance = self.dict_to_state(s_prime)[0]
+		print "newstdict ", s_prime, " distance ", s_prime_distance
+
+		s_prime[agent_name] = max_prime_agent_location
 		print  "current: ", new_state
-		print "maxxx: ", max_state
-		max_encoded = max_state
-		max_policy = self.get_encoded_policy(max_encoded)
-		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(new_state_dict), agent_name, max_policy)
-		max_q = max_policy[max_encoded]
+		#print "maxxx: ", max_state
+		max_policy = self.get_encoded_policy(s_prime_distance)
+		print "max pol: ", max_policy
+		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
+		max_q = max_policy[s_prime_distance]
 
 		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
 		# Update in distance dictionary
 		print "updated: ", updated_q_value
 		print "new: ", new_state
-		print "max: ", max_state
-		print self.party_dict[new_state][max_state]
-		self.party_dict[new_state][max_state] = updated_q_value
-		print "found: ", self.party_dict[new_state][max_state]
-		return self.party_dict[new_state][max_state]
+		print self.party_dict[new_state]
+		print self.party_dict[new_state][s_prime_distance]
+		self.party_dict[new_state][s_prime_distance] = updated_q_value
+
+		print "found: ", self.party_dict[new_state][s_prime_distance]
+		return self.party_dict[new_state][s_prime_distance]
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
