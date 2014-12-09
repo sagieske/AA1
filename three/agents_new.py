@@ -42,8 +42,8 @@ class Agent(object):
 		""" Return the names of the actions for a state """
 		return self.get_policy(state).keys() 		
 
-	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
-		self.policy_grid.q_learning(action, old_state, new_state, learning_rate, discount_factor, epsilon)
+	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+		self.policy_grid.q_learning(action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
 
 	def sarsa(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
 		self.policy_grid.sarsa(action, old_state, new_state, learning_rate, discount_factor, epsilon)

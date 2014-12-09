@@ -214,8 +214,18 @@ class Policy:
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_name		
 
-	def q_learning(self, action, old_state, new_state, learning_rate, discount_factor, epsilon, agents_list):
-
+	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+		new_state, agent_name = self.dict_to_state(s)
+		print "Learning agent: ", agent_name
+		print "Old state: ", s
+		print "Action taken: ", a
+		print "New state: ", s_prime
+		print "Rewards: ", reward_list
+		print "Agents: ", agent_list
+		print "State as distance: ", new_state
+		policy = self.get_encoded_policy(new_state)
+		#policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(new_state), int(agent_name), policy)
+		print "Policy for s: ", policy
 		# Get current qvalue of movement from current distance state to new distance state
 		current_xy = helpers.xy_distance(old_state, self.grid_size)
 		new_xy = helpers.xy_distance(new_state,  self.grid_size)

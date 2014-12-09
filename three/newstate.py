@@ -136,9 +136,12 @@ class Game:
 		#If we're using q-learning, update the q-values using a greedy action in next state
 		
 		if(self.learning_type == 'Q-learning'):
+			s = copy_old_state
+			s_prime = self.environment.get_state()
 			for agent in self.agent_list:
+				a = taken_actions[agent.get_name()]
 				print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
-				agent.q_learning(taken_actions[agent.get_name()], old_state, new_state, learning_rate, discount_factor, epsilon, self.agents_list, rewards_list)
+				agent.q_learning(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
 		
 
 		#Return caught or not
