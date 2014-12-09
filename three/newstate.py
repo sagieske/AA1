@@ -42,8 +42,8 @@ class Game:
 	def get_rounds(self, learning_rate, discount_factor, epsilon):
 		""" Return rounds played """
 		#Play rounds until the prey is caught, and return how many were needed
-		self.rounds = self.until_caught(learning_rate, discount_factor, epsilon)
-		return self.rounds
+		rounds, caught, bumped = self.until_caught(learning_rate, discount_factor, epsilon)
+		return rounds, self.agent_list, caught, bumped
 
 	def until_caught(self, learning_rate, discount_factor, epsilon):
 		""" Repeat turns until prey is caught. Returns number of steps until game stopped """
@@ -58,8 +58,8 @@ class Game:
 			#Run turn and see if prey has been caught
 			prey_caught, predators_bumped = self.turn(state, learning_rate, discount_factor, epsilon, steps)
 			newstate = self.environment.get_state()
-			print "updated state: ", newstate
-			self.environment.print_grid()
+			#print "updated state: ", newstate
+			#self.environment.print_grid()
 		
 		if prey_caught == True:
 			print "Caught prey in " + str(steps) + " rounds!\n=========="
@@ -71,7 +71,7 @@ class Game:
 		#print self.predator.get_policy_grid().distance_dict
 			
 		#return steps, self.predator.get_policy_grid()
-		return steps,  self.agent_list
+		return steps, prey_caught, predators_bumped
 
 	def relative_xy(self, location1, location2):
 		""" Get relative(shortest) distance between two locations using the toroidal property"""
@@ -124,11 +124,11 @@ class Game:
 		#If the predators bumped into eachother, they lose:
 		if(predators_bumped):
 			rewards_list = [-10 for x in range(0, len(self.agent_list)-1)]
-			[10]+rewards_list
+			rewards_list = [10]+rewards_list
 		#If the predators avoided eachother, and caught the prey, they win:
 		elif(prey_caught):
 			rewards_list = [10 for x in range(0, len(self.agent_list)-1)]
-			[-10]+rewards_list
+			rewards_list = [-10]+rewards_list
 		else:
 			rewards_list = [0 for x in range(0, len(self.agent_list))]
 
@@ -140,8 +140,9 @@ class Game:
 			s_prime = self.environment.get_state()
 			for agent in self.agent_list:
 				a = taken_actions[agent.get_name()]
-				print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
+				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
+				print "pol: ", agent.policy_grid.return_state_policy(s)
 		
 
 		#Return caught or not
@@ -261,6 +262,9 @@ def reset_agents(location_dict):
 
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
 	""" Run N episodes and compute average """
+	lose_y_list = []
+	win_y_list = []
+	y_list = []
 	for y in range(0, 1):
 		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
@@ -288,7 +292,12 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		counter=0
 		current_rounds=0
 	
-		y_list = []
+
+
+		cumulative_losses = 0
+		cumulative_wins = 0
+		lose_list = []
+		win_list = []
 		for x in range(0, N):
 			print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
@@ -296,7 +305,15 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 
 			#TODO: Return agentlist and pass to next game
-			current_rounds, agent_list = game.get_rounds(learning_rate, discount_factor, epsilon)
+			current_rounds, agent_list, caught, bumped = game.get_rounds(learning_rate, discount_factor, epsilon)
+			print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
+			print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
+			if(bumped):
+				cumulative_losses +=1
+			elif(caught):
+				cumulative_wins +=1
+			win_list.append(cumulative_wins)
+			lose_list.append(cumulative_losses)
 
 			location_dict = reset_agents(location_dict)
 			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, agent_list=agent_list, location_dict=location_dict)
@@ -305,17 +322,41 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			total_rounds += current_rounds
 			#Add rounds needed in this episode to the list of rounds
 			rounds_list.append(current_rounds)
+		lose_y_list.append(lose_list)
+		win_y_list.append(win_list)
 		y_list.append(rounds_list)
 		#Smooth graph
-	average_rounds = []
-	for number in range(0, len(rounds_list)):
+	av_wins = []
+	av_losses = []
+	av_rounds = []
+	for number in range(0, len(lose_list)):
+		yl_number = 0
+		for yl in lose_y_list:
+			yl_number += yl[number]
+		av_losses.append(yl_number)
+
+	for number in range(0, len(win_list)):
+		yl_number = 0
+		for yl in win_y_list:
+			yl_number += yl[number]
+		av_wins.append(yl_number)		
+
+	for number in range(0, len(y_list)):
 		yl_number = 0
 		for yl in y_list:
 			yl_number += yl[number]
-		average_rounds.append(yl_number)
+		av_rounds.append(yl_number)			
 
-	print "List of steps needed per episode: ", rounds_list
-	print "List of smoothed averages: ", average_rounds
+
+	#print "List of steps needed per episode: ", rounds_list
+
+	#print "List of smoothed averages: ", average_rounds
+	if(amount_predators>1):
+		print "Av losses: ", av_losses
+		print "Av wins: ", av_wins
+	else:
+		print " rounds: ", rounds_list
+
 	#Compute average number of rounds needed
 	#average_rounds = float(average_rounds)/N
 	#Compute list of variances
@@ -326,7 +367,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	#standard_deviation = math.sqrt(variance)
 	#print "Average rounds needed over ", N, " episodes: ", average_rounds
 	#print "Standard deviation: ", standard_deviation	
-	return average_rounds
+	return av_wins, av_losses, rounds_list
 
 
 if __name__ == "__main__":
@@ -382,9 +423,15 @@ if __name__ == "__main__":
 
 
 	all_averages = []
+	amount_predators = 1
 	print "starting game.."
-	average_list = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
-	plt.plot(average_list)
+	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
+	if(amount_predators == 1):
+		plt.plot(av_rounds, label="rounds")
+	else:
+		plt.plot(av_wins, label="wins")
+		plt.plot(av_losses, label="losses")
+	plt.legend()
 	plt.title("Steps needed versus episode number")
 	plt.ylabel('Steps needed before catch')
 	plt.xlabel('Number of steps')

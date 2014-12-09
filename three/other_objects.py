@@ -125,7 +125,7 @@ class Policy:
 					if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] == self.grid_size[0]:
 						continue
 					# Initialize as 15
-					possible_states_dict[tuple(possible_state)] = 15
+					possible_states_dict[tuple(possible_state)] = 15.0
 				# Initialize total distance dictionary
 				self.distance_dict[(i,j)] = possible_states_dict
 
@@ -166,7 +166,7 @@ class Policy:
 				possible_new_state_combos = list(itertools.product(*possible_variations))
 				# Initialize every item to 15
 				for item in possible_new_state_combos:
-					inner_dict[item] = 15
+					inner_dict[item] = 15.0
 				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
 
@@ -214,59 +214,49 @@ class Policy:
 		#Return the name and transformation of the selected action
 		return chosen_move, chosen_name		
 
+	def return_state_policy(self,s):
+		new_state, agent_name = self.dict_to_state(s)
+		policy = self.get_encoded_policy(new_state)
+		print "pollll: ", policy
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		print "policy: ", policy
+		return policy
+
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
 		new_state, agent_name = self.dict_to_state(s)
-		print "Learning agent: ", agent_name
-		print "Old state: ", s
-		print "Action taken: ", a
-		print "New state: ", s_prime
-		print "Rewards: ", reward_list
-		print "Agents: ", agent_list
-		print "State as distance: ", new_state
+		#Get policy encoded
 		policy = self.get_encoded_policy(new_state)
-		#policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(new_state), int(agent_name), policy)
-		print "Policy for s: ", policy
-		# Get current qvalue of movement from current distance state to new distance state
-		current_xy = helpers.xy_distance(old_state, self.grid_size)
-		new_xy = helpers.xy_distance(new_state,  self.grid_size)
-		test_current_q_value = self.distance_dict[tuple(current_xy)][tuple(new_xy)]
-		#Get the q-value of the current state, action pair
-		#current_q_value = self.get_policy(old_state)[action]
+		#Get reachable states from this state
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		#Get current Q-value
+		current_q = policy[new_state]
+		
+		reward = reward_list[int(agent_name)]
 
-		#Get the reward for the new state (10 if caught, 0 otherwise)
-		reward = self.reward(new_state)
 		#Get the max action for the new state
 		softmax_backup = self.softmax
 		self.softmax = False
-		new_move, new_max_action = self.get_action(new_state, 0.0)
+		new_move, new_max_action = self.get_action(s_prime, 0.0)
 		self.softmax = softmax_backup
 		#Get the q-value for the new state and its max action
 		#new_q_value = self.get_policy(new_state)[new_max_action]
+		prime_agent_location = s_prime[agent_name]
+		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
 
+		new_state_dict = copy.deepcopy(s_prime)
+		new_state_dict[agent_name] = max_prime_agent_location
+		max_state = self.dict_to_state(new_state_dict)
+		max_encoded = max_state[0]
+		max_policy = self.get_encoded_policy(max_encoded)
+		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(new_state_dict), agent_name, max_policy)
+		max_q = max_policy[max_encoded]
 
-		# Get new location using the maximal action in the new state
-		max_location_new_state = self.get_new_location([new_state[0], new_state[1]], new_move)
-		# Get its distance state
-		max_xy_new_state = helpers.xy_distance([max_location_new_state[0], max_location_new_state[1], new_state[2], new_state[3]],  self.grid_size)
-
-		# Get the q_value of this max distance state from the new distance state
-		test_new_q_value = self.distance_dict[tuple(new_xy)][tuple(max_xy_new_state)]
-		#new_xy = helpers.xy_distance(new_state,  self.grid_size)
-
-
-		#discounted_next = discount_factor*new_q_value
-		#difference_q = discounted_next - current_q_value
-		#Update the q_value for the current state by adding reward + discounted next q-value - current q-value, discounted by learning rate
-		#updated_q_value = current_q_value + learning_rate * (reward + discount_factor * new_q_value - current_q_value)
-		#Update the q-value for the old state, action pair
-		#self.get_policy(old_state)[action] = updated_q_value
-
-
-		test_updated_q_value = test_current_q_value + learning_rate * (reward + discount_factor * test_new_q_value - test_current_q_value)
-
+		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
 		# Update in distance dictionary
-		self.distance_dict[tuple(current_xy)][tuple(new_xy)] = test_updated_q_value
-
+		print "updated: ", updated_q_value
+		self.party_dict[new_state][max_state] = updated_q_value
+		print "found: ", self.party_dict[new_state][max_state]
+		return self.party_dict[new_state][max_state]
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
@@ -289,7 +279,7 @@ class Policy:
 		agent_list = state.keys()
 		agent_list.sort()
 		state_tuple = ()
-		print "Agent ", self.agent_name, " at location ", state[self.agent_name]
+		
 		for location in agent_list:
 			if(location != self.agent_name):
 				state_list = [state[location][0], state[location][1], state[self.agent_name][0], state[self.agent_name][1]]
@@ -308,8 +298,6 @@ class Policy:
 		#Retrieve the policy for the current state using e_greedy or softmax
 		# Note: action_selection_var is epsilon for e-greedy and temperature for softmax!
 		new_state, agent_name = self.dict_to_state(state)
-		print "statenow: ", state
-		print "new state: ", new_state
 		#dist_to_action = helpers.distance_to_action(new_state, self.agent_name, self.location_dict)
 		policy = self.get_encoded_policy(new_state)
 
@@ -319,7 +307,6 @@ class Policy:
 		#for key, value in self.distance_dict[tuple(current_xy)].iteritems():
 		#for key,value in dist_to_action.iteritems():
 		#	test_policy[key] = self.distance_dict[tuple(current_xy)][tuple(value[0])]
-
 		if self.softmax == True and self.prey==False:
 			#policy = self.get_softmax_action_selection(self.get_policy(state), action_selection_var)
 			policy = self.get_softmax_action_selection(policy, action_selection_var)
