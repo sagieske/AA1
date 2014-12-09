@@ -87,12 +87,14 @@ class Game:
 		#Get each agent's new location and move them within the environment
 		# Copied old_state
 		copy_old_state = copy.deepcopy(old_state)
+		taken_actions = {}
 		for agent in self.agent_list:
 			agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
+			#Store the taken action, important for q-learning
+			taken_actions[agent.get_name()] = agent_action
 			# Prey trips with probability of 0.2
 			if agent.get_name() == '0' and random.randint(1, 10) <= 2:
 				agent_move = [0,0]
-				agent_action = 'Trip'
 				print 'THE PREY BROKE ITS LEG AND TRIPPED!'
 				
 			new_location = self.get_new_location(agent.get_name(), agent_move)
@@ -132,10 +134,12 @@ class Game:
 
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
-		'''
+		
 		if(self.learning_type == 'Q-learning'):
-			self.predator.q_learning(predator_action, old_state, new_state, learning_rate, discount_factor, epsilon, self.agents_list, rewards_list)
-		'''
+			for agent in self.agent_list:
+				print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
+				agent.q_learning(taken_actions[agent.get_name()], old_state, new_state, learning_rate, discount_factor, epsilon, self.agents_list, rewards_list)
+		
 
 		#Return caught or not
 		return prey_caught, predators_bumped
