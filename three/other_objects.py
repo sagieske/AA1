@@ -217,9 +217,7 @@ class Policy:
 	def return_state_policy(self,s):
 		new_state, agent_name = self.dict_to_state(s)
 		policy = self.get_encoded_policy(new_state)
-		print "pollll: ", policy
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
-		print "policy: ", policy
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
@@ -237,6 +235,7 @@ class Policy:
 		softmax_backup = self.softmax
 		self.softmax = False
 		new_move, new_max_action = self.get_action(s_prime, 0.0)
+		
 		self.softmax = softmax_backup
 		#Get the q-value for the new state and its max action
 		#new_q_value = self.get_policy(new_state)[new_max_action]
@@ -245,8 +244,10 @@ class Policy:
 
 		new_state_dict = copy.deepcopy(s_prime)
 		new_state_dict[agent_name] = max_prime_agent_location
-		max_state = self.dict_to_state(new_state_dict)
-		max_encoded = max_state[0]
+		max_state = self.dict_to_state(new_state_dict)[0]
+		print  "current: ", new_state
+		print "maxxx: ", max_state
+		max_encoded = max_state
 		max_policy = self.get_encoded_policy(max_encoded)
 		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(new_state_dict), agent_name, max_policy)
 		max_q = max_policy[max_encoded]
@@ -254,6 +255,9 @@ class Policy:
 		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
 		# Update in distance dictionary
 		print "updated: ", updated_q_value
+		print "new: ", new_state
+		print "max: ", max_state
+		print self.party_dict[new_state][max_state]
 		self.party_dict[new_state][max_state] = updated_q_value
 		print "found: ", self.party_dict[new_state][max_state]
 		return self.party_dict[new_state][max_state]

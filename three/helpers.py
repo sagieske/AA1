@@ -32,6 +32,8 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 		
 		dist_tuple = tuple(local_list)
 		value = policy[dist_tuple]
+		print "selected dist: ", dist_tuple
+		print "selected q: ", value
 		action_q_values.update({dist_tuple:value})
 		distance_action.update({dist_tuple:name})
 	return action_q_values, distance_action
