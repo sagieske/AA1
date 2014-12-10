@@ -260,12 +260,12 @@ def reset_agents(location_dict):
 
 	return location_dict
 
-def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning'):
+def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning', experiments=5):
 	""" Run N episodes and compute average """
 	lose_y_list = []
 	win_y_list = []
 	y_list = []
-	for y in range(0, 5):
+	for y in range(0, experiments):
 		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
 		agent_list = [Prey(prey_pol, str(0))]
@@ -299,19 +299,21 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		lose_list = []
 		win_list = []
 		for x in range(0, N):
-			print "Rounds needed to catch prey: ", current_rounds
+			#print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
 			#If we're using off-policy MC, initialize a learning and then a testing episode
 			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
 
 			#TODO: Return agentlist and pass to next game
 			current_rounds, agent_list, caught, bumped = game.get_rounds(learning_rate, discount_factor, epsilon)
-			print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
-			print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
+			#print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
+			#print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
 			if(bumped):
 				cumulative_losses +=1
+				print "Rounds needed before predators bumped: ", current_rounds
 			elif(caught):
 				cumulative_wins +=1
+				print "Rounds needed before prey was caught: ", current_rounds
 			win_list.append(cumulative_wins)
 			lose_list.append(cumulative_losses)
 
@@ -387,6 +389,7 @@ if __name__ == "__main__":
 	parser.add_argument('-learning_type', metavar='Specify learning type', type=str)
 	parser.add_argument('-softmax', metavar='Use softmax', type=str)
 	parser.add_argument('-predators', metavar='Specify number of predators', type=int)
+	parser.add_argument('-experiments', metavar='Average over number of experiments', type=int)
 	args = parser.parse_args()
 
 	#Default parameter values
@@ -398,10 +401,13 @@ if __name__ == "__main__":
 	softmax = False	
 	learning_type = "Q-learning"
 	amount_predators = 2
+	Y = 5
 
 	#Command line parsing
 	if(vars(args)['runs'] is not None):
 		N = vars(args)['runs']
+	if(vars(args)['experiments'] is not None):
+		Y = vars(args)['experiments']
 	if(vars(args)['learning_type'] is not None):
 		learning_type = vars(args)['learning_type']
 	if(vars(args)['runs'] is not None):
@@ -426,9 +432,9 @@ if __name__ == "__main__":
 
 
 	all_averages = []
-	amount_predators = 2
+	#amount_predators = 2
 	print "starting game.."
-	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
+	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
 	else:
