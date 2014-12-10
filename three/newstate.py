@@ -8,7 +8,7 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from Iva_breaking_other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
@@ -23,14 +23,14 @@ class Game:
 		self.environment = Environment(grid_size, location_dict)
 		#Create prey if none was given
 		if(prey==None):
-			prey_policy = Policy(grid_size, prey=True, softmax=softmax, amount_agents=len(agent_list), agent_name='0')
+			prey_policy = Policy(grid_size, prey=True, softmax=softmax, amount_agents=len(agent_list), agent_name='0', learning_type=learning_type)
 			self.prey = Prey(prey_policy, str(0))
 		#Else, store prey
 		else:
 			self.prey = prey
 		#Create predator if none was given
 		if(agent_list==None):
-			predator_policy = Policy(grid_size, prey=False, softmax=softmax, amount_agents=1, agent_name='1')
+			predator_policy = Policy(grid_size, prey=False, softmax=softmax, amount_agents=1, agent_name='1', learning_type=learning_type)
 			self.agent_list = [self.prey, Predator(predator_policy)]
 		#Else, store the predator
 		else:
@@ -262,18 +262,19 @@ def reset_agents(location_dict):
 
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning', experiments=5):
 	""" Run N episodes and compute average """
+	print 'Run Episodes: learning_type:', learning_type
 	lose_y_list = []
 	win_y_list = []
 	y_list = []
 	for y in range(0, experiments):
 		print "initializing prey..."
-		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
+		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0', learning_type=learning_type)
 		agent_list = [Prey(prey_pol, str(0))]
 		#Prey has a name 0 and a location 5,5
 		location_dict = {"0": [5,5]}
 		for i in range(0, amount_predators):
 			print "initializing predator ", i, "..."
-			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1))
+			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1), learning_type=learning_type)
 			agent_list.append(Predator(pred_pol, str(i+1)))
 			if(i == 0):
 				location = [0,0]
@@ -399,8 +400,8 @@ if __name__ == "__main__":
 	epsilon = 0.1
 	grid_size = 11
 	softmax = False	
-	learning_type = "Q-learning"
-	amount_predators = 2
+	learning_type = "Minimax"
+	amount_predators = 1
 	Y = 5
 
 	#Command line parsing

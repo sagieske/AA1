@@ -76,6 +76,7 @@ class Environment:
 class Policy:
 	""" Policy object that stores action values for each state """
 	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None, learning_type='Q-learning'):
+		print 'Policy: learning_type:', learning_type
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		print "number of agents: ", amount_agents
 		self.agent_name = agent_name
@@ -135,7 +136,17 @@ class Policy:
 			self.distance_dict = {}
 			for i,j in distances:
 				possible_states_dict = {}
-				new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+				
+				if learning_type == 'Minimax':
+				        new_possible_states = [ [i-2,j],
+             			                                [i-1, j-1], [i-1,j], [i-1, j+1],
+             			                                [i, j-2], [i, j-1], [i,j], [i, j+1], [i, j+2],
+             			                                [i+1, j-1], [i+1, j], [i+1, j+1],
+              			                                [i+2, j]]
+             			else:
+             			        new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+             	
+				
 				for possible_state in new_possible_states:
 					# impossible states
 					if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] == self.grid_size[0]:
@@ -144,7 +155,7 @@ class Policy:
 					possible_states_dict[tuple(possible_state)] = 15.0
 				# Initialize total distance dictionary
 				self.distance_dict[(i,j)] = possible_states_dict
-
+                        #print self.distance_dict[(1,1)]
 	
 				
 			#Create all possible combination for distances
@@ -166,8 +177,20 @@ class Policy:
 				for index in range(0, len(tuple_array)):
 					i,j = tuple_array[index]
 					distance_changes = []
-					# get possible states
-					new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+					# get possible states  
+					if learning_type == 'Minimax':
+				                print 'Possible states:'
+             			                new_possible_states = [ [i-2,j],
+             			                                        [i-1, j-1], [i-1,j], [i-1, j+1],
+             			                                        [i, j-2], [i, j-1], [i,j], [i, j+1], [i, j+2],
+             			                                        [i+1, j-1], [i+1, j], [i+1, j+1],
+             			                                        [i+2, j]]
+             			        else:
+             			                new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
+             	
+				
+					
+					
 					for possible_state in new_possible_states:
 						# impossible distance
 						if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] ==self.grid_size[0]:
@@ -185,7 +208,11 @@ class Policy:
 					inner_dict[item] = 15.0
 				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
-
+			for key, value in self.party_dict.iteritems():
+			     print 'key:', key
+			     print '-', value
+			     print "--------------"
+                        sys.exit()
 			#for key, value in self.party_dict.iteritems():
 			#	print "key:", key
 			#	print "possible new states: ", value
@@ -314,7 +341,7 @@ class Policy:
 		return self.party_dict[new_state][new_distances_to_agents]
 		
 		
-	def Minimax_q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+	def Minimax_q_learning(self, a, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
 
 		new_state, agent_name = self.dict_to_state(s)
 
