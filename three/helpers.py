@@ -11,9 +11,9 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	action_q_values = {}
 	distance_action = {}
 
-	print "\n\n\nstate: ", state
-	print "\npolicy: ", policy
-	print "agent : ", agent_name, "\n\n"
+	#print "\n\n\nstate: ", state
+	#print "\npolicy: ", policy
+	#print "agent : ", agent_name, "\n\n"
 	#need locations dict:
 	#Create dictionary of allowed actions (deepcopy actions)
 	#For every agent !this agent: compute current distance, compute distance after action
@@ -21,29 +21,42 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	#If all goes well, at the end there is only one action left!
 
 	# Loop through all possible actions to check for xy_distance
-
+	#print "POLICY:", policy
 	for name, action in actions.iteritems():
 		#Get the result of doing this action, location-wise
 		new_state = get_new_location(state[agent_name], action)
-		print "old_state ", state[agent_name],  "new_state: ", new_state, " action: ", action
-		agent_list = state.keys()
-		agent_list.sort()
-		local_list = []
-
-		for agent in agent_list:
-			if agent != agent_name:
-				print [new_state[0], new_state[1], state[agent][0], state[agent][1]]
-				dist = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [11,11]))
-				print "new dist: ", dist
-				local_list.append(dist)
+		#print "state: %s, action %s, newstate: %s" %(str(state[agent_name]), str(action), str(new_state))
 		
-		dist_tuple = tuple(local_list)
+		# Get all distances to other agents using this new state
+		dist_tuple  = get_all_distances_to_agents(agent_name, new_state, state)
+
 		value = policy[dist_tuple]
-		print "selected dist: ", dist_tuple
-		print "selected q: ", value
+		#print "selected dist: ", dist_tuple
+		#print "selected q: ", value
 		action_q_values.update({dist_tuple:value})
 		distance_action.update({dist_tuple:name})
 	return action_q_values, distance_action
+
+def get_all_distances_to_agents(agent_name, agent_new_state, state_dict):
+	"""
+	Calculate the distance to all other agents using the new state of the current agent(=agent_name)
+	Return tuple of size (nr_agents -1) each is a tuple of the relative distance between an agent and the current agent
+	"""
+	# Get all agents
+	agent_list = state_dict.keys()
+	# Sort to always handle agents n same order
+	agent_list.sort()
+	local_list = []
+	# For every other agent calculate distance
+	for agent in agent_list:
+		# Only calculate for other agents
+		if agent != agent_name:
+			dist = tuple(xy_distance([agent_new_state[0], agent_new_state[1], state_dict[agent][0], state_dict[agent][1]], [11,11]))
+			local_list.append(dist)
+		
+	# Convert to tuple
+	dist_tuple = tuple(local_list)
+	return dist_tuple
 
 #SHOULD BE OBSOLETE
 def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,11]):
