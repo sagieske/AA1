@@ -41,9 +41,22 @@
 \section{Theory}
 
 \subsection{Independent Q-learning}
+In independent Q-learning, all the agents independently use Q-learning to maximize their expected reward. 
 
 \subsection{Minmax Q-Learning} 
-
+In minimax Q-learning, each agent uses update rule \ref{ref:minimaxrule}
+\begin{mdframed}
+\begin{align}
+Q(s,a,o) := (1-\alpha) Q(s,a,o) + \alpha * (R + \gamma V(s'))
+\end{align}
+\label{ref:minimaxrule}
+\end{mdframed}
+Then, linear programming is used to find a policy so that
+\begin{mdframed}
+\begin{align}
+\pi(s,) := \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}
+\end{align}
+\end{mdframed}
 % Update which one is the `other leanring'
 \subsection{Other learning}
 
