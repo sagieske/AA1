@@ -41,7 +41,38 @@
 \section{Theory}
 
 \subsection{Independent Q-learning}
-In independent Q-learning, all the agents independently use Q-learning to maximize their expected reward. 
+In independent Q-learning, all the agents independently use Q-learning to maximize their expected reward.  \\ 
+
+\noindent Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} itself is a temporal difference method that uses the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
+
+\begin{mdframed}
+\begin{align}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma \underset{a}{\text{max}} Q(s_{t+1},a) - Q(s_t,a_t)\right]\label{eq:qupdate}
+\end{align}
+\end{mdframed}
+
+
+\begin{center} 
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize Q(s,a) arbitrarily \\
+Repeat (for each episode):\\
+\tab Initialize s \\
+\tab Repeat (for each step of episode):\\
+\dtab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
+\dtab Take action a, observe r, s'\\
+\dtab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha [ r + \gamma \max_a' Q(s', a') - Q(s, a) ]$  \\
+\dtab s $\leftarrow$ s'; \\
+\tab until s is terminal\\
+\end{algorithm}
+\end{mdframed}
+\captionof{figure}{The algorithm for one-step Q-learning\cite{bartosutton}}
+\label{alg:qlearning}
+\end{center}
+
+
+
+
 
 \subsection{Minmax Q-Learning} 
 In minimax Q-learning, each agent uses update rule \ref{ref:minimaxrule}
@@ -63,6 +94,12 @@ Then, linear programming is used to find a policy so that
 
 
 \section{Implementation}
+
+\subsection{New state space}
+
+
+\subsection{Files}
+
 The implementation consists of the following files:
 \begin{description}
 	\item[Agents\_new] \hfill \\ 
