@@ -208,11 +208,11 @@ class Policy:
 					inner_dict[item] = 15.0
 				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
-			for key, value in self.party_dict.iteritems():
-			     print 'key:', key
-			     print '-', value
-			     print "--------------"
-                        sys.exit()
+			#for key, value in self.party_dict.iteritems():
+			#     print 'key:', key
+			#     print '-', value
+			#     print "--------------"
+                        #sys.exit()
 			#for key, value in self.party_dict.iteritems():
 			#	print "key:", key
 			#	print "possible new states: ", value

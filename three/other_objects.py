@@ -75,7 +75,7 @@ class Environment:
 
 class Policy:
 	""" Policy object that stores action values for each state """
-	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None):
+	def __init__(self, grid_size, policy_grid=None, prey=False, softmax=False, amount_agents=2, agent_name=None, learning_type='Q-learning'):
 		""" Initialize policy object of certain grid_size, with optional initial policy_grid and True for a prey """
 		print "number of agents: ", amount_agents
 		self.agent_name = agent_name
