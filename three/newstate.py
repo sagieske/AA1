@@ -95,7 +95,7 @@ class Game:
 			# Prey trips with probability of 0.2
 			if agent.get_name() == '0' and random.randint(1, 10) <= 2:
 				agent_move = [0,0]
-				print 'THE PREY BROKE ITS LEG AND TRIPPED!'
+				#print 'THE PREY BROKE ITS LEG AND TRIPPED!'
 				
 			new_location = self.get_new_location(agent.get_name(), agent_move)
 			self.environment.move_object(agent.get_name(), new_location)
@@ -265,7 +265,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	lose_y_list = []
 	win_y_list = []
 	y_list = []
-	for y in range(0, 1):
+	for y in range(0, 5):
 		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
 		agent_list = [Prey(prey_pol, str(0))]
@@ -341,11 +341,13 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			yl_number += yl[number]
 		av_wins.append(yl_number)		
 
-	for number in range(0, len(y_list)):
+	#For every episode in every experiment
+	for number in range(0, len(rounds_list)):
 		yl_number = 0
 		for yl in y_list:
+			#Get this experiment's current episode
 			yl_number += yl[number]
-		av_rounds.append(yl_number)			
+		av_rounds.append(yl_number/len(y_list))			
 
 
 	#print "List of steps needed per episode: ", rounds_list
@@ -355,7 +357,8 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		print "Av losses: ", av_losses
 		print "Av wins: ", av_wins
 	else:
-		print " rounds: ", rounds_list
+		print "ylist: ", y_list
+		print " rounds: ", av_rounds
 
 	#Compute average number of rounds needed
 	#average_rounds = float(average_rounds)/N
@@ -367,7 +370,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	#standard_deviation = math.sqrt(variance)
 	#print "Average rounds needed over ", N, " episodes: ", average_rounds
 	#print "Standard deviation: ", standard_deviation	
-	return av_wins, av_losses, rounds_list
+	return av_wins, av_losses, av_rounds
 
 
 if __name__ == "__main__":
@@ -423,7 +426,7 @@ if __name__ == "__main__":
 
 
 	all_averages = []
-	amount_predators = 1
+	amount_predators = 2
 	print "starting game.."
 	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type)
 	if(amount_predators == 1):
