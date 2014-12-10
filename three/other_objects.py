@@ -228,7 +228,7 @@ class Policy:
 		policy = self.get_encoded_policy(new_state)
 		#Get reachable states from this state
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
-
+		#print "policy in state ", s, " is ", policy
 		#Get current Q-value
 		current_q = policy[new_state]
 		#Get reward
