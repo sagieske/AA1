@@ -74,43 +74,8 @@ Repeat (for each episode):\\
 
 
 
-\subsection{Minmax Q-Learning} 
-In minimax Q-learning, each agent uses update rule \ref{ref:minimaxrule}
-\begin{mdframed}
-\begin{align}
-Q(s,a,o) \leftarrow (1-\alpha) Q(s,a,o) + \alpha * (R + \gamma V(s'))
-\end{align}
-\label{ref:minimaxrule}
-\end{mdframed}
-Then, linear programming is used to find a policy so that
-\begin{mdframed}
-\begin{align}
-\pi(s,) \leftarrow \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}
-\end{align}
-\end{mdframed}
-
-
-
-\begin{center} 
-\begin{mdframed}
-\begin{algorithm}[H]
-Initialize Q(s,a) arbitrarily \\
-Repeat (for each episode):\\
-\tab Initialize s \\
-\tab Repeat (for each step of episode):\\
-\dtab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
-\dtab Take action a, observe reward R, s' and opponent's action o\\
-\dtab Q(s,a,o) $\leftarrow$ (1-$\alpha$) Q(s,a,o) + $\alpha$ * (R + $\gamma$ V(s'))  \\
-\dtab $\pi(s,) \leftarrow \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}$ \\
-\dtab $ V(s) \leftarrow \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\}  $ \\
-\dtab $\alpha \leftarrow \alpha * decay$
-\end{algorithm}
-\end{mdframed}
-\captionof{figure}{Minimax-Q learning\cite{Littman94markovgames}}
-\label{alg:minmax}
-\end{center}
-
-
+\subsection{Minimax Q-Learning} 
+\input{minimax_q}
 
 
 
@@ -140,7 +105,7 @@ Let alpha := alpha * decay
 
 % Update which one is the `other leanring'
 \subsection{Friend-or-Foe}
-\include{friend_or_foe}
+\input{friend_or_foe}
 
 \section{Implementation}
 
