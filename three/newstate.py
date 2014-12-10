@@ -265,6 +265,10 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	lose_y_list = []
 	win_y_list = []
 	y_list = []
+	all_first_100_wins = 0
+	all_last_100_wins = 0
+	all_first_100_losses = 0
+	all_last_100_losses = 0
 	for y in range(0, experiments):
 		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0')
@@ -298,6 +302,10 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		cumulative_wins = 0
 		lose_list = []
 		win_list = []
+		first_100_wins = 0
+		first_100_losses = 0
+		last_100_wins = 0
+		last_100_losses = 0
 		for x in range(0, N):
 			#print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
@@ -311,9 +319,17 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			if(bumped):
 				cumulative_losses +=1
 				print "Rounds needed before predators bumped: ", current_rounds
+				if x < 100:
+					first_100_losses +=1
+				elif N-x < 100:
+					last_100_losses += 1
 			elif(caught):
 				cumulative_wins +=1
 				print "Rounds needed before prey was caught: ", current_rounds
+				if x < 100:
+					first_100_wins +=1
+				if N-x < 100:
+					last_100_wins +=1
 			win_list.append(cumulative_wins)
 			lose_list.append(cumulative_losses)
 
@@ -327,6 +343,11 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		lose_y_list.append(lose_list)
 		win_y_list.append(win_list)
 		y_list.append(rounds_list)
+
+		all_first_100_wins += first_100_wins
+		all_last_100_wins += last_100_wins
+		all_first_100_losses += first_100_losses
+		all_last_100_losses += last_100_losses
 		#Smooth graph
 	av_wins = []
 	av_losses = []
@@ -371,8 +392,13 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 	#Compute standard deviation for N rounds
 	#standard_deviation = math.sqrt(variance)
 	#print "Average rounds needed over ", N, " episodes: ", average_rounds
-	#print "Standard deviation: ", standard_deviation	
-	return av_wins, av_losses, av_rounds
+	#print "Standard deviation: ", standard_deviation
+
+	avg_first_100_wins = all_first_100_wins/experiments
+	avg_last_100_wins = all_last_100_wins/experiments
+	avg_first_100_losses = all_first_100_losses/experiments
+	avg_last_100_losses = all_last_100_losses/experiments
+	return av_wins, av_losses, av_rounds, avg_first_100_wins, avg_last_100_wins, avg_first_100_losses, avg_last_100_losses
 
 
 if __name__ == "__main__":
@@ -434,18 +460,22 @@ if __name__ == "__main__":
 	all_averages = []
 	#amount_predators = 2
 	print "starting game.."
-	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
+	av_wins, av_losses, av_rounds, avg_first_100_wins, avg_last_100_wins, avg_first_100_losses, avg_last_100_losses = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
 		plt.ylabel('Steps needed before catch')
-		plt.title("Steps needed versus episode number")
 	else:
+		print "average wins in first 100 runs: ", avg_first_100_wins
+		print "average wins in the last 100 runs: ", avg_last_100_wins
+		print "average losses in first 100 runs: ", avg_first_100_losses
+		print "average losses in last 100 runs: ", avg_last_100_losses
 		plt.plot(av_wins, label="wins")
 		plt.plot(av_losses, label="losses")
 		# Used to be in title: "Predators vs. prey "
-		title = str('predators: ' + str(amount_predators) + ' gamma: ' + str(discount_factor) + ' alpha: ' + str(learning_rate) +  ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
 		plt.ylabel('Predator wins vs. predator losses')
-		plt.title(title)
+
+	title = str('predators: ' + str(amount_predators) + ' gamma: ' + str(discount_factor) + ' alpha: ' + str(learning_rate) +  ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+	plt.title(title)
 	plt.legend()	
 	plt.xlabel('Number of episodes')
 	plt.show()
