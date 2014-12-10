@@ -1,0 +1,20 @@
+Friend-or-Foe Q-learning is a multi-agent reinforcement learning technique in which the agent identifies other agents as a 'friend' or a 'foe' . For 'friend' agents a coordination equilibrium is to be found, that is an equilibrium in which all players achieve their highest possible value. If the other agent is a 'foe' agent an adversarial equilibrium is to be found. This equilibrium has the property that the agent is not hurt by any change of the other agent. The algorithm is an adaption of the Nash-Q update rule as seen in equation \ref{eq:nashq}, where the $NashQ$ function is replaced by a function specified for friend (\ref{eq:friend}) or foe agents (\ref{eq:foe}). \\
+\begin{mdframed}
+\begin{align}
+Q_{t+1}^j(s,a^1, \dots, a^n) = (1-\alpha)Q_t^j(,a^1, \dots, a^n )+ \alpha[r_t^j+\gamma NashQ_t^j(s, Q^1, \dots, Q^n)]\label{eq:nashq}
+\end{align}
+\end{mdframed}
+
+If agent is friend:
+\begin{mdframed}
+\begin{align}
+\max\limits_{a_1\in A_1} Q^i[s,a^1, \dots, a^n]\label{eq:friend}\\
+\end{align}
+\end{mdframed}
+
+%\begin{mdframed}
+%\begin{align}
+%\max\limits_{\pi \in \product(A_i)} min\limits_{a_i \in A_i} Q^i[s,a^1, \dots, a^n]\ref{eq:foe}\\
+%\end{align}
+%\end{mdframed}
+
