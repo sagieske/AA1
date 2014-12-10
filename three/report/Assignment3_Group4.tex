@@ -88,6 +88,48 @@ Then, linear programming is used to find a policy so that
 \pi(s,) := \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}
 \end{align}
 \end{mdframed}
+
+
+
+\begin{center} 
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize s, a and  o \\
+Q(s, a, o) $\leftarrow$ 1
+\end{algorithm}
+\end{mdframed}
+\captionof{figure}{Minimax-Q learning\cite{Littman94markovgames}}
+\label{alg:minmax}
+\end{center}
+
+
+
+
+
+\begin{comment}
+Initialize:
+For all s in S, a in A, and o in O,
+Let Q[s,a,o] := 1
+For all s in S,
+Let V[s] := 1
+For all s in S, a in A,
+Let pi[s,a] := 1/|A|
+Let alpha := 1.0
+Choose an action:
+With probability explor, return an action uniformly at random.
+Otherwise, if current state is s,
+Return action a with probability pi[s,a].
+Learn:
+After receiving reward rew for moving from state s to s’
+via action a and opponent’s action o,
+Let Q[s,a,o] := (1-alpha) * Q[s,a,o] + alpha * (rew + gamma * V[s’])
+Use linear programming to find pi[s,.] such that:
+pi[s,.] := argmaxfpi’[s,.], minfo’, sumfa’, pi[s,a’] * Q[s,a’,o’]ggg
+Let V[s] := minfo’, sumfa’, pi[s,a’] * Q[s,a’,o’]gg
+Let alpha := alpha * decay
+\end{comment}
+
+
 % Update which one is the `other leanring'
 \subsection{Other learning}
 
