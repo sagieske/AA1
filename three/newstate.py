@@ -437,12 +437,16 @@ if __name__ == "__main__":
 	av_wins, av_losses, av_rounds = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
+		plt.ylabel('Steps needed before catch')
+		plt.title("Steps needed versus episode number")
 	else:
 		plt.plot(av_wins, label="wins")
 		plt.plot(av_losses, label="losses")
-	plt.legend()
-	plt.title("Steps needed versus episode number")
-	plt.ylabel('Steps needed before catch')
-	plt.xlabel('Number of steps')
+		# Used to be in title: "Predators vs. prey "
+		title = str('predators: ' + str(amount_predators) + ' gamma: ' + str(discount_factor) + ' alpha: ' + str(learning_rate) +  ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+		plt.ylabel('Predator wins vs. predator losses')
+		plt.title(title)
+	plt.legend()	
+	plt.xlabel('Number of episodes')
 	plt.show()
 
