@@ -142,7 +142,7 @@ class Game:
 				a = taken_actions[agent.get_name()]
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
-				print "pol: ", agent.policy_grid.return_state_policy(s)
+				#print "pol: ", agent.policy_grid.return_state_policy(s)
 		
 
 		#Return caught or not

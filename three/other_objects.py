@@ -221,11 +221,14 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+
 		new_state, agent_name = self.dict_to_state(s)
+
 		#Get policy encoded
 		policy = self.get_encoded_policy(new_state)
 		#Get reachable states from this state
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+
 		#Get current Q-value
 		current_q = policy[new_state]
 		#Get reward
@@ -241,33 +244,44 @@ class Policy:
 		#new_q_value = self.get_policy(new_state)[new_max_action]
 		prime_agent_location = s_prime[agent_name]
 		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
-		print "old: ", prime_agent_location
-		print "max: ", max_prime_agent_location
+		#print "old: ", prime_agent_location
+		#print "max: ", max_prime_agent_location
 
 		new_state_dict = copy.deepcopy(s_prime)
-		print "oldstdict ", s, " distance: ", new_state
+		#print "oldstdict ", s, " distance: ", new_state
 		
 		s_prime_distance = self.dict_to_state(s_prime)[0]
-		print "newstdict ", s_prime, " distance ", s_prime_distance
+		#print "newstdict ", s_prime, " distance ", s_prime_distance
 
-		s_prime[agent_name] = max_prime_agent_location
-		print  "current: ", new_state
-		#print "maxxx: ", max_state
+		#NOT NEEDED: s_prime[agent_name] = max_prime_agent_location
+		#print  "current: ", new_state
+
 		max_policy = self.get_encoded_policy(s_prime_distance)
-		print "max pol: ", max_policy
+		#print "max pol: ", max_policy
+
+
+		
 		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
 		max_q = max_policy[s_prime_distance]
 
 		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
-		# Update in distance dictionary
-		print "updated: ", updated_q_value
-		print "new: ", new_state
-		print self.party_dict[new_state]
-		print self.party_dict[new_state][s_prime_distance]
-		self.party_dict[new_state][s_prime_distance] = updated_q_value
 
-		print "found: ", self.party_dict[new_state][s_prime_distance]
-		return self.party_dict[new_state][s_prime_distance]
+		# Transform current location to new location using chosen action a
+		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
+		# Calculate the distance to all other agents from this chosen distance (while they stand still)
+		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s)
+
+		# Update in distance dictionary
+		#print "old Q value:", self.party_dict[new_state][new_distances_to_agents]
+		#print "updated Q: ", updated_q_value
+		#print "new state: ", new_state
+		#print "---------"
+		#print "party_dict[%s][%s] " %(str(new_state), str(new_distances_to_agents) )
+		self.party_dict[new_state][new_distances_to_agents] = updated_q_value
+
+		#print "found: ", self.party_dict[new_state][new_distances_to_agents]
+		return self.party_dict[new_state][new_distances_to_agents]
+
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
@@ -286,15 +300,24 @@ class Policy:
 		else:
 			return 0
 
-	def dict_to_state(self, state):
-		agent_list = state.keys()
+	def dict_to_state(self, state_dict):
+		""" Calculate distance to all other agents using the dictionary of locations of all agents(=state)
+		Returns tuple of distances to other agents from current agent and ID of current agent
+		"""
+		# Get all names from agent and sort to always loop through agents in ascending ID order
+		agent_list = state_dict.keys()
 		agent_list.sort()
+		# Initialize tuple for states
 		state_tuple = ()
-		
-		for location in agent_list:
-			if(location != self.agent_name):
-				state_list = [state[location][0], state[location][1], state[self.agent_name][0], state[self.agent_name][1]]
+
+		# For every other agent get distance from current agent and append to state tuple		
+		for other_agent in agent_list:
+			if(other_agent != self.agent_name):
+				# Create state array 4x1
+				state_list = [state_dict[other_agent][0], state_dict[other_agent][1], state_dict[self.agent_name][0], state_dict[self.agent_name][1]]
+				# Calculate distance to agent
 				distance_to_other = helpers.xy_distance(state_list, self.grid_size)
+				# Add to tuple for state
 				state_tuple += (tuple(distance_to_other),)
 		return state_tuple, self.agent_name
 
