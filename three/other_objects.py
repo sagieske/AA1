@@ -221,7 +221,7 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-
+		print "reward for agent ", self.agent_name, " is ", reward_list[int(self.agent_name)]
 		new_state, agent_name = self.dict_to_state(s)
 
 		#Get policy encoded
@@ -265,7 +265,7 @@ class Policy:
 		max_q = max_policy[s_prime_distance]
 
 		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
-
+		print "Current q: ", updated_q_value, " new q: ", updated_q_value
 		# Transform current location to new location using chosen action a
 		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
 		# Calculate the distance to all other agents from this chosen distance (while they stand still)
@@ -278,8 +278,9 @@ class Policy:
 		#print "---------"
 		#print "party_dict[%s][%s] " %(str(new_state), str(new_distances_to_agents) )
 		self.party_dict[new_state][new_distances_to_agents] = updated_q_value
-
+		print "quick check: ", self.party_dict[new_state][new_distances_to_agents]
 		#print "found: ", self.party_dict[new_state][new_distances_to_agents]
+		print "State: ", s
 		return self.party_dict[new_state][new_distances_to_agents]
 
 
