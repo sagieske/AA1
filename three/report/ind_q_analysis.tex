@@ -61,7 +61,7 @@ From the graph it is easy to see that a low learning rate yields worst results. 
 \begin{center}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
-\parbox{2cm}{Learning rate/ \\ Wins and losses} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\parbox{2cm}{\textbf{Learning rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
 \hline
 \textbf{0.2} & 50 & 49 & 74 & 24 \\
 \hline
@@ -70,7 +70,7 @@ From the graph it is easy to see that a low learning rate yields worst results. 
 \textbf{0.7} & 54 & 45 & 63 & 35 \\
 \hline
 \end{tabular}
-\caption{Average \# rounds the predators need to catch the prey}
+\caption{Average \# wins and losses by the predators with varying learning rates}
 \end{center}
 \end{table}
 
@@ -99,7 +99,7 @@ The graph shows that for a long time, it does not matter how important the futur
 \textbf{0.7} & 55 & 45 & 74 & 24 \\
 \hline
 \end{tabular}
-\caption{Average \# wins and losses by the predators}
+\caption{Average \# wins and losses by the predators with varying discount factors}
 \end{center}
 \end{table}
 
@@ -115,24 +115,25 @@ Selecting the next action is important. There has to be a balance between explor
 
 Figure \# shows that greedy action selection yields best results. This is possible, as all predators are initialized at the corners of the grid, starting out with equal distance to the prey. As the prey moves, it will be closer to one predator. Therefore, without exploration, the prey will be caught by one predator. As a greedy action, in this case, leads to moving in the direction of the highest Q-value, it is still possible for the predators to bump into each other. However, it seems as if the prey is most often caught before this happens leading to wins for the predators.
 
-%INCOMPLETE AS I FOGOT TO STORE THE TABLE RESULTS! RUNNING AS WE SPEAK!
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{| l | l | l | l | l |}
 \hline
-\parbox{2cm}{\textbf{Discount factor}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\parbox{2cm}{\textbf{$\epsilon$-rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
 \hline
-\textbf{0} & 50 & 49 & 74 & 24 \\
+\textbf{0} & 55 & 44 & 76 & 22 \\
 \hline
-\textbf{0.2} & 50 & 49 & 74 & 24 \\
+\textbf{0.2} & 54 & 45 & 77 & 21 \\
 \hline
-\textbf{0.5} & 54 & 45 & 72 & 21 \\
+\textbf{0.5} & 49 & 50 & 72 & 27 \\
 \hline
-\textbf{0.7} & 54 & 45 & 63 & 24 \\
+\textbf{0.7} & 48 & 51 & 66 & 32 \\
 \hline
-\textbf{0.9} & 50 & 49 & 74 & 24 \\
+\textbf{0.9} & 50 & 59 & 55 & 44 \\
 \hline
 \end{tabular}
-\caption{Average \# wins and losses by the predators}
+\caption{Average \# wins and losses by the predators with varying $\epsilon$-rates}
 \end{center}
 \end{table}
+
+Though, at first, an absolute greedy policy appears to yield the most promising results, a slightly exploratory policy eventually yields the best results. This is not displayed in the graph as the wins are counted cumulatively. Eventually, the results will be best when still exploring sightly.
