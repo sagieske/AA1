@@ -1,25 +1,25 @@
 This section analyses the effects of independent Q-learning, as well as different parameter settings for this learning method.
 \subsubsection{1 predator vs. 1 prey}
-To start off, it is interesting to see if the new environment can cope with the new learning method. As not much changed compared to the previous implementation, it is interesting to see if the implementation still behaves as expected.
+To start off, a test was run to see if the new environment behaves as expected. Not much has changed, except allowing multiple predators to be initialized, different functions for Q-learning and policies (they need to be dynamic and change with the number of agents) and the caveat that the prey has to trip during $20\%$ of its actions.
 
 \begin{center}
 	\includegraphics[scale=0.3]{1_predator_1_prey_q_learning}
-	\captionof{figure}{Independent Q-learning: 1 predator vs. 1 prey}
+	\captionof{figure}{Independent Q-learning: 1 predator versus 1 prey}
 \end{center}
 
-As the graph shows, the predator learns how to catch the prey quicker after each time step. However, in the previous implementation, the number of time steps it took the predator to catch the prey became more stable. Though the number of time steps needed to catch the prey drops significantly, there is more variance than before. Also, the algorithm learns more quickly than before. As the state space grows exponentially with every added predator,  the state space was encoded to reduce the amount of possible states. Therefore, the each chosen action is always in the direction of the prey. This leads to catching the prey quicker than before as even the exploration steps bring the predator closer to the prey.
+As the graph shows, the predator learns how to catch the prey more quickly after each time step. However, in the previous implementation, the number of time steps it took the predator to catch the prey became more stable. Though the number of time steps needed to catch the prey drops significantly (apparently, the $20\%$ trip rate more than offsets the intelligence of the prey), there is more variance than before. Also, the algorithm learns more quickly than before. As the state space grows exponentially with every added predator,  the state space was encoded to reduce the amount of possible states and is now of size $11^2$. Therefore, after the predator has spent enough time learning, each greedily chosen action is always in the direction of the prey. This leads to catching the prey quicker than before as there is a much smaller state space to be explored.
 
-\subsubsection{2 predators vs. 1 prey}
-Now there are two predators taking on one prey. The state space is now larger than before and leads to slower computation at each time step. Tests have shown that the amount of rounds it takes for any of the predators to catch the prey vary significantly. Therefore, the wins and losses of the predators have been taken into account, rather than the amount of rounds it takes the predators to catch the prey. However, the amount of rounds it takes does improve over time. Therefore, the number of rounds it takes the predators to catch the prey has been counted and is shown in the table below.
+\subsubsection{2 predators versus 1 prey}
+In this case, there are two predators hunting one prey. The state space is now larger than before ($11^4$ states) and leads to slower computations. Tests have shown that the amount of rounds it takes for any of the predators to catch the prey vary significantly, but more importantly, cannot be informatively represented in a graph. Therefore, the cumulative wins and losses for the predators have been graphed, rather than the amount of rounds it takes the predators to catch the prey. Unsurprisingly, the graph for wins becomes steeper, and the graph for losses becomes flat after learning. This indicates that the predators are winning more and losing less. Moreover, the numbers of rounds it takes does improve over time. These numbers have been tracked and logged in the table below.
 
 \begin{center}
 	\includegraphics[scale=0.3]{2_predators_q_learning}
 	\captionof{figure}{Independent Q-learning: 2 predators vs. 1 prey}
 \end{center}
 
-The graph shows that the predators learn to cooperate and catch the prey. This number increases, as the number of wins by the prey becomes less and less. As this is counted cumulatively, it can be expected that the number of wins by the prey will become almost steady. It is expected that, in the end, the predators will win almost each game. As their policies are still exploratory, it is possible for two predators to bump into one another and lose the game.
+The graph shows that the predators learn to cooperate and catch the prey. This number increases, as the number of predator losses increases more slowly over time, while the number of predator wins increases more quickly over time. As this is counted cumulatively, it can be expected that the number of wins by the prey will become almost steady. It is expected that, in the end, the predators will win almost each game. As their policies are still exploratory, it is possible for two predators to bump into one another and lose the game.
 
-Now it is interesting to see whether or not the predators catch the prey in a certain amount of rounds.
+The table below shows the average number of rounds the predators need to catch the prey.
 
 \begin{table}[H]
 \begin{center}
@@ -30,19 +30,19 @@ Now it is interesting to see whether or not the predators catch the prey in a ce
 \textbf{Predators} & 58 & 42 & 76 & 23 \\
 \hline
 \end{tabular}
-\caption{Average \# rounds the predators need to catch the prey}
+\caption{Average number of rounds two predators need to catch one prey}
 \end{center}
 \end{table}
 
 As the table shows, the predators learn to catch the prey quicker over time.
 
-\subsubsection{3 predators vs. 1 prey}
-By placing four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of 3 predators vs. one prey.
+\subsubsection{3 predators versus 1 prey}
+With four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of running three predators versus one prey.
 
 This figure shows that the predators lose the game a lot. This is interesting as it is expected of the predators to learn not to bump into one another. However, the grid is both toroidal as well as small and the prey learns. It is possible that the prey learning, combined with a small, toroidal grid, leads to the predators bumping into one another. Perhaps the prey learns to trick the predators into bumping into one another. Therefore, it is interesting to see what happens if the prey learns slower than the predators. By making the prey learn slower, theoretically it is possible for the predators to learn not to bump into one another and catch the prey. 
 
-\subsubsection{4 predators vs. 1 prey}
-Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. 
+\subsubsection{4 predators versus 1 prey}
+Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. This could be solved by using function approximation, for example using Kanerva coding \cite{wu2009function}, where a number of \textit{prototype} state-action pairs are selected, to be used for storing Q-values for similar state-action pairs. Another possible solution is to have the predators learn \textit{together}, meaning they share a Q-value grid. 
 
 \subsubsection{Parameter settings}
 It is interesting to see what happens when the parameters of the learning methods change. As the effects parameter settings have been researched in a 1 vs. 1 scenario, it is interesting to see what is different when there are more agents on the grid. Also, as all agents now learn, the effects of these learning methods should change.

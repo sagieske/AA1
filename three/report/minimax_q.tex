@@ -1,4 +1,4 @@
-The problem with independent Q-learning is that it is based on a stationary environment, i.e. where the rules stay the same. However, in a Multi-agent environment where other agents learn as well, the environment is dynamic. This means that the guarantees that hold for single-agent learning do not hold in this setting. Littman \cite{Littman94markovgames} specifically considers two-player zero-sum games. In this type of Markov Game, it is possible to use a single reward function, that one player tries to \textit{maximize}, and the other (the opponent) tries to \textit{minimize}. For MDPs, there is a policy $\pi$ that is optimal. However, for Markov Games, there is often no \textit{undominated} policy\footnote{If a policy is dominated, that means a better policy exists}. The solution to this is to pick a policy and estimate its value by assuming an opponent that takes the worst actions with regards to this policy. In short, minimax picks the policy that maximizes the agent's reward in the worst case. This optimal policy can be stochastic, as seen in the policy for \textit{rock, paper, scissors} (where the best policy is being unpredictable so you cannot be exploited). To find the optimal policy $\pi^*$, linear programming can be used, where the value of a state is
+The problem with independent Q-learning is that it is based on a stationary environment, i.e. where the rules stay the same. However, in a Multi-agent environment where other agents learn as well, the environment is dynamic. This means that the guarantees that hold for single-agent learning do not hold in this setting. Littman \cite{Littman94markovgames} specifically considers two-player zero-sum games. In this type of Markov Game, it is possible to use a single reward function, that one player tries to \textit{maximize}, and the other (the opponent) tries to \textit{minimize}. For MDPs, there is a policy $\pi$ that is optimal. However, for Markov Games, there is often no \textit{undominated} policy\footnote{If a policy is dominated, that means a better policy exists}. The solution to this is to pick a policy and estimate its value by assuming the opponent will take the actions that are worst for the agents, with regards to this policy. In short, minimax picks the policy that maximizes the agent's reward in the worst case. This optimal policy can be stochastic, as seen in the policy for \textit{rock, paper, scissors} (where the best policy is being unpredictable so you cannot be exploited). To find the optimal policy $\pi^*$, linear programming can be used, where the value of a state is
 \begin{mdframed}
 \begin{align}
 V(s) &= \underset{\pi \in PD(A)}{\text{max}} \underset{o \in O}{\text{min}} \sum_{a\in A} Q(s,a,o) \pi_a
@@ -10,16 +10,16 @@ and the best action is selected using the Q-values, computed by
 Q(s,a,o) &= R(s,a,o) + \gamma \sum_{s'} T(s,a,o,s') V(s')
 \end{align}
 \end{mdframed}
-where T is the transition function for transitioning from state $s$ to state $s'$ if the agent picks action $a$ and the opponent picks action $o$.
+where T is the transition function for transitioning from state $s$ to state $s'$ if the agent picks action $a$ and the opponent picks action $o$. However, since $s$ followed by $s'$ after actions $a$ and $o$ happens with a probability $T(s,a,o,s')$, this function can be left out of the equation.\\
 
-In minimax Q-learning, each agent uses update rule \ref{ref:minimaxrule}
+Consequently, each agent uses the following update rule:
 \begin{mdframed}
 \begin{align}
-Q(s,a,o) \leftarrow (1-\alpha) Q(s,a,o) + \alpha \times (R + \gamma V(s'))
+Q(s,a,o) \leftarrow Q(s,a,o) + \alpha (R + \gamma V(s') - Q(s,a,o))
 \end{align}
 \label{ref:minimaxrule}
 \end{mdframed}
-Then, linear programming is used to find a policy so that
+Then, linear programming is used to find a policy $\pi$ so that
 \begin{mdframed}
 \begin{align}
 \pi(s,) \leftarrow \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}
@@ -37,7 +37,7 @@ Repeat (for each episode):\\
 \tab Repeat (for each step of episode):\\
 \dtab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
 \dtab Take action a, observe reward R, s' and opponent's action o\\
-\dtab Q(s,a,o) $\leftarrow$ (1-$\alpha$) Q(s,a,o) + $\alpha \times$ (R + $\gamma$ V(s'))  \\
+\dtab Q(s,a,o) $\leftarrow$ Q(s,a,o) + $\alpha $(R + $\gamma$ V(s') - Q(s,a,o))  \\
 \dtab $\pi(s,) \leftarrow \underset{\pi'(s,)}{\text{argmax }} \left\{ \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\} \right\}$ \\
 \dtab $ V(s) \leftarrow \underset{o'}{\text{min}} \left\{ \sum_{a'}  \left\{ \pi(s,a') \times Q(s,a',o') \right\} \right\}  $ \\
 \dtab $\alpha \leftarrow \alpha \times decay$
