@@ -321,7 +321,7 @@ class Policy:
 		policy = self.get_encoded_policy(current_state_dist)
 
 		#Get reachable states from this state
-		# TODO: feasible actions not possible
+		# TODO: feasible actions removes +2 states etc?
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
 
 		#Get current Q-value
@@ -349,18 +349,30 @@ class Policy:
 		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
 		max_q = max_policy[s_prime_distance]
 
-		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
+
 
 		# Transform current location to new location using chosen action a
 		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
 		# Calculate the distance to all other agents from this chosen distance (while they stand still)
+		# TODO: minimax policy and value s prime
+		minimax_policy = None
+		value =  self.get_value_for_minimax( minimax_policy, s)
 		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s_prime)
 
-		# Update q value in dictionary
+
+		# Update q value in dictionary using (1-alpha) Q(s,a,o) + alpha * (R + discount V(s'))
+		updated_q_value = (1-learning_rate) * current_q + learning_rate * (reward + discount_factor * value)
 		self.party_dict[current_state_dist][new_distances_to_agents] = updated_q_value
 
 		return self.party_dict[current_state_dist][new_distances_to_agents]
 
+
+	def get_value_for_minimax(self, minimax_policy, current_state_dict):
+		"""
+		Function for minimax minimizing the opponents new move (o') using the policy and q values of current state
+		and summing over possible actions of agent
+		"""
+		return 1
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """
