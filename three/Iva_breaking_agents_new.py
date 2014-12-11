@@ -44,7 +44,9 @@ class Agent(object):
 
 	def q_learning(self, agent_action, opponent_action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list, learning_type):
 		if(learning_type == 'Minimax'):
-			self.policy_grid.Minimax_q_learning(agent_action, opponent_action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
+			#self.policy_grid.Minimax_q_learning(agent_action, opponent_action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
+			# agent_list not needed?
+			self.policy_grid.Minimax_q_learning(agent_action, opponent_action, old_state, new_state, learning_rate, discount_factor, epsilon, reward_list)
 		else:
 		        self.policy_grid.q_learning(agent_action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
 
