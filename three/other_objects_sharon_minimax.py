@@ -387,13 +387,13 @@ class Policy:
 
 		# possible actions
 		actions = ['West', 'East', 'North','South','Wait']
-		x = pulp.LpVariable.dicts('a', actions, lowBound = 0,  cat = pulp.LpInteger)
+		x = pulp.LpVariable.dicts('a', actions, lowBound = 0,upBound = 1, cat = pulp.LpInteger)
 		minimize_o = pulp.LpProblem("Minimize oppononets action",  pulp.LpMinimize)
  
-		# objextive function
-		minimize_o += sum([self.get_qvalue_minimax(s, agent_name, a, o) * x[o] for o in actions for a in actions])
+		# objextive function TODO: THIS DOES NOT WORK
+		#minimize_o += sum([self.get_qvalue_minimax(s, agent_name, a, o) * x[o] for o in actions for a in actions])
 		# This somehow does work?!
-		#minimize_o += sum([self.test_min(o) * x[o] for o in actions])
+		minimize_o += sum([self.test_min(o) * x[o] for o in actions])
 
 		# solve
 		minimize_o.solve()
