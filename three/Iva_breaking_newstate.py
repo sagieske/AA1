@@ -8,7 +8,7 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from Iva_breaking_other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
@@ -426,8 +426,8 @@ if __name__ == "__main__":
 	epsilon = 0.1
 	grid_size = 11
 	softmax = False	
-	learning_type = "Q-learning"
-	amount_predators = 3
+	learning_type = "Minimax"
+	amount_predators = 1
 	Y = 5
 
 	#Command line parsing
