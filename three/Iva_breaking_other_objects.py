@@ -284,7 +284,7 @@ class Policy:
 
 		#Get policy encoded
 		policy = self.get_encoded_policy(new_state)
-		#Get reachable states from this state
+		#Get reachable states fr0om this state
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
 
 		#Get current Q-value
@@ -309,6 +309,10 @@ class Policy:
 		#print "oldstdict ", s, " distance: ", new_state
 		
 		s_prime_distance = self.dict_to_state(s_prime)[0]
+		
+		print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
+		#print 'dict_to_state(s_prime)', self.dict_to_state(s_prime)
+		
 		#print "newstdict ", s_prime, " distance ", s_prime_distance
 
 		#NOT NEEDED: s_prime[agent_name] = max_prime_agent_location
@@ -372,6 +376,8 @@ class Policy:
 		#print "oldstdict ", s, " distance: ", new_state
 		
 		s_prime_distance = self.dict_to_state(s_prime)[0]
+		print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
+		
 		#print "newstdict ", s_prime, " distance ", s_prime_distance
 
 		#NOT NEEDED: s_prime[agent_name] = max_prime_agent_location

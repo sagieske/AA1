@@ -403,7 +403,10 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 
 
 if __name__ == "__main__":
-
+        
+        time_start = time.time()
+        
+        time = time.start()
     
 	#Command line arguments
 	parser = argparse.ArgumentParser(description="Run simulation")
@@ -481,3 +484,5 @@ if __name__ == "__main__":
 	plt.xlabel('Number of episodes')
 	plt.show()
 
+
+        print N, 'runs and', Y, 'experiments for', amount_predators, 'finished in', time.time() - time_start, 'seconds'

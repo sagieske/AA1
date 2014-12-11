@@ -6,7 +6,7 @@ import numpy as np
 import time
 from math import ceil, floor
 import pdb
-from agents_new import Predator, Prey
+from Iva_breaking_agents_new import Predator, Prey
 import helpers
 from Iva_breaking_other_objects import Environment, Policy
 import matplotlib.pyplot as plt
@@ -135,14 +135,38 @@ class Game:
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
 		
-		if(self.learning_type == 'Q-learning'):
+		if(self.learning_type == 'Q-learning' or self.learning_type == 'Minimax'):
 			s = copy_old_state
 			s_prime = self.environment.get_state()
 			for agent in self.agent_list:
-				a = taken_actions[agent.get_name()]
+				agent_name = agent.get_name()
+				agent_action = taken_actions[agent_name]
+		
+				opponent_name = str((int(agent_name)+1)%2)
+				opponent_action = taken_actions[opponent_name]
+				
+				print 'all actions taken:', taken_actions
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
-				agent.q_learning(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
+				agent.q_learning(agent_action, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list, learning_type)
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
+		
+		
+		#if(self.learning_type == 'Minimax'):
+		#	s = copy_old_state
+		#	s_prime = self.environment.get_state()
+		#	
+		#	for agent in self.agent_list:
+		#		agent_name = agent.get_name()
+		#		agent_action = taken_actions[agent_name]
+		#
+		#		opponent_name = str((int(agent_name)+1)%2)
+		#		opponent_action = taken_actions[opponent_name]
+		#		
+		#		print 'all actions taken:', taken_actions
+		#		#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
+		#		agent.Minimax_q_learning(agent_action, opponent_action, s_prime, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
+		#		#print "pol: ", agent.policy_grid.return_state_policy(s)
+		#
 		
 
 		#Return caught or not
@@ -420,7 +444,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	#Default parameter values
-	N = 100
+	N = 5
 	discount_factor = 0.9
 	learning_rate = 0.5
 	epsilon = 0.1
