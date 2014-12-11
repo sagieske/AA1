@@ -151,6 +151,7 @@ class Game:
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
 		
 		
+		
 		#if(self.learning_type == 'Minimax'):
 		#	s = copy_old_state
 		#	s_prime = self.environment.get_state()

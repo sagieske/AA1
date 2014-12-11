@@ -179,8 +179,7 @@ class Policy:
 					distance_changes = []
 					# get possible states  
 					if learning_type == 'Minimax':
-				                print 'Possible states:'
-             			                new_possible_states = [ [i-2,j],
+				                new_possible_states = [ [i-2,j],
              			                                        [i-1, j-1], [i-1,j], [i-1, j+1],
              			                                        [i, j-2], [i, j-1], [i,j], [i, j+1], [i, j+2],
              			                                        [i+1, j-1], [i+1, j], [i+1, j+1],
@@ -279,7 +278,8 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-
+                print 'Q-LEARNING'                
+                
 		new_state, agent_name = self.dict_to_state(s)
 
 		#Get policy encoded
@@ -346,7 +346,7 @@ class Policy:
 		
 		
 	def Minimax_q_learning(self, a, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-
+                print 'MINIMAX'
 		new_state, agent_name = self.dict_to_state(s)
 
 		#Get policy encoded
