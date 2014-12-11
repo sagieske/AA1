@@ -354,9 +354,9 @@ class Policy:
 		# Transform current location to new location using chosen action a
 		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
 		# Calculate the distance to all other agents from this chosen distance (while they stand still)
-		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s)
+
 		# Update q value in dictionary
-		self.party_dict[current_state_dist][new_distances_to_agents] = updated_q_value
+		#self.party_dict[current_state_dist][new_distances_to_agents] = updated_q_value
 
 		return self.party_dict[current_state_dist][new_distances_to_agents]
 
