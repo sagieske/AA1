@@ -50,8 +50,8 @@ class Agent(object):
 		else:
 		        self.policy_grid.q_learning(agent_action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
 
-	def sarsa(self, action, old_state, new_state, learning_rate, discount_factor, epsilon):
-		self.policy_grid.sarsa(action, old_state, new_state, learning_rate, discount_factor, epsilon)
+	def sarsa(self, action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+		return self.policy_grid.sarsa(action, old_state, new_state, learning_rate, discount_factor, epsilon, agent_list, reward_list)
 
 class Predator(Agent):
 	""" Predator agent, inherits from Agent class """
