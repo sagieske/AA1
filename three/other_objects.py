@@ -283,6 +283,67 @@ class Policy:
 		print "State: ", s
 		return self.party_dict[new_state][new_distances_to_agents]
 
+	def sarsa(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
+		#print "reward for agent ", self.agent_name, " is ", reward_list[int(self.agent_name)]
+		new_state, agent_name = self.dict_to_state(s)
+
+		#Get policy encoded
+		policy = self.get_encoded_policy(new_state)
+		#Get reachable states from this state
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		#print "policy in state ", s, " is ", policy
+		#Get current Q-value
+		current_q = policy[new_state]
+		#Get reward
+		reward = reward_list[int(agent_name)]
+		softmax_backup = self.softmax
+		self.softmax = False
+		#Get the max action for the new state
+		new_move, new_max_action = self.get_action(s_prime, epsilon=epsilon)
+		self.softmax = softmax_backup
+
+		#Get the q-value for the new state and its max action
+		#new_q_value = self.get_policy(new_state)[new_max_action]
+		prime_agent_location = s_prime[agent_name]
+		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
+		#print "old: ", prime_agent_location
+		#print "max: ", max_prime_agent_location
+
+		new_state_dict = copy.deepcopy(s_prime)
+		#print "oldstdict ", s, " distance: ", new_state
+		
+		s_prime_distance = self.dict_to_state(s_prime)[0]
+		#print "newstdict ", s_prime, " distance ", s_prime_distance
+
+		#NOT NEEDED: s_prime[agent_name] = max_prime_agent_location
+		#print  "current: ", new_state
+
+		max_policy = self.get_encoded_policy(s_prime_distance)
+		#print "max pol: ", max_policy
+
+
+		
+		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
+		max_q = max_policy[s_prime_distance]
+
+		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
+		#print "Current q: ", updated_q_value, " new q: ", updated_q_value
+		# Transform current location to new location using chosen action a
+		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
+		# Calculate the distance to all other agents from this chosen distance (while they stand still)
+		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s)
+
+		# Update in distance dictionary
+		#print "old Q value:", self.party_dict[new_state][new_distances_to_agents]
+		#print "updated Q: ", updated_q_value
+		#print "new state: ", new_state
+		#print "---------"
+		#print "party_dict[%s][%s] " %(str(new_state), str(new_distances_to_agents) )
+		self.party_dict[new_state][new_distances_to_agents] = updated_q_value
+		#print "quick check: ", self.party_dict[new_state][new_distances_to_agents]
+		#print "found: ", self.party_dict[new_state][new_distances_to_agents]
+		#print "State: ", s
+		return new_move, new_max_action
 
 	def get_new_location(self, object_location, transformation):
 		""" Returns new location of an object when performs the chosen move """

@@ -51,12 +51,13 @@ class Game:
 		prey_caught = 0
 		predators_bumped = 0
 		#Runs turns until the prey is caught
+		action_dict = None
 		while(prey_caught == 0 and predators_bumped == 0):
 			steps +=1
 			#Get the current state
 			state = self.environment.get_state()
 			#Run turn and see if prey has been caught
-			prey_caught, predators_bumped = self.turn(state, learning_rate, discount_factor, epsilon, steps)
+			prey_caught, predators_bumped, action_dict = self.turn(state, learning_rate, discount_factor, epsilon, steps, action_dict)
 			newstate = self.environment.get_state()
 			#print "updated state: ", newstate
 			#self.environment.print_grid()
@@ -82,14 +83,19 @@ class Game:
 		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
 		return [distance_x, distance_y]
 
-	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps):
+	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps, action_dict=None):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get each agent's new location and move them within the environment
 		# Copied old_state
 		copy_old_state = copy.deepcopy(old_state)
 		taken_actions = {}
 		for agent in self.agent_list:
-			agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
+			if action_dict is None:
+				agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
+			else:
+				agent_name = agent.get_name()
+				agent_move = action_dict.get(agent_name)[0]
+				agent_action = action_dict.get(agent_name)[1]
 			#Store the taken action, important for q-learning
 			taken_actions[agent.get_name()] = agent_action
 			# Prey trips with probability of 0.2
@@ -132,9 +138,9 @@ class Game:
 		else:
 			rewards_list = [0 for x in range(0, len(self.agent_list))]
 
+		new_action_dict = {}
 
 		#If we're using q-learning, update the q-values using a greedy action in next state
-		
 		if(self.learning_type == 'Q-learning'):
 			s = copy_old_state
 			s_prime = self.environment.get_state()
@@ -143,10 +149,19 @@ class Game:
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
+		elif(self.learning_type == 'SARSA'):
+			s = copy_old_state
+			s_prime = self.environment.get_state()
+			for agent in self.agent_list:
+				a = taken_actions[agent.get_name()]
+				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
+				action = agent.sarsa(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
+				new_action_dict.update({agent.get_name():action})
+				#print "pol: ", agent.policy_grid.return_state_policy(s)
 		
 
 		#Return caught or not
-		return prey_caught, predators_bumped
+		return prey_caught, predators_bumped, new_action_dict
 
 
 	def get_new_location(self, chosen_object, chosen_move):
@@ -406,7 +421,7 @@ if __name__ == "__main__":
         
         time_start = time.time()
         
-        time = time.start()
+        #time = time.start()
     
 	#Command line arguments
 	parser = argparse.ArgumentParser(description="Run simulation")
@@ -461,28 +476,44 @@ if __name__ == "__main__":
 		verbose = 2
 
 
-	all_averages = []
-	#amount_predators = 2
-	print "starting game.."
+	discount_factors = [0.2, 0.5, 0.7]
+	learning_rates = [0.2, 0.5, 0.7]
+	epsilon_rates = [0, 0.2, 0.5, 0.7, 0.9]
+
+	avg_first_100_wins_list = []
+	avg_last_100_wins_list = []
+	avg_first_100_losses_list = []
+	avg_last_100_losses_list = []
+	#for eps in epsilon_rates:	
+	print "eps: ", epsilon
 	av_wins, av_losses, av_rounds, avg_first_100_wins, avg_last_100_wins, avg_first_100_losses, avg_last_100_losses = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
 		plt.ylabel('Steps needed before catch')
 	else:
-		print "average wins in first 100 runs: ", avg_first_100_wins
-		print "average wins in the last 100 runs: ", avg_last_100_wins
-		print "average losses in first 100 runs: ", avg_first_100_losses
-		print "average losses in last 100 runs: ", avg_last_100_losses
+		avg_first_100_wins_list.append(avg_first_100_wins)
+		avg_last_100_wins_list.append(avg_last_100_wins)
+		avg_first_100_losses_list.append(avg_first_100_losses)
+		avg_last_100_losses_list.append(avg_last_100_losses)
 		plt.plot(av_wins, label="wins")
 		plt.plot(av_losses, label="losses")
+		
 		# Used to be in title: "Predators vs. prey "
-		plt.ylabel('Predator wins vs. predator losses')
+		plt.ylabel('Predator average wins')
 
-	title = str('predators: ' + str(amount_predators) + ' gamma: ' + str(discount_factor) + ' alpha: ' + str(learning_rate) +  ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+	title = str('2 predators vs. 1 prey -> epsilon: ' + str(epsilon) +  ' alpha: ' + str(learning_rate) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+	#'predators: ' + str(amount_predators) +  ' gamma: ' + str(discount_factor)
+#	title = "2 predators vs. 1 prey: discount factors"
+
+	print "first 100 wins: ", avg_first_100_wins_list
+	print "last 100 wins: ", avg_last_100_wins_list
+	print "first 100 losses: ", avg_first_100_losses_list
+	print "last 100 losses: ", avg_last_100_losses_list
 	plt.title(title)
 	plt.legend()	
 	plt.xlabel('Number of episodes')
 	plt.show()
+
 
 
         print N, 'runs and', Y, 'experiments for', amount_predators, 'finished in', time.time() - time_start, 'seconds'
