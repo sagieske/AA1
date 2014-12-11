@@ -37,7 +37,12 @@ The table below shows the average number of rounds the predators need to catch t
 As the table shows, the predators learn to catch the prey quicker over time.
 
 \subsubsection{3 predators versus 1 prey}
-With four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of running three predators versus one prey.
+With four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of running three predators versus one prey. Due to time constraints and the amount of time it takes for the algorithm to calculate the all the states, this was for 1000 episodes. Contrary to the other testing approaches, this test was run once and so not averaged over several experiments.
+
+\begin{center}
+	\includegraphics[scale=0.3]{1000runs_3predators}
+	\captionof{figure}{Independent Q-learning: 3 predators vs. 1 prey}
+\end{center}
 
 This figure shows that the predators lose the game a lot. This is interesting as it is expected of the predators to learn not to bump into one another. However, the grid is both toroidal as well as small and the prey learns. It is possible that the prey learning, combined with a small, toroidal grid, leads to the predators bumping into one another. Perhaps the prey learns to trick the predators into bumping into one another. Therefore, it is interesting to see what happens if the prey learns slower than the predators. By making the prey learn slower, theoretically it is possible for the predators to learn not to bump into one another and catch the prey. 
 
