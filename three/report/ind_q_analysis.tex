@@ -1,0 +1,138 @@
+This section analyses the effects of independent Q-learning, as well as different parameter settings for this learning method.
+\subsubsection{1 predator vs. 1 prey}
+To start off, it is interesting to see if the new environment can cope with the new learning method. As not much changed compared to the previous implementation, it is interesting to see if the implementation still behaves as expected.
+
+\begin{center}
+	\includegraphics[scale=0.3]{1_predator_1_prey_q_learning}
+	\captionof{figure}{Independent Q-learning: 1 predator vs. 1 prey}
+\end{center}
+
+As the graph shows, the predator learns how to catch the prey quicker after each time step. However, in the previous implementation, the number of time steps it took the predator to catch the prey became more stable. Though the number of time steps needed to catch the prey drops significantly, there is more variance than before. Also, the algorithm learns much quicker than before. As the state space grows exponentially larger with each added predator, the state space encoding was implemented to reduce the state space. Therefore, the each chosen action is always in the direction of the prey. This leads to catching the prey quicker than before as even the exploration steps bring the predator closer to the prey.
+
+\subsubsection{2 predators vs. 1 prey}
+Now there are two predators taking on one prey. The state space is now larger than before and leads to slower computation at each time step. Tests have shown that the amount of rounds it takes for any of the predators to catch the prey vary significantly. Therefore, the wins and losses of the predators have been taken into account, rather than the amount of rounds it takes the predators to catch the prey. However, the amount of rounds it takes does improve over time. Therefore, the number of rounds it takes the predators to catch the prey has been counted and is shown in the table below.
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_q_learning}
+	\captionof{figure}{Independent Q-learning: 2 predators vs. 1 prey}
+\end{center}
+
+The graph shows that the predators learn to cooperate and catch the prey. This number increases, as the number of wins by the prey becomes less and less. As this is counted cumulatively, it can be expected that the number of wins by the prey will become almost steady. It is expected that, in the end, the predators will win almost each game. As their policies are still exploratory, it is possible for two predators to bump into one another and lose the game.
+
+Now it is interesting to see whether or not the predators catch the prey in a certain amount of rounds.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+ & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{Predators} & 58 & 42 & 76 & 23 \\
+\hline
+\end{tabular}
+\caption{Average \# rounds the predators need to catch the prey}
+\end{center}
+\end{table}
+
+As the table shows, the predators learn to catch the prey quicker over time.
+
+\subsubsection{3 predators vs. 1 prey}
+By placing four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of 3 predators vs. one prey.
+
+This figure shows that the predators lose the game a lot. This is interesting as it is expected of the predators to learn not to bump into one another. However, the grid is both toroidal as well as small and the prey learns. It is possible that the prey learning, combined with a small, toroidal grid, leads to the predators bumping into one another. Perhaps the prey learns to trick the predators into bumping into one another. Therefore, it is interesting to see what happens if the prey learns slower than the predators. By making the prey learn slower, theoretically it is possible for the predators to learn not to bump into one another and catch the prey. 
+
+\subsubsection{4 predators vs. 1 prey}
+Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. 
+
+\subsubsection{Parameter settings}
+It is interesting to see what happens when the parameters of the learning methods change. As the effects parameter settings have been researched in a 1 vs. 1 scenario, it is interesting to see what is different when there are more agents on the grid. Also, as all agents now learn, the effects of these learning methods should change.
+
+\subsubsection{Learning rate}
+First, the effect of the learning rate is researched. As the learning rate determines to what extent the newly acquired information will override the old information, it is interesting to see what happens. 
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_learning_rate_q_learning}
+	\captionof{figure}{Independent Q-learning: 2 predators vs. 1 prey, learning rate}
+\end{center}
+
+From the graph it is easy to see that a low learning rate yields worst results. For a long time, a high learning rate yields good results, however, in the end a learning rate of 0.5 yields best results. This shows that for a long time, a lot of recent information is interesting.  Later on, however, an even balance of new and old information leads to more wins for the predator. 
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{Learning rate/ \\ Wins and losses} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0.2} & 50 & 49 & 74 & 24 \\
+\hline
+\textbf{0.5} & 54 & 45 & 72 & 27 \\
+\hline
+\textbf{0.7} & 54 & 45 & 63 & 35 \\
+\hline
+\end{tabular}
+\caption{Average \# rounds the predators need to catch the prey}
+\end{center}
+\end{table}
+
+The table shows that the lowest learning rate shows better and better results over time. This shows that in the beginning, a lot must be learned. As the game progresses, the prey becomes less predictable and a low learning rate yields better results. This could indicate that the predators as well as the prey become predictable and so less has to be learned about them. As minimax Q-learning contains a decay in learning, perhaps this is the reason why. %this is strange.
+
+\subsubsection{Discount factor}
+The discount factor determines the importance of future rewards. In the previous assignment, the a high discount factor yielded best results. This means that the future reward was most important. Only the goal state yielded a reward, making reaching the goal state very important. Currently, there are two terminal states: the win state and the lose state. It is interesting to see what effect the negative rewards have on the importance of the immediate reward.
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_discount_factor_q_learning}
+	\captionof{figure}{Independent Q-learning: 2 predators vs. 1 prey, discount factor}
+\end{center}
+
+The graph shows that for a long time, it does not matter how important the future reward is. However, eventually the graph shows that a low discount factor yields best results. This can be caused by the fact that the predators will receive a negative reward when running into another predator. In order to avoid this, the immediate reward has to become more important.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{Discount factor}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0.2} & 52 & 47 & 98 & 4 \\
+\hline
+\textbf{0.5} & 55 & 44 & 78 & 21 \\
+\hline
+\textbf{0.7} & 55 & 45 & 74 & 24 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators}
+\end{center}
+\end{table}
+
+The table shows that the discount factor has a huge impact on the success of the predators. By making sure that the predators do not run into each other, the game is less often lost.
+
+\subsubsection{$\epsilon$-greedy action selection}
+Selecting the next action is important. There has to be a balance between exploration and exploitation. One of the most widely used techniques is $\epsilon$-greedy action selection. That is also the action selection method used in this case. This is where the $\epsilon$ factor comes into action. This factor determines how greedy the action selection is. An $\epsilon$ value of 0 selects only greedy actions. The closer this values is to 1, the more exploring actions are selected. The following figure shows the results of this test.
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_epsilon_q_learning}
+	\captionof{figure}{Independent Q-learning: 2 predators vs. 1 prey, $\epsilon$-greedy action selection}
+\end{center}
+
+Figure \# shows that greedy action selection yields best results. This is possible, as all predators are initialized at the corners of the grid, starting out with equal distance to the prey. As the prey moves, it will be closer to one predator. Therefore, without exploration, the prey will be caught by one predator. As a greedy action, in this case, leads to moving in the direction of the highest Q-value, it is still possible for the predators to bump into each other. However, it seems as if the prey is most often caught before this happens leading to wins for the predators.
+
+%INCOMPLETE AS I FOGOT TO STORE THE TABLE RESULTS! RUNNING AS WE SPEAK!
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{Discount factor}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0} & 50 & 49 & 74 & 24 \\
+\hline
+\textbf{0.2} & 50 & 49 & 74 & 24 \\
+\hline
+\textbf{0.5} & 54 & 45 & 72 & 21 \\
+\hline
+\textbf{0.7} & 54 & 45 & 63 & 24 \\
+\hline
+\textbf{0.9} & 50 & 49 & 74 & 24 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators}
+\end{center}
+\end{table}
