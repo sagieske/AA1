@@ -1,0 +1,29 @@
+In independent SARSA, all the agents independently use SARSA to maximize their expected reward.  \\ 
+
+\noindent SARSA is a temporal difference method, like Q-learning, that uses the update rule in equation \ref{eq:supdate}. Because this algorithm retrieves the Q value after taking an $\epsilon$-greedy action, it is an \textit{on-policy} method. The algorithm for SARSA can be found in pseudocode in figure \ref{alg:slearning}.
+
+\begin{mdframed}
+\begin{align}
+Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \left[ r_{t+1} + \gamma Q(s_{t+1},a_{t+1}) - Q(s_t,a_t)\right]\label{eq:supdate}
+\end{align}
+\end{mdframed}
+
+
+\begin{center}
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize Q(s,a) arbitrarily\\
+Repeat (for each episode):\\
+\tab Initialize s \\
+\tab Choose a from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
+\tab Repeat (for each step of episode):\\
+\dtab Take action a, observe r, s'\\
+\dtab Choose a' from s' using policy derived from Q (e.g., $\epsilon$-greedy)\\
+\dtab Q(s,a) $\leftarrow$ Q(s,a) + $\alpha [ r + \gamma Q(s', a') - Q(s, a) ]$ \\
+\dtab s $\leftarrow$ s'; \\
+\tab until s is terminal\\
+\end{algorithm}
+\end{mdframed}
+\captionof{figure}{The algorithm for Sarsa \cite{bartosutton}}
+\label{alg:slearning}
+\end{center}

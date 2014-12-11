@@ -32,19 +32,101 @@ The graph is very similar to the graph in Q-learning. This is possible, as both 
 \end{center}
 \end{table}
 
-Compared to independent Q-learning, independent SARSA performs slightly better. This can be attributed to the fact that SARSA is more careful than Q-learning. This behaviour leads to more wins for the predators.
+Compared to independent Q-learning, independent SARSA performs slightly better. This can be attributed to the fact that SARSA is more careful than Q-learning. This behaviour leads to more wins for the predators, on average, compared to Q-learning.
 
-\subsubsection{2 predators vs. 1 prey}
-This is slooooow
+\subsubsection{3 predators vs. 1 prey}
 
 \subsubsection{4 predators vs. 1 prey}
 Again, this is intractable. 
 
 \subsubsection{Parameter settings}
-Again, parameter settings were explored for this algorithm.
+Again, parameter settings were explored for this algorithm. This was tested with two predators and one prey.
 
 \subsubsection{Learning rate}
+First, the effect of the learning rate is researched. As the learning rate determines to what extent the newly acquired information will override the old information, it is interesting to see what happens. 
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_learning_rate_SARSA}
+	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey, learning rate}
+\end{center}
+
+From the graph it is difficult to see if a high or average learning rate affect the implementation in the best possible way. In the end, however it appears as though a learning rate of 0.5 yields best results.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{$\epsilon$-rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0.2} & 56 & 44 & 75 & 23 \\
+\hline
+\textbf{0.5} & 58 & 41 & 79 & 19 \\
+\hline
+\textbf{0.7} & 59 & 40 & 68 & 30 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators with varying learning rates}
+\end{center}
+\end{table}
+
+The table confirms the theory derived off the graph. A learning rate does yield best results. When the predators are learning while hunting the prey, an equal balance of new and old information yields optimal results.
 
 \subsubsection{Discount factor}
+The discount factor determines the importance of future rewards. In the previous assignment, the a high discount factor yielded best results. This means that the future reward was most important. Only the goal state yielded a reward, making reaching the goal state very important. Currently, there are two terminal states: the win state and the lose state. It is interesting to see what effect the negative rewards have on the importance of the immediate reward.
+
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_discount_factor_SARSA}
+	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey, discount factor}
+\end{center}
+
+Again, the immediate reward shows to be important. It has been mentioned several times that SARSA is a careful algorithm, as it collects rewards during learning. Independent Q-learning yields similar results, confirming the theory that introducing a negative reward into the game makes the immediate reward more important.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{$\epsilon$-rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0.2} & 52 & 47 & 95 & 3 \\
+\hline
+\textbf{0.5} & 53 & 46 & 80 & 18 \\
+\hline
+\textbf{0.7} & 57 & 42 & 71 & 27 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators with varying discount factors}
+\end{center}
+\end{table}
+
+The previous conclusions are supported by the table. However, it is interesting to note that keeping into account the immediate reward yields significantly better results than seen before. Winning games 95\% of the time, on average, is highly successful. This means that even when the predators are exploring new paths, the predators hardly ever bump into one another. These are excellent results for any algorithm, let alone an on-policy algorithm.
 
 \subsubsection{$\epsilon$-greedy action selection}
+\begin{center}
+	\includegraphics[scale=0.3]{2_predators_epsilon_SARSA}
+	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey, $\epsilon$-greedy action selection}
+\end{center}
+
+The graph shows that low exploration leads to the best results. Again, this is to be expected as exploration most likely will lead to predators bumping into one another.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{$\epsilon$-rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{0} & 54 & 45 & 74 & 24 \\
+\hline
+\textbf{0.2} & 55 & 45 & 74 & 24 \\
+\hline
+\textbf{0.5} & 53 & 47 & 73 & 25 \\
+\hline
+\textbf{0.7} & 51 & 48 & 66 & 32 \\
+\hline
+\textbf{0.9} & 48 & 51 & 57 & 41 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators with varying $\epsilon$-rates}
+\end{center}
+\end{table}
+
+The table confirms almost what the graph shows. Where the graph shows better results for an absolutely greedy action selection, the table shows that the results over the last 100 runs are exactly the same.  This will lead to trying to catch the prey in the beginning, but exploring other paths to the prey while avoiding other predators is also important. This can help the predators significantly in the future. However, exploration is needed. Therefore, lowering the learning rate over time will help the predators best. This confirms the theory that the learning rate must be lowered in order to yield best results.
