@@ -10,7 +10,9 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 	action_q_values = {}
 	distance_action = {}
-
+	print "policy: ", policy
+	print "state: ", state
+	print "Agent: ", agent_name
 	#print "\n\n\nstate: ", state
 	#print "\npolicy: ", policy
 	#print "agent : ", agent_name, "\n\n"
@@ -29,6 +31,8 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 		
 		# Get all distances to other agents using this new state
 		dist_tuple  = get_all_distances_to_agents(agent_name, new_state, state, grid_size=grid_size)
+		print "grid size: ", grid_size
+		print "dist: ", dist_tuple
 		value = policy[dist_tuple]
 		#print "selected dist: ", dist_tuple
 		#print "selected q: ", value
@@ -57,7 +61,7 @@ def get_all_distances_to_agents(agent_name, agent_new_state, state_dict, grid_si
 	return dist_tuple
 
 #SHOULD BE OBSOLETE
-def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[5,5]):
+def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,11]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -95,7 +99,7 @@ def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[5,5]
 	return random_action, actions[random_action]
 
 #SHOULD BE OBSOLETE
-def distance_to_action(state, agent_name, new_distance, grid_size=[5,5]):
+def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -323,7 +327,7 @@ def pretty_print_latex(matrix, label, indices=True):
 	print "\\end{tabular}"
 
 
-def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[5,5]):
+def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[11,11]):
 	""" Create full grid from partial grid created by encoded state space for policy grid"""
 	full_grid = np.zeros((gridsize[0],gridsize[1]))
 

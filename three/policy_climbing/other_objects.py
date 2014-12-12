@@ -262,15 +262,15 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):               
-		step_size = 0.001
+		step_size = 0.1
 		new_state, agent_name = self.state_dict_to_state_distances(s)
-		#Retrieve Q-values
+		#Retrieve Q-value for s,a
 		policy = self.get_regular_encoded(new_state)
 		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy, grid_size=self.grid_size)
 		current_q = policy[new_state]
 		reward = reward_list[int(agent_name)]
 
-		best_move, best_action = self.get_greedy_action(s, 0.0)
+		#Find max Q-value action for s
 		max_value = 0.0
 		max_action = ""
 		for reg_action in policy.keys():
@@ -281,6 +281,7 @@ class Policy:
 		prob_policy = self.get_encoded_policy(new_state)
 		prob_policy, prob_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, prob_policy, grid_size=self.grid_size)
 
+		#Edit mixed policy
 		minus_step_size = step_size/(len(prob_policy) - 1) 
 		for action in prob_policy.keys():
 			if(action == max_action):
@@ -288,6 +289,7 @@ class Policy:
 			else:
 				prob_policy[action] -= minus_step_size
 		self.prob_party_dict[new_state] = prob_policy
+		
 		#Retrieve Q-value of max action
 		new_move, new_max_action = self.get_greedy_action(s_prime, 0.0)
 		prime_agent_location = s_prime[agent_name]

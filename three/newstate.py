@@ -8,7 +8,7 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects_sharon_minimax import Environment, Policy
+from other_objects import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
@@ -35,6 +35,7 @@ class Game:
 		#Else, store the predator
 		else:
 			self.agent_list = agent_list
+
 
 
 		print "Episode created with grid size ", grid_size
