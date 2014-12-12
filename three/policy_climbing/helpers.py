@@ -10,9 +10,6 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 	action_q_values = {}
 	distance_action = {}
-	print "policy: ", policy
-	print "state: ", state
-	print "Agent: ", agent_name
 	#print "\n\n\nstate: ", state
 	#print "\npolicy: ", policy
 	#print "agent : ", agent_name, "\n\n"
@@ -31,8 +28,7 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 		
 		# Get all distances to other agents using this new state
 		dist_tuple  = get_all_distances_to_agents(agent_name, new_state, state, grid_size=grid_size)
-		print "grid size: ", grid_size
-		print "dist: ", dist_tuple
+
 		value = policy[dist_tuple]
 		#print "selected dist: ", dist_tuple
 		#print "selected q: ", value

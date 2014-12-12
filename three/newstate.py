@@ -375,7 +375,7 @@ if __name__ == "__main__":
 	discount_factor = 0.9
 	learning_rate = 0.5
 	epsilon = 0.1
-	grid_size = 5
+	grid_size = 11
 	softmax = False	
 	learning_type = "Q-learning"
 	amount_predators = 1
@@ -446,5 +446,5 @@ if __name__ == "__main__":
 	plt.show()
 
 
-        print learning_type, 'ran for', N, 'runs,', Y, 'experiments and ', amount_predators, 'predators and finished in', time.time() - time_start, 'seconds'
+	print learning_type, 'ran for', N, 'runs,', Y, 'experiments and ', amount_predators, 'predators and finished in', time.time() - time_start, 'seconds'
 

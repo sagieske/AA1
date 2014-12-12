@@ -59,8 +59,7 @@ class Game:
 			#Run turn and see if prey has been caught
 			prey_caught, predators_bumped, action_dict = self.turn(state, learning_rate, discount_factor, epsilon, steps, action_dict)
 			newstate = self.environment.get_state()
-			#print "updated state: ", newstate
-			#self.environment.print_grid()
+
 		
 		if prey_caught == True:
 			print "Caught prey in " + str(steps) + " rounds!\n=========="
@@ -68,10 +67,7 @@ class Game:
 			print "Predators bumped into each other in round " + str(steps) + "!\n=========="
 		else:
 			print "Game ended in " + str(steps) + " rounds!\n=========="
-		#distance_dict_test = self.predator.get_policy_grid().distance_dict
-		#print self.predator.get_policy_grid().distance_dict
-			
-		#return steps, self.predator.get_policy_grid()
+
 		return steps, prey_caught, predators_bumped
 
 	def relative_xy(self, location1, location2):
@@ -101,7 +97,6 @@ class Game:
 			# Prey trips with probability of 0.2
 			if agent.get_name() == '0' and random.randint(1, 10) <= 2:
 				agent_move = [0,0]
-				#print 'THE PREY BROKE ITS LEG AND TRIPPED!'
 				
 			new_location = self.get_new_location(agent.get_name(), agent_move, grid_size=self.environment.grid_size)
 			self.environment.move_object(agent.get_name(), new_location)
@@ -151,39 +146,15 @@ class Game:
 				opponent_name = str((int(agent_name)+1)%2)
 				opponent_action = taken_actions[opponent_name]
 				
-				#print 'all actions taken:', taken_actions
-				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(agent_action, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list, learning_type)
-				#print "pol: ", agent.policy_grid.return_state_policy(s)
+
 		elif(self.learning_type == 'SARSA'):
 			s = copy_old_state
 			s_prime = self.environment.get_state()
 			for agent in self.agent_list:
 				a = taken_actions[agent.get_name()]
-				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				action = agent.sarsa(a, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
 				new_action_dict.update({agent.get_name():action})
-				#print "pol: ", agent.policy_grid.return_state_policy(s)
-		
-		
-		
-		#if(self.learning_type == 'Minimax'):
-		#	s = copy_old_state
-		#	s_prime = self.environment.get_state()
-		#	
-		#	for agent in self.agent_list:
-		#		agent_name = agent.get_name()
-		#		agent_action = taken_actions[agent_name]
-		#
-		#		opponent_name = str((int(agent_name)+1)%2)
-		#		opponent_action = taken_actions[opponent_name]
-		#		
-		#		print 'all actions taken:', taken_actions
-		#		#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
-		#		agent.Minimax_q_learning(agent_action, opponent_action, s_prime, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
-		#		#print "pol: ", agent.policy_grid.return_state_policy(s)
-		#
-		
 
 		#Return caught or not
 		return prey_caught, predators_bumped, new_action_dict
@@ -352,15 +323,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		last_100_losses = 0
 		for x in range(0, N):
 			print "Round ", x, " in experiment ", y
-			#print "Rounds needed to catch prey: ", current_rounds
-			#Initialize episode
-			#If we're using off-policy MC, initialize a learning and then a testing episode
-			#current_rounds, policy_grid = game.get_rounds(learning_rate, discount_factor, epsilon)
-
-			#TODO: Return agentlist and pass to next game
 			current_rounds, agent_list, caught, bumped = game.get_rounds(learning_rate, discount_factor, epsilon)
-			#print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
-			#print agent_list[0].policy_grid.return_state_policy(game.environment.get_state())
 			if(bumped):
 				cumulative_losses +=1
 				print "Rounds needed before predators bumped: ", current_rounds
@@ -418,9 +381,6 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		av_rounds.append(yl_number/len(y_list))			
 
 
-	#print "List of steps needed per episode: ", rounds_list
-
-	#print "List of smoothed averages: ", average_rounds
 	if(amount_predators>1):
 		print "Av losses: ", av_losses
 		print "Av wins: ", av_wins
@@ -428,16 +388,6 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		print "ylist: ", y_list
 		print " rounds: ", av_rounds
 
-	#Compute average number of rounds needed
-	#average_rounds = float(average_rounds)/N
-	#Compute list of variances
-	#var_list = [(x-average_rounds)**2 for x in rounds_list]
-	#Compute average variance
-	#variance = float(sum(var_list)/len(var_list))
-	#Compute standard deviation for N rounds
-	#standard_deviation = math.sqrt(variance)
-	#print "Average rounds needed over ", N, " episodes: ", average_rounds
-	#print "Standard deviation: ", standard_deviation
 
 	avg_first_100_wins = all_first_100_wins/experiments
 	avg_last_100_wins = all_last_100_wins/experiments
@@ -531,7 +481,6 @@ if __name__ == "__main__":
 	#'predators: ' + str(amount_predators) +  ' gamma: ' + str(discount_factor)
 #	title = "2 predators vs. 1 prey: discount factors"
 
-	#print "RIGGED PREY!"
 	print "first 100 wins: ", avg_first_100_wins_list
 	print "last 100 wins: ", avg_last_100_wins_list
 	print "first 100 losses: ", avg_first_100_losses_list

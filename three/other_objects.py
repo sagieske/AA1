@@ -78,7 +78,7 @@ class Policy:
 		#Store grid size
 		self.grid_size = grid_size
 		self.learning_type = learning_type
-		if learning_type != 'Minimax':
+		if learning_type == 'Minimax':
 			init_value = 1.0
 		else:
 			init_value = 15.0
@@ -157,7 +157,7 @@ class Policy:
 		
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-                new_state, agent_name = self.state_dict_to_state_distances(s)
+		new_state, agent_name = self.state_dict_to_state_distances(s)
 
 		#Get policy encoded
 		policy = self.get_encoded_policy(new_state)
@@ -204,7 +204,6 @@ class Policy:
 
 
 	def sarsa(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-                print 'SARSA'                
                 
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 
@@ -304,7 +303,7 @@ class Policy:
 		# Probabilities sum to 1
 		max_v += sum([action_policy_vars[a] for a in actions]) == 1
 		for a in actions:
-			max_v += action_policy_vars[a] > 0 
+			max_v += action_policy_vars[a] >= 0.000000001 
 
 		# add constraints as summation of actions given an opponent action are bigger than 0
 		for o in actions:
@@ -312,6 +311,10 @@ class Policy:
 
 		# Solve maximization
 		max_v.solve()
+		#for i in actions:
+		#	if action_policy_vars[i].value() == 1.0:
+		#		print i
+
 
 		return pulp.value(max_v.objective)
 
@@ -340,7 +343,25 @@ class Policy:
 
 		return q_value
 
-		
+	
+
+	def get_new_location(self, object_location, transformation, grid_size=[11,11]):
+		""" Returns new location of an object when performs the chosen move """
+		new_location = []
+		#Retrieve the agent's position in the grid
+		#Get the size of the environment
+		environment_size = grid_size
+		#Wrap edges to make grid toroidal
+		new_location.append((object_location[0] + transformation[0]) % environment_size[0])
+		new_location.append((object_location[1] + transformation[1]) % environment_size[1])
+		return new_location
+
+	def reward(self, state):
+		if state[0] == state[2] and state[1] == state[3]:
+			return 10
+		else:
+			return 0
+
 	def state_dict_to_state_distances(self, state_dict):
 		""" Calculate distance to all other agents using the dictionary of locations of all agents(=state)
 		Returns tuple of distances to other agents from current agent and ID of current agent

@@ -279,17 +279,18 @@ class Policy:
 				max_value = policy[reg_action]
 
 		prob_policy = self.get_encoded_policy(new_state)
+		second_prob = copy.deepcopy(prob_policy)
 		prob_policy, prob_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, prob_policy, grid_size=self.grid_size)
 
-		#Edit mixed policy
+		#Edit mixed
+
 		minus_step_size = step_size/(len(prob_policy) - 1) 
 		for action in prob_policy.keys():
 			if(action == max_action):
-				prob_policy[action] += step_size
+				second_prob[action] += step_size
 			else:
-				prob_policy[action] -= minus_step_size
-		self.prob_party_dict[new_state] = prob_policy
-		
+				second_prob[action] -= minus_step_size
+		self.prob_party_dict[new_state] = second_prob
 		#Retrieve Q-value of max action
 		new_move, new_max_action = self.get_greedy_action(s_prime, 0.0)
 		prime_agent_location = s_prime[agent_name]
