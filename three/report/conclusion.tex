@@ -1,10 +1,20 @@
 This section discusses the conclusions drawn from the analysis. %This report has discussed independent multi-agent learning as well as minimax learning in as zero-sum game.
 
 \subsection{Independent learning}
-Independent learning was performed in two different ways: Q-learning and SARSA. When more than 2 predators enter the grid, the predators lose the game more often than the prey. This is to be expected as the agents learn independently from one another. Though all agents act on what is best for them, they do not work together. Therefore, all agents must learn each others behaviour before being able to catch the prey without bumping into another predator. This takes very long and even then it is not certain that the predators will catch the prey. As all agents learn each others policies, the prey will also learn what the predators will do and may trick them into bumping into one another.
+Independent learning was performed in two different ways: Q-learning and SARSA. For 1 predator vs. 1 prey, the game can only be won by the predator. The predator does catch the prey in less and less time steps. The amount of rounds the predator needs still varies, but not as much as when exploring. Also, SARSA needs significantly more time steps to catch the prey at the start of the experiment than Q-learning. This is attributed to the fact that SARSA is a more careful algorithm than Q-learning.
+
+When two predators take on the prey, they learn to work together and catch the prey. This is the case for both Q-learning and SARSA.
+
+When more than 2 predators enter the grid, the predators lose the game more often than the prey. This is to be expected as the agents learn independently from one another. Though all agents act on what is best for them, they do not work together. Therefore, all agents must learn each others behaviour before being able to catch the prey without bumping into another predator. This takes very long and even then it is not certain that the predators will catch the prey. As all agents learn each others policies, the prey will also learn what the predators will do and may trick them into bumping into one another. 
+
+Eventually, the game becomes intractable when there are 4 predators vs. 1 prey.
 
 \subsubsection{Parameter settings}
-Parameters settings for both algorithms were tested. 
+Parameters settings for both algorithms were tested. For both algorithms it was shown that an immediate reward is very important ($\gamma$ is 0.2). In previous assignments, the future reward was most important. Therefore, it can be concluded that the introduction of negative rewards makes immediate rewards much more important.
+
+Both algorithms show that low exploration yields best results. As the algorithms learn more and more, a greedy policy starts yielding worse results. Therefore, it is important to keep exploring.
+
+The most interesting part comes from the learning rate. Both algorithms show that starting with a high learning rate and ending with a low learning rate yields best results. For optimal results, it is imperative to implement a decaying learning rate. This way, optimal results can be achieved.
 
 \subsection{Minimax Q-learning}
 Draw thine conclusions and place them here. Oh Romeo, Romeo. Wherefore art thou Romeo? :'(
