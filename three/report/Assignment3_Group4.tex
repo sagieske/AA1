@@ -9,8 +9,8 @@
 \usepackage{caption}
 \usepackage{mdframed}
 \usepackage{float}
+\setcounter{tocdepth}{5}
 %\usepackage{soul}
-
 
 \usepackage[backend=bibtex]{biblatex}
 \addbibresource{bibliography.bib}
@@ -43,9 +43,9 @@
 \section{Theory}
 
 \subsection{Independent Q-learning}
-In independent Q-learning, all the agents independently use Q-learning to maximize their expected reward.  \\ 
+In independent Q-learning, all agents independently use Q-learning to maximize their expected reward.  \\ 
 
-\noindent Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} itself is a temporal difference method that uses the update rule in equation \ref{eq:qupdate}. Because it retrieves the Q-value of the state-action pair where Q(s', a) is maximized, it is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
+\noindent Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} itself is a temporal difference method that uses the update rule in equation \ref{eq:qupdate}. Since the algorithm retrieves the Q-value of the state-action pair where Q(s', a) is maximized, this is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
 
 \begin{mdframed}
 \begin{align}
@@ -73,7 +73,8 @@ Repeat (for each episode):\\
 \end{center}
 
 
-
+\subsection{Independent Sarsa}
+\input{sarsa}
 
 
 \subsection{Minimax Q-Learning} 
@@ -108,8 +109,6 @@ Let alpha := alpha * decay
 % Update which one is the `other leanring'
 %\subsection{Friend-or-Foe}
 %\input{friend_or_foe}
-\subsection{Independent SARSA}
-\input{sarsa}
 
 \pagebreak
 
@@ -129,9 +128,9 @@ The implementation consists of the following files:
 	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
 	
 	\item[Other\_objects] \hfill \\ % uncertain about policy class description
-	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, Sarsa, $\epsilon$-greedy, softmax action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
+	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, Sarsa and $\epsilon$-greedy action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
 	\item[Newstate] \hfill \\ 
-	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs independent Q-learning, minimax Q-learning and independent SARSA. It uses $\epsilon$-greedy action selection. The results are printed in the command line and graphs are used for analysis.
+	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs independent Q-learning, minimax Q-learning and independent Sarsa. It uses $\epsilon$-greedy action selection. The results are printed in the command line and graphs are used for analysis.
 \end{description}
 
 \pagebreak
@@ -149,14 +148,15 @@ This section discusses the results of the implementations. In order to display a
 \item 0.1 epsilon ($\epsilon$)
 \end{itemize}
 
-When testing the implementation or parameters, the rest of the parameters remain as stated above.
+When testing the implementation or parameters, only the parameter under test changes. All other parameters have the default value as described above.
 
 \subsection{Independent Q-Learning}
 \input{ind_q_analysis}
-\subsection{Minimax Q-learning}
 
-\subsection{Independent SARSA}
+\subsection{Independent Sarsa}
 \input{ind_sarsa_analysis}
+
+\subsection{Minimax Q-learning}
 \pagebreak
 
 
