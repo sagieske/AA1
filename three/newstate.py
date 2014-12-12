@@ -511,8 +511,7 @@ if __name__ == "__main__":
 	avg_last_100_wins_list = []
 	avg_first_100_losses_list = []
 	avg_last_100_losses_list = []
-	#for eps in epsilon_rates:	
-	print "eps: ", epsilon
+	# factor in discount_factors:	
 	av_wins, av_losses, av_rounds, avg_first_100_wins, avg_last_100_wins, avg_first_100_losses, avg_last_100_losses = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
@@ -524,14 +523,15 @@ if __name__ == "__main__":
 		avg_last_100_losses_list.append(avg_last_100_losses)
 		plt.plot(av_wins, label="wins")
 		plt.plot(av_losses, label="losses")
-		
+	
 		# Used to be in title: "Predators vs. prey "
 		plt.ylabel('Predator average wins')
 
-	title = str('2 predators vs. 1 prey -> epsilon: ' + str(epsilon) +  ' alpha: ' + str(learning_rate) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+	title = str('2 predators vs. 1 prey -> learning_rate: ' + str(learning_rate) + 'discount factor' + str(discount_factor) + ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
 	#'predators: ' + str(amount_predators) +  ' gamma: ' + str(discount_factor)
 #	title = "2 predators vs. 1 prey: discount factors"
 
+	#print "RIGGED PREY!"
 	print "first 100 wins: ", avg_first_100_wins_list
 	print "last 100 wins: ", avg_last_100_wins_list
 	print "first 100 losses: ", avg_first_100_losses_list

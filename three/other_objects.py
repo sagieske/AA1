@@ -260,7 +260,9 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-                print 'Q-LEARNING'                
+                #print 'Q-LEARNING'
+		#if self.agent_name == "0":
+		#	learning_rate = 0.01        
                 
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 
@@ -292,7 +294,7 @@ class Policy:
 		
 		s_prime_distance = self.state_dict_to_state_distances(s_prime)[0]
 		
-		print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
+		#print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
 		#print 'state_dict_to_state_distances(s_prime)', self.state_dict_to_state_distances(s_prime)
 		
 		#print "newstdict ", s_prime, " distance ", s_prime_distance
@@ -437,7 +439,7 @@ class Policy:
 		new_state_dict = copy.deepcopy(s_prime)
 		
 		s_prime_distance = self.state_dict_to_state_distances(s_prime)[0]
-		print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
+		#print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
 		
 		# Get maximizing policy
 		max_policy = self.get_encoded_policy(s_prime_distance)

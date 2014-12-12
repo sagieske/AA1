@@ -40,11 +40,35 @@ As the table shows, the predators learn to catch the prey quicker over time.
 With four agents on the grid, the implementation became very slow. It was possible to run the implementation, but as it is very slow, the parameter changes have not been tested. However, figure -some-reference- shows the results of running three predators versus one prey. Due to time constraints and the amount of time it takes for the algorithm to calculate the all the states, this was for 1000 episodes. Contrary to the other testing approaches, this test was run once and so not averaged over several experiments.
 
 \begin{center}
-	\includegraphics[scale=0.3]{1000runs_3predators}
+	\includegraphics[scale=0.3]{3_predators_3_ex_1000_runs_q-learning}
 	\captionof{figure}{Independent Q-learning: 3 predators vs. 1 prey}
 \end{center}
 
-This figure shows that the predators lose the game a lot. This is interesting as it is expected of the predators to learn not to bump into one another. However, the grid is both toroidal as well as small and the prey learns. It is possible that the prey learning, combined with a small, toroidal grid, leads to the predators bumping into one another. Perhaps the prey learns to trick the predators into bumping into one another. Therefore, it is interesting to see what happens if the prey learns slower than the predators. By making the prey learn slower, theoretically it is possible for the predators to learn not to bump into one another and catch the prey. 
+This figure shows that the predators lose the game a lot. This is interesting as it is expected of the predators to learn not to bump into one another. However, the grid is both toroidal as well as small and the prey learns. It is possible that the prey learning, combined with a small, toroidal grid, leads to the predators bumping into one another. Perhaps the prey learns to trick the predators into bumping into one another. Therefore, it is interesting to see what happens if the prey learns slower than the predators. By making the prey learn slower, theoretically it is possible for the predators to learn not to bump into one another and catch the prey. In order to simulate this, the predators learn as stated in default, but the prey learns with a learning rate of 0.01. These results are shown in the next figure.
+
+\begin{center}
+	\includegraphics[scale=0.3]{smaller_learning_rate_prey}
+	\captionof{figure}{Independent Q-learning: 3 predators vs. 1 prey, slow learning prey}
+\end{center}
+
+The following table shows the results of the first- and last 100 wins and losses of the predators.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+ & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{Default learning rate} & 21 & 78 & 25 & 73 \\
+\hline
+\textbf{Low learning rate} & 23 & 76 & 31 & 68 \\
+\hline
+\end{tabular}
+\caption{Average number of wins and losses by the predators with varying learning rates}
+\end{center}
+\end{table}
+
+The results in table \# show that the predators do learn to catch the prey. When the prey learns slower, the predators manage to catch the prey more often in the same amount of time. Therefore, it can be concluded that the algorithm does learn the predators to cooperate and catch the prey. This just takes many episodes.
 
 \subsubsection{4 predators versus 1 prey}
 Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. This could be solved by using function approximation, for example using Kanerva coding \cite{wu2009function}, where a number of \textit{prototype} state-action pairs are selected, to be used for storing Q-values for similar state-action pairs. Another possible solution is to have the predators learn \textit{together}, meaning they share a Q-value grid and learn simultaneously. However, this is not truly independent Q-learning. 

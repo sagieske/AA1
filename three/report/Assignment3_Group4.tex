@@ -27,6 +27,7 @@
 
 \author{By Group 4: Gieske, Gornishka, Koster, Loor}
 \maketitle
+
 \pagebreak
 \tableofcontents
 
@@ -110,6 +111,8 @@ Let alpha := alpha * decay
 \subsection{Independent SARSA}
 \input{sarsa}
 
+\pagebreak
+
 \section{Implementation}
 
 \subsection{New state space}
@@ -135,7 +138,18 @@ The implementation consists of the following files:
 
 
 \section{Analysis}
-This section discusses the results of the implementations. In order to display and compare results, graphs are used. The title describes which parameters are analysed and the legend shows which color represents which setting of said parameters. Contrary to previous reports, tests were run 5 times with 2000 episodes. Eventually, the results were averaged and used for analysis.
+This section discusses the results of the implementations. In order to display and compare results, graphs are used. The title describes which parameters are analysed and the legend shows which color represents which setting of said parameters. Contrary to previous reports, tests were run 5 times with 2000 episodes. Eventually, the results were averaged and used for analysis. In order to analyse the results, several default parameters were established, based on the previous assignments. These are:
+
+\begin{itemize}
+\item 2000 runs
+\item 5 experiments
+\item 2 predators
+\item 0.9 discount factor ($\gamma$)
+\item 0.5 learning rate ($\alpha$)
+\item 0.1 epsilon ($\epsilon$)
+\end{itemize}
+
+When testing the implementation or parameters, the rest of the parameters remain as stated above.
 
 \subsection{Independent Q-Learning}
 \input{ind_q_analysis}
