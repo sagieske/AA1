@@ -91,7 +91,7 @@ class Game:
 		taken_actions = {}
 		for agent in self.agent_list:
 			if self.learning_type is not "SARSA":
-				agent_move, agent_action = agent.get_action(copy_old_state, epsilon)
+				 agent_action, agent_move = agent.get_action(copy_old_state, epsilon)
 			else:
 				agent_name = agent.get_name()
 				agent_move = action_dict.get(agent_name)[0]
