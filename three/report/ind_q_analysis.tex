@@ -81,7 +81,7 @@ Table \ref{table:3vs1} shows the results of the first- and last 100 wins and los
 
 The results in table \ref{table:3vs1} show that the predators do learn to catch the prey. When the prey learns slower, the predators manage to catch the prey more often in the same amount of time. Therefore, it can be concluded that the algorithm does learn the predators to cooperate and catch the prey. This just takes many episodes.
 
-\subsubsection{4 predators versus 1 prey}
+\subsubsection{4 predators versus 1 prey} \label{sec:intractable}
 Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. This could be solved by using function approximation, for example using Kanerva coding \cite{wu2009function}, where a number of \textit{prototype} state-action pairs are selected, to be used for storing Q-values for similar state-action pairs. Another possible solution is to have the predators learn \textit{together}, meaning they share a Q-value grid and learn simultaneously. However, this is not truly independent Q-learning. 
 
 \subsubsection{Parameter settings}
