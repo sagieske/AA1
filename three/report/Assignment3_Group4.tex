@@ -76,7 +76,7 @@ Repeat (for each episode):\\
 \end{center}
 
 
-\subsection{Independent Sarsa}
+\subsection{Independent SARSA}
 \input{sarsa}
 
 
@@ -132,9 +132,9 @@ The implementation consists of the following files:
 	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
 	
 	\item[Other\_objects] \hfill \\ % uncertain about policy class description
-	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, Sarsa and $\epsilon$-greedy action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
+	This file contains the Policy and Environment classes. The environment of the game as well as the rules are implemented in the Environment class. The Policy class contains the implementation of Q-Learning, SARSA and $\epsilon$-greedy action selection and more functions that help in determining and optimizing a policy as well as choosing an action of this policy.
 	\item[Newstate] \hfill \\ 
-	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs independent Q-learning, minimax Q-learning and independent Sarsa. It uses $\epsilon$-greedy action selection. The results are printed in the command line and graphs are used for analysis.
+	This file contains the Game class as well as a demonstration function. The Game class instantiates the game, initialized the predator and the prey and assigns policies to these. The game is run N times and the result is printed. The demonstration function also performs independent Q-learning, minimax Q-learning and independent SARSA. It uses $\epsilon$-greedy action selection. The results are printed in the command line and graphs are used for analysis.
 \end{description}
 
 \pagebreak
@@ -157,7 +157,7 @@ When testing the implementation or parameters, only the parameter under test cha
 \subsection{Independent Q-Learning}
 \input{ind_q_analysis}
 
-\subsection{Independent Sarsa}
+\subsection{Independent SARSA}
 \input{ind_sarsa_analysis}
 
 \subsection{Minimax Q-learning}

@@ -32,8 +32,37 @@ Graph \ref{graph:phc_2v1} shows that the predators win most episodes. As the num
 \hline
 \end{tabular}
 \caption{Average number of rounds two predators need to catch one prey}
-\label{table:2vs1}
+\label{table:phc_2vs1}
 \end{center}
 \end{table}
 
-Table \ref{table:2vs1} shows that the number of wins are indeed still increasing.
+Table \ref{table:phc_2vs1} shows that the number of wins are indeed still increasing.
+
+\subsubsection{3 predators vs. 1 prey}
+Due to time constraints, this test was performed on a smaller grid. Other than that, all other parameters are set to default. 
+
+\begin{center}
+	\includegraphics[scale=0.3]{phc_3predators_5by5_graph}
+	\captionof{figure}{Policy Hill-Climbing: 3 predators versus 1 prey, on a 5x5 grid}
+	\label{graph:phc_3v1}
+\end{center}
+
+The graph shows that the predators win more often than they lose. This shows that the policy hill-climbing performs better than independent Q-learning and independent SARSA.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+ & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{Predators} & 50 & 62 & 62 & 36 \\
+\hline
+\end{tabular}
+\caption{Average number of rounds two predators need to catch one prey}
+\label{table:phc_3vs1}
+\end{center}
+\end{table}
+
+The results in table \ref{table:phc_3vs1} shows that the predators are more and more successful in catching the prey. 
+
+As this grid is smaller than the 11x11 grid, it is possible that this algorithm performs differently on the 11x11 grid. Therefore, these results are not completely reliable for analysis.
