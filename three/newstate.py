@@ -8,7 +8,7 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from other_objects_sharon_minimax import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
@@ -103,7 +103,7 @@ class Game:
 				agent_move = [0,0]
 				#print 'THE PREY BROKE ITS LEG AND TRIPPED!'
 				
-			new_location = self.get_new_location(agent.get_name(), agent_move)
+			new_location = self.get_new_location(agent.get_name(), agent_move, grid_size=self.environment.grid_size)
 			self.environment.move_object(agent.get_name(), new_location)
 		#Retrieve the new state (location per agent)
 		new_locations = self.environment.get_state()
@@ -151,7 +151,7 @@ class Game:
 				opponent_name = str((int(agent_name)+1)%2)
 				opponent_action = taken_actions[opponent_name]
 				
-				print 'all actions taken:', taken_actions
+				#print 'all actions taken:', taken_actions
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(agent_action, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list, learning_type)
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
@@ -189,7 +189,7 @@ class Game:
 		return prey_caught, predators_bumped, new_action_dict
 
 
-	def get_new_location(self, chosen_object, chosen_move):
+	def get_new_location(self, chosen_object, chosen_move, grid_size=[11,11]):
 		""" Returns new location of an object when performs the chosen move """
 		new_location = []
 		#Retrieve the agent's position in the grid
@@ -284,19 +284,21 @@ class Game:
 		else:
 			return 0.05
 
-def reset_agents(location_dict):
+def reset_agents(location_dict, grid_size):
 	#reset agents to original place on board!
+
 	for agent in location_dict:
 		if agent == "0":
-			location_dict["0"] = [5,5]
+			location_dict["0"] = [0,0]
 		elif agent == "1":
-			location_dict["1"] = [0,0]
+			location_dict["1"] = [grid_size[0]/2,grid_size[1]/2]
 		elif agent == "2":
-			location_dict["2"] = [10,10]
+				location = [grid_size[0]-1,grid_size[1]-1]
 		elif agent == "3":
-			location_dict["3"] = [10,0]
+			location_dict["3"] = [grid_size[0]-1,0]
 		elif agent == "4":
-			location_dict["4"] = [0,10]
+			location_dict["4"] = [0,grid_size[1]-1]
+
 
 	return location_dict
 
@@ -314,21 +316,23 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		print "initializing prey..."
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0', learning_type=learning_type)
 		agent_list = [Prey(prey_pol, str(0))]
-		#Prey has a name 0 and a location 5,5
-		location_dict = {"0": [5,5]}
+		#Prey has a name 0 and is in middle of the grid
+		location_dict = {"0": [grid_size[0]/2,grid_size[1]/2]}
 		for i in range(0, amount_predators):
 			print "initializing predator ", i, "..."
 			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1), learning_type=learning_type)
 			agent_list.append(Predator(pred_pol, str(i+1)))
 			if(i == 0):
 				location = [0,0]
+				#location = [5,5]
 			elif(i==1):
-				location = [10,10]
+				location = [grid_size[0]-1,grid_size[1]-1]
 			elif(i==2):
-				location = [10,0]
+				location = [grid_size[0]-1,0]
 			elif(i==3):
-				location = [0,10]
+				location = [0,grid_size[1]-1]
 			location_dict[str(i+1)] = location
+		reset_dict = copy.deepcopy(location_dict)
 		total_rounds = 0
 		rounds_list = []
 	#If we're using off-policy MC, initialize game/predator differently to allow separated learn/test runs
@@ -374,7 +378,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			win_list.append(cumulative_wins)
 			lose_list.append(cumulative_losses)
 
-			location_dict = reset_agents(location_dict)
+			location_dict = reset_agents(reset_dict, grid_size)
 			game = Game(grid_size=grid_size, softmax=softmax, learning_type=learning_type, agent_list=agent_list, location_dict=location_dict)
 
 			#Add rounds needed in test episode to total_rounds	

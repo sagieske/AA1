@@ -134,23 +134,6 @@ class Policy:
 			# Initialize q-values for all possible distances (distance_state) from prey as dictionaries 
 			# with possible new distances from that distance_state
 			
-			
-			'Do we use this?!'
-			#self.distance_dict = {}
-			#for i,j in distances:
-			#	possible_states_dict = {}
-			#	new_possible_states = [[i,j], [i-1,j], [i+1, j], [i, j-1], [i, j+1]]
-			#	for possible_state in new_possible_states:
-			#		# impossible states
-			#		if possible_state[0] < 0 or possible_state[0] == self.grid_size[0] or possible_state[1] < 0 or possible_state[1] == self.grid_size[0]:
-			#			continue
-			#		# Initialize as 15
-			#		possible_states_dict[tuple(possible_state)] = 15.0
-			#	# Initialize total distance dictionary
-			#	self.distance_dict[(i,j)] = possible_states_dict
-
-	
-				
 			#Create all possible combination for distances
 			distances_agent = list(itertools.product(range_max_distance_x , range_max_distance_y))
 			list_distance_agent = [distances_agent] * (amount_agents-1)
@@ -200,6 +183,7 @@ class Policy:
 					inner_dict[item] = 1.0
 				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
+
 
 
 		self.softmax = softmax
@@ -257,7 +241,7 @@ class Policy:
 	def return_state_policy(self,s):
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 		policy = self.get_encoded_policy(new_state)
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy, grid_size=self.grid_size)
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
@@ -268,7 +252,7 @@ class Policy:
 		#Get policy encoded
 		policy = self.get_encoded_policy(new_state)
 		#Get reachable states fr0om this state
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy, grid_size=self.grid_size)
 
 		#Get current Q-value
 		current_q = policy[new_state]
@@ -284,7 +268,7 @@ class Policy:
 		#Get the q-value for the new state and its max action
 		#new_q_value = self.get_policy(new_state)[new_max_action]
 		prime_agent_location = s_prime[agent_name]
-		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
+		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move, grid_size=self.grid_size)
 		#print "old: ", prime_agent_location
 		#print "max: ", max_prime_agent_location
 
@@ -306,7 +290,7 @@ class Policy:
 
 
 		
-		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
+		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy, grid_size=self.grid_size)
 		max_q = max_policy[s_prime_distance]
 
 		updated_q_value = current_q + learning_rate * (reward + discount_factor * max_q - current_q)
@@ -314,9 +298,9 @@ class Policy:
 		#print "Current q: ", updated_q_value, " new q: ", updated_q_value
 		
 		# Transform current location to new location using chosen action a
-		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
+		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a],grid_size=self.grid_size)
 		# Calculate the distance to all other agents from this chosen distance (while they stand still)
-		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s)
+		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s, grid_size=self.grid_size)
 
 		# Update in distance dictionary
 		#print "old Q value:", self.party_dict[new_state][new_distances_to_agents]
@@ -350,7 +334,7 @@ class Policy:
 
 		#Get reachable states from this state
 		# TODO: feasible actions removes +2 states etc?
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy)
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy, grid_size=self.grid_size)
 
 		#Get current Q-value
 		current_q = policy[current_state_dist]
@@ -365,7 +349,7 @@ class Policy:
 
 		#Get the q-value for the new state and its max action
 		prime_agent_location = s_prime[agent_name]
-		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move)
+		max_prime_agent_location = self.get_new_location(prime_agent_location, new_move, grid_size=self.grid_size)
 
 		new_state_dict = copy.deepcopy(s_prime)
 		
@@ -374,13 +358,13 @@ class Policy:
 		
 		# Get maximizing policy
 		max_policy = self.get_encoded_policy(s_prime_distance)
-		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy)
+		max_policy, max_policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s_prime), agent_name, max_policy, grid_size=self.grid_size)
 		max_q = max_policy[s_prime_distance]
 
 
 
 		# Transform current location to new location using chosen action a
-		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a])
+		agent_new_state = helpers.get_new_location(s[agent_name], self.actions[a], grid_size= self.grid_size)
 		# Calculate the distance to all other agents from this chosen distance (while they stand still)
 		# TODO: minimax policy and value s prime
 		minimax_policy = None
@@ -410,7 +394,7 @@ class Policy:
 		#print value
 
 		#print self.minimize(s, agent_name, a)
-		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s_prime)
+		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s_prime, grid_size=self.grid_size)
 
 
 		# Update q value in dictionary using (1-alpha) Q(s,a,o) + alpha * (R + discount V(s'))
@@ -466,7 +450,7 @@ class Policy:
 		print "current policy:", self.party_dict[current_state_distance]
 		#Get policy encoded using current distance state
 		policy = self.get_encoded_policy(current_state_distance)
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy( current_state_dict), agent_name, policy)
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy( current_state_dict), agent_name, policy, grid_size=self.grid_size)
 		print "new policy:", policy
 		print "new policy2:", policy_with_action
 		#helpers.get_feasible_actions(current_state_distance, agent_name, max_policy)
@@ -481,14 +465,14 @@ class Policy:
 		"""
 		new_state = copy.deepcopy(state)
 		# Get new location for agent
-		agent_new_state = helpers.get_new_location(state[agent_name], self.actions[action])
+		agent_new_state = helpers.get_new_location(state[agent_name], self.actions[action], grid_size=self.grid_size)
 		new_state[agent_name] = agent_new_state
 		# Get name of other agent
 		other_agents = state.keys()
 		del other_agents[other_agents.index(agent_name)]
 		other_agents_name = other_agents[0]
 		# Get new location for other agent
-		other_agent_new_state = helpers.get_new_location(state[other_agents_name], self.actions[opponent_action])
+		other_agent_new_state = helpers.get_new_location(state[other_agents_name], self.actions[opponent_action], grid_size=self.grid_size)
 		new_state[other_agents_name] = other_agent_new_state
 		q_value = self.party_dict[self.state_dict_to_state_distances(state)[0]][self.state_dict_to_state_distances(new_state)[0]]
 
@@ -510,12 +494,12 @@ class Policy:
 
 		
 
-	def get_new_location(self, object_location, transformation):
+	def get_new_location(self, object_location, transformation, grid_size=[11,11]):
 		""" Returns new location of an object when performs the chosen move """
 		new_location = []
 		#Retrieve the agent's position in the grid
 		#Get the size of the environment
-		environment_size = self.grid_size
+		environment_size = grid_size
 		#Wrap edges to make grid toroidal
 		new_location.append((object_location[0] + transformation[0]) % environment_size[0])
 		new_location.append((object_location[1] + transformation[1]) % environment_size[1])
@@ -562,7 +546,7 @@ class Policy:
 		#dist_to_action = helpers.distance_to_action(new_state, self.agent_name, self.location_dict)
 		policy = self.get_encoded_policy(new_state)
 
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(state), agent_name, policy)
+		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(state), agent_name, policy, grid_size=self.grid_size)
 
 		#test_policy = {}
 		#for key, value in self.distance_dict[tuple(current_xy)].iteritems():
