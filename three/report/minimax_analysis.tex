@@ -36,3 +36,12 @@ In comparison with the Q-learning algorithm for the same parameters (Figure \ref
 	\captionof{figure}{Q-learning: 1 predator versus 1 prey, with discount factor of 0.2}
 	\label{graph:Q1vs1_disc_02_50exp}
 \end{center}
+
+
+Different learning rates for Minimax-Q are also implemented and the results can be found in Figure \ref{graph:Minimax_1vs1_learning_rates_50exp}. It shows that even though the experiments with a learning rate of 0.2 are not the first to approximate converge, it show less high peaks, i.e. more steps to catch the prey, over the long run than the other learning rates. This result has also been found in independent Q-learning (Section \ref{learning_rate_ch}).
+
+\begin{center}
+	\includegraphics[scale=0.3]{minimax_50runs_20exp_learning_rates}
+	\captionof{figure}{Q-learning: 1 predator versus 1 prey, with different learning rates}
+	\label{graph:Minimax_1vs1_learning_rates_50exp}
+\end{center}
