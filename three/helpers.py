@@ -6,7 +6,7 @@ import random
 import time
 import pdb
 
-def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
+def get_feasible_actions(state, agent_name, policy, grid_size=[5,5]):
 	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 	action_q_values = {}
 	distance_action = {}
@@ -51,7 +51,7 @@ def get_all_distances_to_agents(agent_name, agent_new_state, state_dict):
 	for agent in agent_list:
 		# Only calculate for other agents
 		if agent != agent_name:
-			dist = tuple(xy_distance([agent_new_state[0], agent_new_state[1], state_dict[agent][0], state_dict[agent][1]], [11,11]))
+			dist = tuple(xy_distance([agent_new_state[0], agent_new_state[1], state_dict[agent][0], state_dict[agent][1]], [5,5]))
 			local_list.append(dist)
 		
 	# Convert to tuple
@@ -59,7 +59,7 @@ def get_all_distances_to_agents(agent_name, agent_new_state, state_dict):
 	return dist_tuple
 
 #SHOULD BE OBSOLETE
-def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,11]):
+def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[5,5]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -86,7 +86,7 @@ def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,1
 		amount_distances = len(new_distance)
 		for agent in agent_list:
 			if agent != agent_name:
-				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [11,11]))
+				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [5,5]))
 				if new_distance[int(agent)-1] == action_distance:
 					amount_correct_actions+=1
 					if amount_correct_actions == amount_distances:
@@ -97,7 +97,7 @@ def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,1
 	return random_action, actions[random_action]
 
 #SHOULD BE OBSOLETE
-def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
+def distance_to_action(state, agent_name, new_distance, grid_size=[5,5]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -127,7 +127,7 @@ def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
 			if agent != agent_name:
 				#print "checking for agent: ", agent, " vs: ", agent_name
 				#print "goal new distance: ", new_distance
-				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [11,11]))
+				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], [5,5]))
 				
 				# check if we are in the list
 				if action_distance in new_distance:
@@ -155,9 +155,9 @@ def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
 def action_to_distance(current_state, action):
 	predator_state = [current_state[0],current_state[1]]
 	prey_state = [current_state[2],current_state[3]]
-	grid_size = [11,11]
+	grid_size = [5,5]
 	new_state = get_new_location(predator_state,action)
-	action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [11,11])
+	action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [5,5])
 
 
 
@@ -166,7 +166,7 @@ def get_new_location(object_location, transformation):
 	new_location = []
 	#Retrieve the agent's position in the grid
 	#Get the size of the environment
-	environment_size = [11,11]
+	environment_size = [5,5]
 	#Wrap edges to make grid toroidal
 	new_location.append((object_location[0] + transformation[0]) % environment_size[0])
 	new_location.append((object_location[1] + transformation[1]) % environment_size[1])
@@ -326,7 +326,7 @@ def pretty_print_latex(matrix, label, indices=True):
 	print "\\end{tabular}"
 
 
-def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[11,11]):
+def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[5,5]):
 	""" Create full grid from partial grid created by encoded state space for policy grid"""
 	full_grid = np.zeros((gridsize[0],gridsize[1]))
 

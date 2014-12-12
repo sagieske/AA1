@@ -8,7 +8,7 @@ from math import ceil, floor
 import pdb
 from agents_new import Predator, Prey
 import helpers
-from other_objects import Environment, Policy
+from other_objects_sharon_minimax import Environment, Policy
 import matplotlib.pyplot as plt
 import copy
 
@@ -151,7 +151,7 @@ class Game:
 				opponent_name = str((int(agent_name)+1)%2)
 				opponent_action = taken_actions[opponent_name]
 				
-				print 'all actions taken:', taken_actions
+				#print 'all actions taken:', taken_actions
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(agent_action, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list, learning_type)
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
@@ -288,15 +288,15 @@ def reset_agents(location_dict):
 	#reset agents to original place on board!
 	for agent in location_dict:
 		if agent == "0":
-			location_dict["0"] = [5,5]
+			location_dict["0"] = [2,2]
 		elif agent == "1":
 			location_dict["1"] = [0,0]
 		elif agent == "2":
-			location_dict["2"] = [10,10]
+			location_dict["2"] = [4,4]
 		elif agent == "3":
-			location_dict["3"] = [10,0]
+			location_dict["3"] = [4,0]
 		elif agent == "4":
-			location_dict["4"] = [0,10]
+			location_dict["4"] = [0,4]
 
 	return location_dict
 
@@ -315,7 +315,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		prey_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name='0', learning_type=learning_type)
 		agent_list = [Prey(prey_pol, str(0))]
 		#Prey has a name 0 and a location 5,5
-		location_dict = {"0": [5,5]}
+		location_dict = {"0": [2,2]}
 		for i in range(0, amount_predators):
 			print "initializing predator ", i, "..."
 			pred_pol = Policy(grid_size, amount_agents=amount_predators+1, agent_name=str(i+1), learning_type=learning_type)
@@ -323,11 +323,11 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			if(i == 0):
 				location = [0,0]
 			elif(i==1):
-				location = [10,10]
+				location = [4,4]
 			elif(i==2):
-				location = [10,0]
+				location = [4,0]
 			elif(i==3):
-				location = [0,10]
+				location = [0,4]
 			location_dict[str(i+1)] = location
 		total_rounds = 0
 		rounds_list = []
@@ -336,7 +336,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		average_list = []
 		counter=0
 		current_rounds=0
-	
+
 
 
 		cumulative_losses = 0
@@ -348,6 +348,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		last_100_wins = 0
 		last_100_losses = 0
 		for x in range(0, N):
+			print "Round ", x, " in experiment ", y
 			#print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
 			#If we're using off-policy MC, initialize a learning and then a testing episode
@@ -465,7 +466,7 @@ if __name__ == "__main__":
 	discount_factor = 0.9
 	learning_rate = 0.5
 	epsilon = 0.1
-	grid_size = 11
+	grid_size = 5
 	softmax = False	
 	learning_type = "Minimax"
 	amount_predators = 1
