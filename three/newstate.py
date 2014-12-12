@@ -74,15 +74,7 @@ class Game:
 		#return steps, self.predator.get_policy_grid()
 		return steps, prey_caught, predators_bumped
 
-	def relative_xy(self, location1, location2):
-		""" Get relative(shortest) distance between two locations using the toroidal property"""
-		# Get grid size of the game
-		grid_size = self.environment.get_size()
-		# Get relative distance to prey using toroidal property
-		distance_x = min(abs(state_prey[0] - state_predator[0]), abs(grid_size[0] - abs(state_prey[0] - state_predator[0])))
-		distance_y = min(abs(state_prey[1] - state_predator[1]), abs(grid_size[1] - abs(state_prey[1] - state_predator[1])))
-		return [distance_x, distance_y]
-
+	
 	def turn(self, old_state, learning_rate, discount_factor, epsilon, steps, action_dict=None):
 		""" Plays one turn for prey and predator. Choose their action and adjust their state and location accordingly """
 		#Get each agent's new location and move them within the environment
@@ -167,23 +159,6 @@ class Game:
 		
 		
 		
-		#if(self.learning_type == 'Minimax'):
-		#	s = copy_old_state
-		#	s_prime = self.environment.get_state()
-		#	
-		#	for agent in self.agent_list:
-		#		agent_name = agent.get_name()
-		#		agent_action = taken_actions[agent_name]
-		#
-		#		opponent_name = str((int(agent_name)+1)%2)
-		#		opponent_action = taken_actions[opponent_name]
-		#		
-		#		print 'all actions taken:', taken_actions
-		#		#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
-		#		agent.Minimax_q_learning(agent_action, opponent_action, s_prime, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list)
-		#		#print "pol: ", agent.policy_grid.return_state_policy(s)
-		#
-		
 
 		#Return caught or not
 		return prey_caught, predators_bumped, new_action_dict
@@ -229,60 +204,8 @@ class Game:
 		      if new_location == new_state:
 		          return action
 
-	def wrap_state(self, state, gridsize, encoding):
-		""" Wrap states for non-encoding for toroidal grid"""
-		# Only wrap for non-encoding
-		if not encoding:
-			temp_state = state
-			state[0] = temp_state[0] % gridsize[0]
-			state[1] = temp_state[1] % gridsize[1]
-		return state
 
-	def reward(self, old_state, new_state, action):
-		""" Calculate reward for transition from old state to new state"""
-		if old_state[0] == old_state[2] and old_state[1] == old_state[3]:
-			return 0
-		elif new_state[0] == new_state[2] and new_state[1] == new_state[3]:
-			return 10
-		else:
-			return 0
 
-	def transition(self, old_state, new_state, action):
-		""" Calculate transition value from old state to new state """
-		old_predator_state = [old_state[0], old_state[1]]
-		old_prey_state = [old_state[2], old_state[3]]
-		new_predator_state = [new_state[0], new_state[1]]
-		new_prey_state = [new_state[2], new_state[3]]
-		new_location = self.get_new_state_location(old_predator_state, action)
-
-		# Check if predator can move to its new location given action
-		if(new_predator_state == new_location):
-			is_allowed = 1
-		elif(new_prey_state == old_predator_state):
-			is_allowed = 0
-		else:
-			is_allowed = 0
-		# Get probability of prey moving to new prey state
-		if(new_prey_state == old_prey_state):
-			prey_probability = 0.8
-		else:
-			prey_probability = 0.05
-		return is_allowed * prey_probability
-
-	def predator_transition(self, old_state, new_state, action):
-		""" Calculate if predator can move to new state """
-		new_location = self.get_new_state_location(old_state, action)
-		if(new_state == new_location):
-			return 1
-		else:
-			return 0
-
-	def prey_transition(self, old_state, new_state, action):
-		""" Calculate probability of prey moving to new prey state """
-		if old_state == new_state:
-			return 0.8
-		else:
-			return 0.05
 
 def reset_agents(location_dict, grid_size):
 	#reset agents to original place on board!
@@ -300,6 +223,7 @@ def reset_agents(location_dict, grid_size):
 			location_dict["4"] = [0,grid_size[1]-1]
 
 	return location_dict
+
 
 def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_predators=2, softmax=False, verbose=0, learning_type='Q-learning', experiments=5):
 	""" Run N episodes and compute average """
@@ -471,7 +395,7 @@ if __name__ == "__main__":
 	epsilon = 0.1
 	grid_size = 5
 	softmax = False	
-	learning_type = "Minimax"
+	learning_type = "Q-learning"
 	amount_predators = 1
 	Y = 5
 
