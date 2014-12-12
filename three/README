@@ -1,0 +1,29 @@
+==========MULTI-AGENT LEARNING==========
+To test and compare the different algorithms, you may call the file "newstate.py" and set it with a number of different parameters.
+For the case of 1 predator and one prey it will output a plot with on the y-axis the amount of steps needed per episode (averaged over all the experiments) and on the x-axis the amount of episodes that have passed.
+For the case of more than 1 predator and one prey it will output a plot with on the y-axis cumulative wins and losses from the perspective of the predator (averaged over all the experiments) and on the x-axis the amount of episodes that have passed.
+==========SETTING PARAMETERS==========
+The different parameters may be set as follows:
+Flag               |     Default value     | Function
+-----------------------------------------------
+-runs              | 100                   | How many episodes should be run
+-experiments       | 5x5                   | Number of experiments to average over 
+-discount          | 0.9                   | Discount factor
+-learning_rate     | 0.5                   | Learning rate
+-epsilon           | 0.1                   | Exploration rate/temperature (if softmax)
+-predators		   | 2	                   | Amount of predators to take part in the game (1, 2, 3 or 4). Note: computation is extremely slow for 3 predators and it becomes intractable for 4. 
+-learning_type     | "Q-learning"          | Which learning algorithm to use ("Q-learning", "Sarsa", "Minimax")
+-softmax           | False                 | Turns softmax on if string "yes" is supplied
+-grid_size         | 11                    | Creates nxn grid with n=grid_size. Note: prey is initialized at 5x5 so grids smaller than 6x6 don't work
+-verbose           | 2                     | Different levels of output, 0,1 or 2. 0 outputs least, 2 outputs most.
+=========DEMO RUN==========
+To run independent Q-learning for 1 prey and 2 predators, for 2000 episodes, with exploration rate 0.1, discount factor 0f 0.9 and learning rate of 0.5 and average results over 5 experiments, you may enter the following into the command line:
+
+python newstate.py -runs 2000 -experiments 5 -predators 2 -epsilon 0.1 -softmax yes -discount 0.9 -learning_rate 0.5 -learning_type Q-learning 
+
+==========POLICY HILL CLIMBING==========
+In order to test Policy Hill Climbing, navigate to the policy_climbing folder. 
+The parameters are exactly the same as explained above, but learning_type should be always "Q-learning".
+Once you are in the policy_climbing folder, to run Policy Hill Climbing for 1 prey and 2 predator, for 2000 episodes, with exploration rate 0.1, discount factor 0f 0.9 and learning rate of 0.5 and average results over 5 experiments, you may enter the following into the command line:
+
+python newstate.py -runs 2000 -experiments 5 -predators 2 -epsilon 0.1 -softmax yes -discount 0.9 -learning_rate 0.5 -learning_type Q-learning 

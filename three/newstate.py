@@ -388,8 +388,6 @@ if __name__ == "__main__":
 		Y = vars(args)['experiments']
 	if(vars(args)['learning_type'] is not None):
 		learning_type = vars(args)['learning_type']
-	if(vars(args)['runs'] is not None):
-		N = vars(args)['runs']
 	if(vars(args)['predators'] is not None):
 		amount_predators = vars(args)['predators']
 	if(vars(args)['softmax'] is not None):
