@@ -7,7 +7,6 @@ import time
 import pdb
 
 def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
-
 	actions = {'North': [-1,0], 'East': [0,1], 'South': [1,0], 'West': [0,-1], 'Wait': [0,0]}
 	action_q_values = {}
 	distance_action = {}
@@ -58,7 +57,7 @@ def get_all_distances_to_agents(agent_name, agent_new_state, state_dict, grid_si
 	return dist_tuple
 
 #SHOULD BE OBSOLETE
-def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,11]):
+def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[5,5]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -96,7 +95,7 @@ def distance_to_action_ORIGINAL(state, agent_name, new_distance, grid_size=[11,1
 	return random_action, actions[random_action]
 
 #SHOULD BE OBSOLETE
-def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
+def distance_to_action(state, agent_name, new_distance, grid_size=[5,5]):
 	"""
 	Given the new chosen distance, return corresponding action
 	"""
@@ -124,14 +123,11 @@ def distance_to_action(state, agent_name, new_distance, grid_size=[11,11]):
 		amount_distances = len(new_distance)
 		for agent in agent_list:
 			if agent != agent_name:
-				#print "checking for agent: ", agent, " vs: ", agent_name
-				#print "goal new distance: ", new_distance
 				action_distance = tuple(xy_distance([new_state[0], new_state[1], state[agent][0], state[agent][1]], grid_size))
 				
 				# check if we are in the list
 				if action_distance in new_distance:
 					amount_correct_actions+=1
-					#print "amount correct actions: ", amount_correct_actions, " amount dists: ", amount_distances
 					# if we are, store action!
 					possible_actions.append(name)
 					if amount_correct_actions == amount_distances:
@@ -155,9 +151,10 @@ def action_to_distance(current_state, action):
 	predator_state = [current_state[0],current_state[1]]
 	prey_state = [current_state[2],current_state[3]]
 	grid_size = [11,11]
-	print "NO"
+	print "NO THIS WAS NOT USED ANYMORE"
 	new_state = get_new_location(predator_state,action, grid_size=grid_size)
 	action_distance = xy_distance([new_state[0], new_state[1]], prey_state, [11,11])
+
 
 
 
@@ -326,7 +323,7 @@ def pretty_print_latex(matrix, label, indices=True):
 	print "\\end{tabular}"
 
 
-def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[11,11]):
+def full_policy_grid_from_encoding(goal_state, encoded_grid, gridsize=[5,5]):
 	""" Create full grid from partial grid created by encoded state space for policy grid"""
 	full_grid = np.zeros((gridsize[0],gridsize[1]))
 

@@ -289,16 +289,15 @@ def reset_agents(location_dict, grid_size):
 
 	for agent in location_dict:
 		if agent == "0":
-			location_dict["0"] = [0,0]
-		elif agent == "1":
 			location_dict["1"] = [grid_size[0]/2,grid_size[1]/2]
+		elif agent == "1":
+			location_dict["0"] = [0,0]
 		elif agent == "2":
-				location = [grid_size[0]-1,grid_size[1]-1]
+			location = [grid_size[0]-1,grid_size[1]-1]
 		elif agent == "3":
 			location_dict["3"] = [grid_size[0]-1,0]
 		elif agent == "4":
 			location_dict["4"] = [0,grid_size[1]-1]
-
 
 	return location_dict
 
@@ -324,13 +323,13 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 			agent_list.append(Predator(pred_pol, str(i+1)))
 			if(i == 0):
 				location = [0,0]
-				#location = [5,5]
 			elif(i==1):
 				location = [grid_size[0]-1,grid_size[1]-1]
 			elif(i==2):
 				location = [grid_size[0]-1,0]
 			elif(i==3):
 				location = [0,grid_size[1]-1]
+
 			location_dict[str(i+1)] = location
 		reset_dict = copy.deepcopy(location_dict)
 		total_rounds = 0
@@ -340,7 +339,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		average_list = []
 		counter=0
 		current_rounds=0
-	
+
 
 
 		cumulative_losses = 0
@@ -352,6 +351,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		last_100_wins = 0
 		last_100_losses = 0
 		for x in range(0, N):
+			print "Round ", x, " in experiment ", y
 			#print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
 			#If we're using off-policy MC, initialize a learning and then a testing episode
@@ -469,7 +469,7 @@ if __name__ == "__main__":
 	discount_factor = 0.9
 	learning_rate = 0.5
 	epsilon = 0.1
-	grid_size = 11
+	grid_size = 5
 	softmax = False	
 	learning_type = "Minimax"
 	amount_predators = 1
