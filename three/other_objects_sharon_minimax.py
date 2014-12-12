@@ -197,7 +197,7 @@ class Policy:
 				possible_new_state_combos = list(itertools.product(*possible_variations))
 				# Initialize every item to 15
 				for item in possible_new_state_combos:
-					inner_dict[item] = 15.0
+					inner_dict[item] = 1.0
 				# Add this dictionary of new possible distances as value to party dict where key is current distance to other agents.
 				self.party_dict[key] = inner_dict
 
@@ -339,7 +339,10 @@ class Policy:
 		a: 		action name (str) of action taken by agent
 		opponent_action: action name (str) of action taken by other agent
 		"""
-                print 'MINIMAX'
+		
+                #print 'MINIMAX'
+		if self.agent_name == '0':
+			learning_rate = 0.01
 		current_state_dist, agent_name = self.state_dict_to_state_distances(s)
 
 		#Get policy encoded using current distance state
@@ -367,7 +370,7 @@ class Policy:
 		new_state_dict = copy.deepcopy(s_prime)
 		
 		s_prime_distance = self.state_dict_to_state_distances(s_prime)[0]
-		print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
+		#print 's_prime_distance for agent', agent_name, ', s_prime', s_prime, 'and s', s, 'is: ', s_prime_distance
 		
 		# Get maximizing policy
 		max_policy = self.get_encoded_policy(s_prime_distance)
@@ -387,25 +390,26 @@ class Policy:
 
 		# possible actions
 		actions = ['West', 'East', 'North','South','Wait']
-		x = pulp.LpVariable.dicts('a', actions, lowBound = 0,upBound = 1, cat = pulp.LpInteger)
-		minimize_o = pulp.LpProblem("Minimize oppononets action",  pulp.LpMinimize)
- 
-		# objextive function TODO: THIS DOES NOT WORK
-		#minimize_o += sum([self.get_qvalue_minimax(s, agent_name, a, o) * x[o] for o in actions for a in actions])
-		# This somehow does work?!
-		minimize_o += sum([self.test_min(o) * x[o] for o in actions])
 
+		maximize_a = pulp.LpProblem("Maximize my action",  pulp.LpMaximize)
+
+		# Create dictionary with all values for agent
+		test_dict = {}
+		for i in actions:
+			test_dict[i] =  self.minimize(s, agent_name, a)
+		action_vars = pulp.LpVariable.dicts("a",actions,0)
+		maximize_a += pulp.lpSum([test_dict[i] * action_vars[i] for i in actions])
+		maximize_a += pulp.lpSum([action_vars[i] for i in actions]) == 1
 		# solve
-		minimize_o.solve()
+		maximize_a.solve()
 
-		print "The choosen tables are out of a total of %s:"%len(actions)
-		for o in actions:
-			print x[o].value()
-			if x[o].value() == 1.0:
-				print o
+		#print "hello"
+		for action in actions:
+		    if action_vars[action].value() == 1.0:
+			value = self.minimize(s, agent_name, a)
+		#print value
 
-		sys.exit()
-		value =  self.get_value_for_minimax(agent_name, minimax_policy, s, current_state_dist)
+		#print self.minimize(s, agent_name, a)
 		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s_prime)
 
 
@@ -413,7 +417,33 @@ class Policy:
 		updated_q_value = (1-learning_rate) * current_q + learning_rate * (reward + discount_factor * value)
 		self.party_dict[current_state_dist][new_distances_to_agents] = updated_q_value
 
+
 		return self.party_dict[current_state_dist][new_distances_to_agents]
+
+	def minimize(self,s, agent_name, a):
+		# possible actions
+		actions = ['West', 'East', 'North','South','Wait']
+
+		minimize_o = pulp.LpProblem("Minimize oppononets action",  pulp.LpMinimize)
+
+		# Create dictionary with all values for agent
+		test_dict = {}
+		for i in actions:
+			test_dict[i] = self.get_qvalue_minimax(s, agent_name, a, i)
+		policy = {'West': 0.2, 'East': 0.2, 'North': 0.2,'South': 0.2,'Wait': 0.2}
+
+
+		action_vars = pulp.LpVariable.dicts("a",actions,0)
+		minimize_o += sum([self.get_qvalue_minimax(s, agent_name, a, i) * action_vars[i] * policy[i] for i in actions])
+		minimize_o += pulp.lpSum([action_vars[i] for i in actions]) == 1
+		# solve
+		minimize_o.solve()
+
+		for action in actions:
+		    if action_vars[action].value() == 1.0:
+			return self.get_qvalue_minimax(s, agent_name, a, action)
+		# Randomly return?
+		return self.get_qvalue_minimax(s, agent_name, a, 'Wait')	
 
 	def test_min(self, action):
 		"""
@@ -463,18 +493,19 @@ class Policy:
 		q_value = self.party_dict[self.state_dict_to_state_distances(state)[0]][self.state_dict_to_state_distances(new_state)[0]]
 
 		# Randomly added to check pulp function
-		print opponent_action
-		if opponent_action == 'Wait':
-			q_value = 16
-		if opponent_action == 'North':
-			q_value = 10
-		if opponent_action == 'East':
-			q_value = 11
-		if opponent_action == 'South':
-			q_value = 2
-		print 'q', q_value
+		#print opponent_action
+		#if opponent_action == 'Wait':
+		#	q_value = 16
+		#if opponent_action == 'North':
+		#	q_value = 2
+		#if opponent_action == 'East':
+		#	q_value = 11
+		#if opponent_action == 'South':
+		#	q_value = 10
+		#print 'q', q_value
 		#q_value = {'West': 0.1, 'East': 0.22, 'North': 5, 'South': -1, 'Wait': 16}
-		print "RETURNS"
+		#print "RETURNS"
+
 		return q_value
 
 		

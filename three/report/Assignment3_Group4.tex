@@ -105,8 +105,10 @@ Let alpha := alpha * decay
 
 
 % Update which one is the `other leanring'
-\subsection{Friend-or-Foe}
-\input{friend_or_foe}
+%\subsection{Friend-or-Foe}
+%\input{friend_or_foe}
+\subsection{Independent SARSA}
+\input{sarsa}
 
 \section{Implementation}
 
@@ -133,24 +135,24 @@ The implementation consists of the following files:
 
 
 \section{Analysis}
-This section discusses the results of the implementations. In order to display and compare results, graphs are used. The title describes which parameters are analysed and the legend shows which color represents which setting of said parameters.
+This section discusses the results of the implementations. In order to display and compare results, graphs are used. The title describes which parameters are analysed and the legend shows which color represents which setting of said parameters. Contrary to previous reports, tests were run 5 times with 2000 episodes. Eventually, the results were averaged and used for analysis.
 
 \subsection{Independent Q-Learning}
 \input{ind_q_analysis}
 \subsection{Minimax Q-learning}
 
 \subsection{Independent SARSA}
-%\input{ind_sarsa_analysis}
+\input{ind_sarsa_analysis}
 \pagebreak
 
 
 \section{Conclusion}
-
+\input{conclusion}
 \pagebreak
 
 
 \section{Future work}
-
+\input{future_work}
 \pagebreak
 
 
