@@ -13,9 +13,10 @@ Q(s,a,o) &= R(s,a,o) + \gamma \sum_{s'} T(s,a,o,s') V(s')
 where T is the transition function for transitioning from state $s$ to state $s'$ if the agent picks action $a$ and the opponent picks action $o$. However, since $s$ followed by $s'$ after actions $a$ and $o$ happens with a probability $T(s,a,o,s')$, this function can be left out of the equation.\\
 
 Consequently, each agent uses the following update rule:
+
 \begin{mdframed}
 \begin{align}
-Q(s,a,o) \leftarrow Q(s,a,o) + \alpha (R + \gamma V(s') - Q(s,a,o))
+Q(s,a,o) & \leftarrow Q(s,a,o) + \alpha (R + \gamma V(s') - Q(s,a,o))
 \end{align}
 \label{ref:minimaxrule}
 \end{mdframed}
@@ -26,7 +27,7 @@ Then, linear programming is used to find a policy $\pi$ so that
 \end{align}
 \end{mdframed}
 
-Eventually, the update rules can be used to implement the minimax-Q algorithm as described in \ref{alg:minmax}.
+Eventually, the update rules can be used to implement the minimax-Q algorithm as described in figure \ref{alg:minmax}.
 
 \begin{center} 
 \begin{mdframed}

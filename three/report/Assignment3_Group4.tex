@@ -45,7 +45,7 @@
 \subsection{Independent Q-learning}
 In independent Q-learning, all agents independently use Q-learning to maximize their expected reward.  \\ 
 
-\noindent Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} itself is a temporal difference method that uses the update rule in equation \ref{eq:qupdate}. Since the algorithm retrieves the Q-value of the state-action pair where Q(s', a) is maximized, this is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
+\noindent Q-learning\footnote{More specifically, this is \textit{one-step Q-learning}, which is the algorithm evaluated in this paper.} itself is a temporal difference method that uses the update rule in equation \eqref{eq:qupdate}. Since the algorithm retrieves the Q-value of the state-action pair where Q(s', a) is maximized, this is an \textit{off-policy} method. The algorithm for Q-learning can be found in pseudocode in figure \ref{alg:qlearning}.
 
 \begin{mdframed}
 \begin{align}
@@ -122,7 +122,7 @@ Let alpha := alpha * decay
 The implementation consists of the following files:
 \begin{description}
 	\item[Agents\_new] \hfill \\ 
-	This file contains implementions of the Agent class, the Prey class and the Predator class. Both the predator and the prey inherit functions of the Agent class. The Agent class contains functions any agent needs, such as a set of actions, a policy and other functions. As the predator is the agent is the agent this implementation focuses on, the predator class contains more functions than the predator class.
+	This file contains implementions of the Agent class, the Prey class and the Predator class. Both the predator and the prey inherit functions of the Agent class. The Agent class contains functions any agent needs, such as a set of actions, a policy and other functions. As the predator is the agent this implementation focuses on, the predator class contains more functions than the predator class.
 	
 	\item[Helpers] \hfill \\ 
 	This file contains many helper functions. These functions aid in computation and decision making, but cannot (and need not) be part of a specific class.
