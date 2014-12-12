@@ -1,7 +1,13 @@
 This section contains information about improvements in the future
 
 \subsection{State space encoding}
-It has shown that the state space encoding has improved the performance of the program. However, in order to run tests with four predators on one grid, a smarter encoding is necessary. With a smarter state space encoding, it will be possible to run the program with up to four predators and this research can be completed. The smarter state space encoding will also allow multiple experiments to be run on grids with three or more predators. 
+It has shown that the state space encoding has improved the performance of the program. However, in order to run tests with four predators on one grid, a smarter encoding is necessary. With a smarter state space encoding, it will be possible to run the program with up to four predators and this research can be completed. The smarter state space encoding will also allow multiple experiments to be run on grids with three or more predators. One possible form of automatic state space encoding at bit level is Kanerva coding\cite{wu2009function}. Kanerva coding compares state-action pairs at a bit level and chooses whichever action looks similar to this. This, itself leads to a smaller state space and an executable program.
 
 \subsection{Grid size}
 All the tests were performed on an 11x11 grid. As it is believed that the predators bump into each other so much because the grid is small, it is interesting to see how all agents learn on a larger grid. As stated before, this will significantly increase the state space of the implementation, leading to slow computation. In order to perform these tests, it is imperative to come up with smarter state space encoding. Then these tests can be executed and the effects of these learning algorithms can be evaluated.
+
+\subsection{Communication-based greedy role assignment}
+In order to prevent the predators from bumping into one another, communication-based greedy role assignment can me implemented. In this algorithm, cooperating agents get roles assigned. In this case, whichever predator is closest to the prey will get the role of "hunter" and each predator knows their own role as well as the roles of the other predators. The predators that are further away from the prey will get the role of "idle". This gives the "hunter" permission to catch the prey. This will reduce the chances of the predators bumping into one another.
+
+\subsection{WoLF Hill-Climbing}
+All types of learning implemented, thus far, will become predictable after convergence. By implementing Win-or-Learn-Fast Hill Climbing, this can be prevented. This algorithm has a variable learning rate. As the name suggests, when the agent wins it hardly learns. When the agents loses, it learns quickly. This is all adjusted by setting the learning rate. As the grid is small and toroidal and it can contain up to four cooperating agents, it is interesting to see what decisions the agents will make.
