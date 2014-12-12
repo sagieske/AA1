@@ -37,6 +37,7 @@ class Game:
 			self.agent_list = agent_list
 
 
+
 		print "Episode created with grid size ", grid_size
 
 	def get_rounds(self, learning_rate, discount_factor, epsilon):
