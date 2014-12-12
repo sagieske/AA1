@@ -11,3 +11,6 @@ In order to prevent the predators from bumping into one another, communication-b
 
 \subsection{WoLF Hill-Climbing}
 All types of learning implemented, thus far, will become predictable after convergence. By implementing Win-or-Learn-Fast Hill Climbing, this can be prevented. This algorithm has a variable learning rate. As the name suggests, when the agent wins it hardly learns. When the agents loses, it learns quickly. This is all adjusted by setting the learning rate. As the grid is small and toroidal and it can contain up to four cooperating agents, it is interesting to see what decisions the agents will make.
+
+\subsection{Friend-or-Foe Q-learning}
+Another type of Q-learning algorithm is Friend-or-Foe Q-learning\cite{littman2001friend}. This algorithm is an extension of the Minimax-Q algorithm. It takes into account different types of opponent agents: 'friend' and 'foe'. A coordination equilibria is found with a 'friend' agent, while a adversarial equilibria is found with a 'foe' agent. This algorithm could be implemented by identifying the other predators as 'friend' and the prey as 'foe'. This will increase the coordination between predators and decrease the chances of the predators bumping into one another.
