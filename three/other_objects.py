@@ -87,7 +87,7 @@ class Policy:
 		#Store grid size
 		self.grid_size = grid_size
 		self.learning_type = learning_type
-		if learning_type != 'Minimax':
+		if learning_type == 'Minimax':
 			init_value = 1.0
 		else:
 			init_value = 15.0
@@ -211,7 +211,7 @@ class Policy:
 		return policy
 
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-                print 'Q-LEARNING'
+
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 
 		#Get policy encoded
@@ -259,7 +259,6 @@ class Policy:
 
 
 	def sarsa(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-                print 'SARSA'                
                 
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 
@@ -359,7 +358,7 @@ class Policy:
 		# Probabilities sum to 1
 		max_v += sum([action_policy_vars[a] for a in actions]) == 1
 		for a in actions:
-			max_v += action_policy_vars[a] > 0 
+			max_v += action_policy_vars[a] >= 0.000000001 
 
 		# add constraints as summation of actions given an opponent action are bigger than 0
 		for o in actions:
@@ -367,6 +366,10 @@ class Policy:
 
 		# Solve maximization
 		max_v.solve()
+		#for i in actions:
+		#	if action_policy_vars[i].value() == 1.0:
+		#		print i
+
 
 		return pulp.value(max_v.objective)
 
@@ -404,9 +407,6 @@ class Policy:
 		#Get the size of the environment
 		environment_size = grid_size
 		#Wrap edges to make grid toroidal
-		print grid_size
-		print object_location
-		print transformation
 		new_location.append((object_location[0] + transformation[0]) % environment_size[0])
 		new_location.append((object_location[1] + transformation[1]) % environment_size[1])
 		return new_location

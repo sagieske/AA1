@@ -11,9 +11,6 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	action_q_values = {}
 	distance_action = {}
 
-	#print "\n\n\nstate: ", state
-	#print "\npolicy: ", policy
-	#print "agent : ", agent_name, "\n\n"
 	#need locations dict:
 	#Create dictionary of allowed actions (deepcopy actions)
 	#For every agent !this agent: compute current distance, compute distance after action
@@ -21,12 +18,10 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 	#If all goes well, at the end there is only one action left!
 
 	# Loop through all possible actions to check for xy_distance
-	#print "POLICY:", policy
+
 	for name, action in actions.iteritems():
 		#Get the result of doing this action, location-wise
 		new_state = get_new_location(state[agent_name], action, grid_size=grid_size)
-		#print "state: %s, action %s, newstate: %s" %(str(state[agent_name]), str(action), str(new_state))
-		
 		# Get all distances to other agents using this new state
 		dist_tuple  = get_all_distances_to_agents(agent_name, new_state, state, grid_size=grid_size)
 		value = policy[dist_tuple]
@@ -34,6 +29,7 @@ def get_feasible_actions(state, agent_name, policy, grid_size=[11,11]):
 		#print "selected q: ", value
 		action_q_values.update({dist_tuple:value})
 		distance_action.update({dist_tuple:name})
+
 	return action_q_values, distance_action
 
 def get_all_distances_to_agents(agent_name, agent_new_state, state_dict, grid_size=[11,11]):
