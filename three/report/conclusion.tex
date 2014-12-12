@@ -1,7 +1,10 @@
 This section discusses the conclusions drawn from the analysis. %This report has discussed independent multi-agent learning as well as minimax learning in as zero-sum game.
 
-\subsubsection{Independent learning}
-Independent learning was performed in two different ways: Q-learning and SARSA. Both suck dick, ass and balls when more than 2 predators enter the grid. This is to be expected as the agents learn independently from one another. Though all agents act on what is best for them, they do not work together. Therefore, all agents must learn each others behaviour before being able to catch the prey without bumping into another predator. This takes very long and even then it is not certain that the predators will catch the prey. As all agents learn each others policies, the prey will also learn what the predators will do and may trick them into bumping into one another.
+\subsection{Independent learning}
+Independent learning was performed in two different ways: Q-learning and SARSA. When more than 2 predators enter the grid, the predators lose the game more often than the prey. This is to be expected as the agents learn independently from one another. Though all agents act on what is best for them, they do not work together. Therefore, all agents must learn each others behaviour before being able to catch the prey without bumping into another predator. This takes very long and even then it is not certain that the predators will catch the prey. As all agents learn each others policies, the prey will also learn what the predators will do and may trick them into bumping into one another.
 
-\subsubsection{Minimax Q-learning}
+\subsubsection{Parameter settings}
+Parameters settings for both algorithms were tested. 
+
+\subsection{Minimax Q-learning}
 Draw thine conclusions and place them here. Oh Romeo, Romeo. Wherefore art thou Romeo? :'(
