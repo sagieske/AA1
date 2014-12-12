@@ -324,9 +324,7 @@ class Policy:
 		opponent_action: action name (str) of action taken by other agent
 		"""
 		
-                #print 'MINIMAX'
-		if self.agent_name == '0':
-			learning_rate = 0.01
+
 		current_state_dist, agent_name = self.state_dict_to_state_distances(s)
 
 		#Get policy encoded using current distance state
@@ -377,23 +375,21 @@ class Policy:
 
 		maximize_a = pulp.LpProblem("Maximize my action",  pulp.LpMaximize)
 
+
 		# Create dictionary with all values for agent
 		test_dict = {}
 		for i in actions:
-			test_dict[i] =  self.minimize(s, agent_name, a)
+			test_dict[i] =  self.minimize(s_prime, agent_name, a)
 		action_vars = pulp.LpVariable.dicts("a",actions,0)
 		maximize_a += pulp.lpSum([test_dict[i] * action_vars[i] for i in actions])
 		maximize_a += pulp.lpSum([action_vars[i] for i in actions]) == 1
 		# solve
 		maximize_a.solve()
 
-		#print "hello"
 		for action in actions:
 		    if action_vars[action].value() == 1.0:
-			value = self.minimize(s, agent_name, a)
-		#print value
+			value = self.minimize(s_prime, agent_name, a)
 
-		#print self.minimize(s, agent_name, a)
 		new_distances_to_agents = helpers.get_all_distances_to_agents(agent_name, agent_new_state, s_prime, grid_size=self.grid_size)
 
 
@@ -415,7 +411,6 @@ class Policy:
 		for i in actions:
 			test_dict[i] = self.get_qvalue_minimax(s, agent_name, a, i)
 		policy = {'West': 0.2, 'East': 0.2, 'North': 0.2,'South': 0.2,'Wait': 0.2}
-
 
 		action_vars = pulp.LpVariable.dicts("a",actions,0)
 		minimize_o += sum([self.get_qvalue_minimax(s, agent_name, a, i) * action_vars[i] * policy[i] for i in actions])
