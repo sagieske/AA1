@@ -116,7 +116,7 @@ Figure \ref{graph:learningrate} shows that a low learning rate yields worst resu
 \end{center}
 \end{table}
 
-Table \ref{table:learningrate} shows that the lowest learning rate shows better and better results over time. This shows that in the beginning, a lot must be learned. As the game progresses, a low learning rate yields better results. This could indicate that the predators as well as the prey become predictable and so less new information has to be learned. As minimax Q-learning contains a decay in learning, perhaps this is the reason why.\red{THIS IS INDEED STRANGE!!!! }  %this is strange.  
+Table \ref{table:learningrate} shows that the lowest learning rate shows better and better results over time. This shows that in the beginning, a lot must be learned. As the game progresses, a low learning rate yields better results. This could indicate that the predators as well as the prey become predictable and so less new information has to be learned. As minimax Q-learning contains a decay in learning, perhaps this is because the algorithm needs to start with a high learning rate and lower this gradually over time in order to achieve optimal results. However, this can also mean that a low learning rate yields better results due to the fact that old information is taken into account more.
 
 
 \subsubsection{Discount factor}
