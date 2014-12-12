@@ -151,7 +151,7 @@ class Game:
 				opponent_name = str((int(agent_name)+1)%2)
 				opponent_action = taken_actions[opponent_name]
 				
-				print 'all actions taken:', taken_actions
+				#print 'all actions taken:', taken_actions
 				#print "Agent ", agent.get_name(), " took action ", taken_actions[agent.get_name()]
 				agent.q_learning(agent_action, opponent_action, s, s_prime, learning_rate, discount_factor, epsilon, self.agent_list, rewards_list, learning_type)
 				#print "pol: ", agent.policy_grid.return_state_policy(s)
@@ -348,6 +348,7 @@ def run_episodes(grid_size, N, learning_rate, discount_factor, epsilon, amount_p
 		last_100_wins = 0
 		last_100_losses = 0
 		for x in range(0, N):
+			print "round: ", x
 			#print "Rounds needed to catch prey: ", current_rounds
 			#Initialize episode
 			#If we're using off-policy MC, initialize a learning and then a testing episode
@@ -507,8 +508,7 @@ if __name__ == "__main__":
 	avg_last_100_wins_list = []
 	avg_first_100_losses_list = []
 	avg_last_100_losses_list = []
-	#for eps in epsilon_rates:	
-	print "eps: ", epsilon
+	# factor in discount_factors:	
 	av_wins, av_losses, av_rounds, avg_first_100_wins, avg_last_100_wins, avg_first_100_losses, avg_last_100_losses = run_episodes([grid_size,grid_size], N, learning_rate, discount_factor, epsilon, amount_predators=amount_predators, softmax=softmax, learning_type=learning_type, experiments=Y)
 	if(amount_predators == 1):
 		plt.plot(av_rounds, label="rounds")
@@ -520,14 +520,15 @@ if __name__ == "__main__":
 		avg_last_100_losses_list.append(avg_last_100_losses)
 		plt.plot(av_wins, label="wins")
 		plt.plot(av_losses, label="losses")
-		
+	
 		# Used to be in title: "Predators vs. prey "
 		plt.ylabel('Predator average wins')
 
-	title = str('2 predators vs. 1 prey -> epsilon: ' + str(epsilon) +  ' alpha: ' + str(learning_rate) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
+	title = str('2 predators vs. 1 prey -> learning_rate: ' + str(learning_rate) + 'discount factor' + str(discount_factor) + ' epsilon: ' + str(epsilon) + ' experiments: ' + str(Y) + ' learning type: ' + str(learning_type))
 	#'predators: ' + str(amount_predators) +  ' gamma: ' + str(discount_factor)
 #	title = "2 predators vs. 1 prey: discount factors"
 
+	#print "RIGGED PREY!"
 	print "first 100 wins: ", avg_first_100_wins_list
 	print "last 100 wins: ", avg_last_100_wins_list
 	print "first 100 losses: ", avg_first_100_losses_list
