@@ -45,7 +45,8 @@ It is interesting to see what happens when three predators take on one prey. As 
 	\label{graph:sarsa3vs1}
 \end{center}
 
-The graph in figure \ref{graph:sarsa3vs1} shows that the prey manages to escape most of the times. This hardly differs from independent Q-learning.
+
+The graph in figure \ref{graph:sarsa3vs1} shows that the prey manages to escape most of the times.\labelerrorfootnote \: This hardly differs from independent Q-learning.
 
 \begin{table}[H]
 \begin{center}
@@ -63,7 +64,7 @@ The graph in figure \ref{graph:sarsa3vs1} shows that the prey manages to escape 
 This shows that SARSA learns very slowly, in this case. Combined with the fact that there are many predators on a small grid, these can bump into one another. Any learning will be much delayed. It is important to note that this is the only test which was run once, with 1000 episodes.
 
 \subsubsection{4 predators vs. 1 prey}
-Again, this is intractable. 
+Just like performing Q-learning with 4 predators and 1 prey, this case is again intractable. More information about the problem might be found in section \ref{sec:intractable}.
 
 \subsubsection{Parameter settings}
 Again, parameter settings were explored for this algorithm. This was tested with two predators and one prey.

@@ -1,0 +1,23 @@
+Q-learning can be extended to play mixed strategies. Essentially, the policy is improved by increasing the probability of selecting the highest Q-value, according to the learning rate $\delta$. This is called a mixed strategy. Due to the strong relation with Q-learning and its convergence, it is assumed that this algorithm also converges to an optimal policy if all other agents in the game are playing with stationary strategies \cite{bowling2001rational}. This also leads to the policy $\pi$ to converge to a greedy policy, always selecting the highest Q-values. The algorithm is displayed, in pseudocode, in figure \ref{alg:hclearning}.
+
+\begin{center} 
+\begin{mdframed}
+\begin{algorithm}[H]
+Initialize: \\
+Q(s,a) $\leftarrow$ 0 \\
+$\pi$(s,a) $\leftarrow \dfrac{1}{|\mathcal{A}_i|}$ \\
+
+Repeat: \\
+\tab From state \textit{s} select action \textit{a} with probability $\pi(s,a)$ with some exploration \\
+\tab Observing reward $\mathcal{r}$ and next state \textit{s'}, \\
+\tab $Q(s,a) \leftarrow (1- \alpha)Q(s,a) + \alpha \left( r + \gamma \max\limits_{a'} Q(s',a')\right)$ \\
+\tab Update $\pi(s,a)$ and constrain it to a legal probability distribution: \\
+$\pi(s,a)\leftarrow \pi (s,a) + \begin{cases}
+	\delta, & \text{if } a = \textit{arg} \max_{a'} Q(s,a')\\
+	\frac{-\delta}{|\mathcal{A}_i -1|} & \text{otherwise }
+\end{cases}$\\
+\end{algorithm}
+\end{mdframed}
+\captionof{figure}{The algorithm for policy hill-climbing \cite{bowling2001rational}}
+\label{alg:hclearning}
+\end{center}

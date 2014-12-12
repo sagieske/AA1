@@ -36,15 +36,6 @@ class Environment:
 			print row
 		print "=========="
 
-	def place_object(self, agent_name, new_location):
-		""" Place an object at a given location in the environment"""
-		if(agent_name=='0'):
-			#Update grid
-			self.grid[new_location[0]][new_location[1]] = 'O'
-		else:
-			self.grid[new_location[0]][new_location[1]] = 'X'
-		#Update location dict
-		self.location_dict[agent_name] = new_location
 
 	def move_object(self, agent_name, new_location):
 		""" Move object from old to new location in the grid """
@@ -163,55 +154,9 @@ class Policy:
 
 
 		self.softmax = softmax
-
-
-
-
-	def update_Q_values(self,Q, params):
-		if self.learning_type == 'Minimax':
-			state = params[0]
-			i = state[0]
-			j = state[1]
-			k = state[2]
-			l = state[3]
-			action = params[1]
-			opponent_action = params[2] 
-			self.policy_grid[i][j][k][l][action][opponent_action] = Q
-		else:
-			state = params[0]
-			state = params[0]
-			i = state[0]
-			j = state[1]
-			k = state[2]
-			l = state[3]
-			action = params[1]
-			self.policy_grid[i][j][k][l][action] = Q
-
-
-
-
-        # Stays the same for Minimax
-	def get_policy(self, state):
-		""" Return the policy dictionary for a state """
-		i = state[0]
-		j = state[1]
-		k = state[2]
-		l = state[3]
-		return self.policy_grid[i][j][k][l]
 		
 
-	def set_distance_dict(self, distance_dict):
-		self.distance_dict = distance_dict
-
-
-	def return_state_policy(self,s):
-		new_state, agent_name = self.state_dict_to_state_distances(s)
-		policy = self.get_encoded_policy(new_state)
-		policy, policy_with_action = helpers.get_feasible_actions(copy.deepcopy(s), agent_name, policy, grid_size=self.grid_size)
-		return policy
-
 	def q_learning(self, a, s, s_prime, learning_rate, discount_factor, epsilon, agent_list, reward_list):
-
 		new_state, agent_name = self.state_dict_to_state_distances(s)
 
 		#Get policy encoded
@@ -398,7 +343,7 @@ class Policy:
 
 		return q_value
 
-		
+	
 
 	def get_new_location(self, object_location, transformation, grid_size=[11,11]):
 		""" Returns new location of an object when performs the chosen move """
@@ -438,8 +383,6 @@ class Policy:
 				state_tuple += (tuple(distance_to_other),)
 		return state_tuple, self.agent_name
 
-	def tuple_to_old_state(self, tup):
-		return [tup[0], tup[1]]
 
 	def get_encoded_policy(self, state):
 		return self.party_dict[state]

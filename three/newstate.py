@@ -69,9 +69,8 @@ class Game:
 			print "Predators bumped into each other in round " + str(steps) + "!\n=========="
 		else:
 			print "Game ended in " + str(steps) + " rounds!\n=========="
-		#distance_dict_test = self.predator.get_policy_grid().distance_dict
-		#print self.predator.get_policy_grid().distance_dict
-			
+		
+				
 		#return steps, self.predator.get_policy_grid()
 		return steps, prey_caught, predators_bumped
 
@@ -187,24 +186,6 @@ class Game:
 		new_location.append((old_location[0] + chosen_move[0]) % environment_size[0])
 		new_location.append((old_location[1] + chosen_move[1]) % environment_size[1])
 		return new_location
-
-		
-	def get_action(self, old_state, new_state):
-		""" Returns the action which should be used to obtain a specific new state from the old one """
-		actions = self.predator.get_policy().keys()
-		# Loop through the actions and find which one yields the desired new_state
-		for action in actions:
-		      new_location = []
-		      chosen_move = self.predator.get_transformation(action)
-		      environment_size = self.environment.get_size()
-		      # division by modulo makes board toroidal:
-		      new_location.append((old_state[0] + chosen_move[0]) % environment_size[0])
-		      new_location.append((old_state[1] + chosen_move[1]) % environment_size[1])
-		      
-		      # Return the action which yields the new state
-		      if new_location == new_state:
-		          return action
-
 
 
 

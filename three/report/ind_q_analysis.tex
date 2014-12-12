@@ -11,7 +11,7 @@ To start off, a test was run to see if the new environment behaves as expected. 
 As the graph in figure \ref{graph:1vs1} shows, the predator learns how to catch the prey more quickly after each time step. However, in the previous implementation, the number of time steps it took the predator to catch the prey became more stable. Though the number of time steps needed to catch the prey drops significantly (apparently, the $20\%$ trip rate more than offsets the intelligence of the prey), there is more variance than before. Also, the algorithm learns more quickly than before. As the state space grows exponentially with every added predator,  the state space was encoded to reduce the amount of possible states and is now of size $11^2$. Therefore, after the predator has spent enough time learning, each greedily chosen action is always in the direction of the prey. This leads to catching the prey quicker than before as there is a much smaller state space to be explored.
 
 \subsubsection{2 predators versus 1 prey}
-In this case, there are two predators hunting one prey. The state space is now larger than before ($11^4$ states) and leads to slower computations. Tests have shown that the amount of rounds it takes for any of the predators to catch the prey vary significantly, but more importantly, cannot be informatively represented in a graph. Therefore, the cumulative wins and losses for the predators have been graphed, rather than the amount of rounds it takes the predators to catch the prey. Unsurprisingly,  as shown in figure \ref{graph:2vs1}, the graph for wins becomes steeper, and the graph for losses becomes flat after learning. This indicates that the predators are winning more and losing less. Moreover, the numbers of rounds it takes does improve over time. These numbers have been tracked and logged in table \ref{table:2vs1} below.
+In this case, there are two predators hunting one prey. The state space is now larger than before ($11^4$ states) and leads to slower computations. Tests have shown that the amount of rounds it takes for any of the predators to catch the prey vary significantly, but more importantly, cannot be informatively represented in a graph. Therefore, the cumulative wins and losses for the predators have been graphed, rather than the amount of rounds it takes the predators to catch the prey. Unsurprisingly,  as shown in figure \ref{graph:2vs1}, the graph for wins becomes steeper, and the graph for losses becomes flat after learning. This indicates that the predators are winning more and losing less. Moreover, the numbers of rounds it takes for the predators to catch the prey improves over time. These numbers have been tracked and logged in table \ref{table:2vs1} below.
 
 \begin{center}
 	\includegraphics[scale=0.3]{2_predators_q_learning}
@@ -81,7 +81,7 @@ Table \ref{table:3vs1} shows the results of the first- and last 100 wins and los
 
 The results in table \ref{table:3vs1} show that the predators do learn to catch the prey. When the prey learns slower, the predators manage to catch the prey more often in the same amount of time. Therefore, it can be concluded that the algorithm does learn the predators to cooperate and catch the prey. This just takes many episodes.
 
-\subsubsection{4 predators versus 1 prey}
+\subsubsection{4 predators versus 1 prey} \label{sec:intractable}
 Though it is implemented for four predators and one prey to be placed on the grid, this leads to implementations freezing. It is therefore conclusive to state that the program has become intractable. This could be solved by using function approximation, for example using Kanerva coding \cite{wu2009function}, where a number of \textit{prototype} state-action pairs are selected, to be used for storing Q-values for similar state-action pairs. Another possible solution is to have the predators learn \textit{together}, meaning they share a Q-value grid and learn simultaneously. However, this is not truly independent Q-learning. 
 
 \subsubsection{Parameter settings}
@@ -183,6 +183,31 @@ Figure \ref{graph:greedy} shows that greedy action selection yields best results
 \end{center}
 \end{table}
 
-\red{THERE SEEMS TO BE NO INFO ABOUT TABLE \ref{table:greedy}}	
+Table \ref{table:greedy} Though, at first, an absolute greedy policy appears to yield the most promising results, a slightly exploratory policy eventually yields the best results. This is not displayed in the graph as the wins are counted cumulatively. Eventually, the results will be best when still exploring sightly.
 
-Though, at first, an absolute greedy policy appears to yield the most promising results, a slightly exploratory policy eventually yields the best results. This is not displayed in the graph as the wins are counted cumulatively. Eventually, the results will be best when still exploring sightly.
+\subsubsection{Optimal settings}
+As the optimal settings have been found ($\gamma$ = 0.2, $\epsilon$ = 0.2, $\alpha$ = 0.5), two predators were unleashed against the predator. In order to maximize the result of the predators, the learning rate of the prey was also reduced to a minimum of 0.01. This lead to the results displayed in figure \ref{graph:optimal_q_graph} and table \ref{table:optimal_q_table}. However, due to time constraints, this test was run once. These results were not averaged over several experiments\footnote{As one may have noticed, the graph states that this experiment was run for two predators. This was not changed before running the test. However, these results are indeed of three predators versus one prey.}.
+
+\begin{center}
+	\includegraphics[scale=0.3]{q_learning_optimal_1000times5}
+	\captionof{figure}{Independent Q-learning: 3 predators vs. 1 prey, optimal settings}
+	\label{graph:optimal_q_graph}
+\end{center}
+
+The graph shows a significant difference with the previous test of three predators versus one prey. 
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+\parbox{2cm}{\textbf{$\epsilon$-rate}} & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{Optimal} & 63 & 37 & 67 & 32 \\
+\hline
+\end{tabular}
+\caption{Average number of wins and losses by the predators with optimal values}
+\label{table:optimal_q_table}
+\end{center}
+\end{table}
+
+Table \ref{table:optimal_q_table} shows that the predators are winning in most episodes and this number has increased near the end of the experiment. This shows how powerful choosing the correct parameters is when implementing an algorithm.
