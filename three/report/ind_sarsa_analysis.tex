@@ -35,6 +35,29 @@ The graph is very similar to the graph in Q-learning. This is possible, as both 
 Compared to independent Q-learning, independent SARSA performs slightly better. This can be attributed to the fact that SARSA is more careful than Q-learning. This behaviour leads to more wins for the predators, on average, compared to Q-learning.
 
 \subsubsection{3 predators vs. 1 prey}
+It is interesting to see what happens when three predators take on one prey. As seen with independent Q-learning, this does not work well. As SARSA is a more careful algorithm, the predators may learn to cooperate better than with Q-learning.
+
+\begin{center}
+	\includegraphics[scale=0.3]{3_predators_SARSA}
+	\captionof{figure}{Independent SARSA: 3 predators vs. 1 prey}
+\end{center}
+
+The graph shows that the prey manages to escape most of the times. This hardly differs from independent Q-learning.
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{| l | l | l | l | l |}
+\hline
+ & \parbox{2cm}{\textbf{Avg wins \\ (first 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (first 100)}} & \parbox{2cm}{\textbf{Avg wins \\ (last 100)}} & \parbox{2cm}{\textbf{Avg losses \\ (last 100)}} \\
+\hline
+\textbf{Predators} & 21 & 79 & 22 & 77 \\
+\hline
+\end{tabular}
+\caption{Average \# wins and losses by the predators with varying learning rates}
+\end{center}
+\end{table}
+
+This shows that SARSA learns very slowly, in this case. Combined with the fact that there are many predators on a small grid, these can bump into one another. Any learning will be much delayed. It is important to note that this is the only test which was run once, with 1000 episodes.
 
 \subsubsection{4 predators vs. 1 prey}
 Again, this is intractable. 
