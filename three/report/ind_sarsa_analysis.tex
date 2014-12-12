@@ -16,10 +16,10 @@ Compared to independent Q-learning, SARSA takes much longer to catch the prey in
 \begin{center}
 	\includegraphics[scale=0.3]{2_predators_SARSA}
 	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey}
-	\label{graph:sarsa2vs1}
+	\label{graph:SARSA2vs1}
 \end{center}
 
-The graph shown in figure \ref{graph:sarsa2vs1} is very similar to the corresponding graph for Q-learning. This is possible, as both are temporal difference learning methods and are based on the same principles. The main difference between these two is that SARSA is an on-policy learning method and Q-learning is an off-policy learning method. It is therefore expected for these two methods to behave similarly.
+The graph shown in figure \ref{graph:SARSA2vs1} is very similar to the corresponding graph for Q-learning. This is possible, as both are temporal difference learning methods and are based on the same principles. The main difference between these two is that SARSA is an on-policy learning method and Q-learning is an off-policy learning method. It is therefore expected for these two methods to behave similarly.
 
 \begin{table}[H]
 \begin{center}
@@ -42,11 +42,11 @@ It is interesting to see what happens when three predators take on one prey. As 
 \begin{center}
 	\includegraphics[scale=0.3]{3_predators_SARSA}
 	\captionof{figure}{Independent SARSA: 3 predators vs. 1 prey}
-	\label{graph:sarsa3vs1}
+	\label{graph:SARSA3vs1}
 \end{center}
 
 
-The graph in figure \ref{graph:sarsa3vs1} shows that the prey manages to escape most of the times.\labelerrorfootnote \: This hardly differs from independent Q-learning.
+The graph in figure \ref{graph:SARSA3vs1} shows that the prey manages to escape most of the times.\labelerrorfootnote \: This hardly differs from independent Q-learning.
 
 \begin{table}[H]
 \begin{center}
@@ -75,10 +75,10 @@ First, the effect of the learning rate is researched. As the learning rate deter
 \begin{center}
 	\includegraphics[scale=0.3]{2_predators_learning_rate_SARSA}
 	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey, learning rate}
-	\label{graph:sarsalearningrates}
+	\label{graph:SARSAlearningrates}
 \end{center}
 
-From the graph in figure \ref{graph:sarsalearningrates} it is difficult to see if a high or average learning rate affect the implementation in the best possible way. In the end, however it appears as though a learning rate of 0.5 yields best results.
+From the graph in figure \ref{graph:SARSAlearningrates} it is difficult to see if a high or average learning rate affect the implementation in the best possible way. In the end, however it appears as though a learning rate of 0.5 yields best results.
 
 \begin{table}[H]
 \begin{center}
@@ -94,11 +94,11 @@ From the graph in figure \ref{graph:sarsalearningrates} it is difficult to see i
 \hline
 \end{tabular}
 \caption{Average number of wins and losses by the predators with varying learning rates}
-\label{table:sarsalearningrates}
+\label{table:SARSAlearningrates}
 \end{center}
 \end{table}
 
-Table \ref{table:sarsalearningrates} confirms the theory derived off the graph. A medium learning rate does yield best results. When the predators are learning while hunting the prey, an equal balance of new and old information yields optimal results.
+Table \ref{table:SARSAlearningrates} confirms the theory derived off the graph. A medium learning rate does yield best results. When the predators are learning while hunting the prey, an equal balance of new and old information yields optimal results.
 
 \subsubsection{Discount factor}
 The discount factor determines the importance of future rewards. In the previous assignment, a high discount factor yielded best results. This means that the future reward was most important. Only the goal state yielded a reward, making reaching the goal state very important. Currently, there are two terminal states: the win state and the lose state. It is interesting to see what effect the negative rewards have on the importance of the immediate reward.
@@ -124,20 +124,20 @@ Again, the immediate reward shows to be important. It has been mentioned several
 \hline
 \end{tabular}
 \caption{Average number of wins and losses by the predators with varying discount factors}
-\label{table:sarsadiscountfactor}
+\label{table:SARSAdiscountfactor}
 \end{center}
 \end{table}
 
-The previous conclusions are supported by table \ref{table:sarsadiscountfactor}. However, it is interesting to note that keeping into account the immediate reward yields significantly better results than seen before. Winning games 95\% of the time, on average, is highly successful. This means that even when the predators are exploring new paths, the predators hardly ever bump into one another. These are excellent results for any algorithm, let alone an on-policy algorithm.
+The previous conclusions are supported by table \ref{table:SARSAdiscountfactor}. However, it is interesting to note that keeping into account the immediate reward yields significantly better results than seen before. Winning games 95\% of the time, on average, is highly successful. This means that even when the predators are exploring new paths, the predators hardly ever bump into one another. These are excellent results for any algorithm, let alone an on-policy algorithm.
 
 \subsubsection{$\epsilon$-greedy action selection}
 \begin{center}
 	\includegraphics[scale=0.3]{2_predators_epsilon_SARSA}
 	\captionof{figure}{Independent SARSA: 2 predators vs. 1 prey, $\epsilon$-greedy action selection}
-	\label{graph:sarsagreedy}
+	\label{graph:SARSAgreedy}
 \end{center}
 
-Figure \ref{graph:sarsagreedy} shows that low exploration leads to the best results. Again, this is to be expected as exploration most likely will lead to predators bumping into one another.
+Figure \ref{graph:SARSAgreedy} shows that low exploration leads to the best results. Again, this is to be expected as exploration most likely will lead to predators bumping into one another.
 
 \begin{table}[H]
 \begin{center}
@@ -157,8 +157,8 @@ Figure \ref{graph:sarsagreedy} shows that low exploration leads to the best resu
 \hline
 \end{tabular}
 \caption{Average number of wins and losses by the predators with varying $\epsilon$-rates}
-\label{table:sarsagreedy}
+\label{table:SARSAgreedy}
 \end{center}
 \end{table}
 
-Table \ref{table:sarsagreedy} confirms almost what the graph shows. Where the graph shows better results for an absolutely greedy action selection, the table shows that the results over the last 100 runs are exactly the same.  This will lead to trying to catch the prey in the beginning, but exploring other paths to the prey while avoiding other predators is also important. This can help the predators significantly in the future. However, exploration is needed. Therefore, lowering the learning rate over time will help the predators best. This confirms the theory that the learning rate must be lowered in order to yield best results.
+Table \ref{table:SARSAgreedy} confirms almost what the graph shows. Where the graph shows better results for an absolutely greedy action selection, the table shows that the results over the last 100 runs are exactly the same.  This will lead to trying to catch the prey in the beginning, but exploring other paths to the prey while avoiding other predators is also important. This can help the predators significantly in the future. However, exploration is needed. Therefore, lowering the learning rate over time will help the predators best. This confirms the theory that the learning rate must be lowered in order to yield best results.
